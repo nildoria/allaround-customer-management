@@ -37,7 +37,8 @@ get_header(); // Include header template
         if (in_array('customer', $current_user->roles)) {
             echo '<div class="author-header aum-container">';
             echo '<div class="welcome-column">';
-            echo '<h1>היי, ' . ($user_header_title) ? esc_html($user_header_title) : esc_html($current_user->display_name) . '</h1>';
+            echo '<h1>היי, ' . (($user_header_title) ? esc_html($user_header_title) : esc_html($current_user->display_name)) . '</h1>';
+
             echo '<input type="hidden" id="ml_username_hidden" value="'.$current_author.'" />';
             
             echo '<p>עיצבנו ויצרנו חנות אישית משלך, שבה תוכל להזמין בקלות לצרכי החברה שלך.</p>';
