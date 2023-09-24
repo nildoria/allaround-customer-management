@@ -1,0 +1,118 @@
+.rotate-controls {
+    margin-top: 10px;
+}
+
+canvas {
+    cursor: default;
+    transform-origin: left top;
+}
+
+body.rtl canvas {
+    transform-origin: right top;
+}
+
+button#alarndGenerateMockup {
+    width: 100%;
+}
+
+.alarnd--canvas-container {
+    max-width: 1000px; 
+    overflow: hidden;
+    border: 1px solid #000;
+    display: inline-block;
+}
+
+.alarnd--select-customers,
+.alarnd--select-logotypes {
+    margin: 15px 0px;
+}
+
+.alarnd--canvas-save-wrap {
+    padding-top: 20px;
+}
+
+.alarnd--canvas-save-wrap button.button.button-primary.button-large {
+    width: 200px;
+}
+
+.ml_add_loading {
+    position: relative;
+    -webkit-transition: opacity .1s ease, background-color .1s ease, color .1s ease, box-shadow .1s ease, background .1s ease;
+    transition: opacity .1s ease, background-color .1s ease, color .1s ease, background .1s ease, -webkit-box-shadow .1s ease;
+    transition: opacity .1s ease, background-color .1s ease, color .1s ease, box-shadow .1s ease, background .1s ease;
+    transition: opacity .1s ease, background-color .1s ease, color .1s ease, box-shadow .1s ease, background .1s ease, -webkit-box-shadow .1s ease;
+    -moz-transition: opacity .1s ease, background-color .1s ease, color .1s ease, box-shadow .1s ease, background .1s ease;
+    -ms-transition: opacity .1s ease, background-color .1s ease, color .1s ease, box-shadow .1s ease, background .1s ease;
+    -o-transition: opacity .1s ease, background-color .1s ease, color .1s ease, box-shadow .1s ease, background .1s ease;
+}
+
+.ml_add_loading.ml_loading {
+    position: relative;
+    cursor: default;
+    text-shadow: none !important;
+    color: transparent !important;
+    opacity: 1;
+    pointer-events: auto;
+    -webkit-transition: all 0s linear, opacity .1s ease;
+    transition: all 0s linear, opacity .1s ease;
+    -moz-transition: all 0s linear, opacity .1s ease;
+    -ms-transition: all 0s linear, opacity .1s ease;
+    -o-transition: all 0s linear, opacity .1s ease;
+}
+
+.ml_add_loading.ml_loading:before {
+    position: absolute;
+    content: '';
+    top: 50%;
+    left: 50%;
+    margin: -.74285714em 0 0 -.74285714em;
+    width: 1.28571429em;
+    height: 1.28571429em;
+    border-radius: 500rem;
+    border: .2em solid rgba(0, 0, 0, .15);
+}
+
+.ml_add_loading.ml_loading:after {
+    position: absolute;
+    content: '';
+    top: 50%;
+    left: 50%;
+    margin: -.74285714em 0 0 -.74285714em;
+    width: 1.28571429em;
+    height: 1.28571429em;
+    -webkit-animation: button-spin .6s linear;
+    animation: button-spin .6s linear;
+    -webkit-animation-iteration-count: infinite;
+    animation-iteration-count: infinite;
+    border-radius: 500rem;
+    border-color: #fff transparent transparent;
+    border-style: solid;
+    border-width: .2em;
+    -webkit-box-shadow: 0 0 0 1px transparent;
+    box-shadow: 0 0 0 1px transparent;
+}
+
+
+@-webkit-keyframes button-spin {
+    from {
+        -webkit-transform: rotate(0deg);
+        transform: rotate(0deg);
+    }
+
+    to {
+        -webkit-transform: rotate(360deg);
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes button-spin {
+    from {
+        -webkit-transform: rotate(0deg);
+        transform: rotate(0deg);
+    }
+
+    to {
+        -webkit-transform: rotate(360deg);
+        transform: rotate(360deg);
+    }
+}
