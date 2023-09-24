@@ -877,3 +877,15 @@ function ml_debug_test() {
     echo '</pre>';
 }
 // add_action( 'init', 'ml_debug_test' );
+
+
+// Redirect Admin to Dashboard if Already Logged in
+function redirect_admin_to_dashboard() {
+    if (is_front_page() && is_user_logged_in() && current_user_can('administrator')) {
+        wp_redirect(admin_url());
+        exit;
+    }
+}
+
+add_action('template_redirect', 'redirect_admin_to_dashboard');
+

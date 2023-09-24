@@ -432,6 +432,21 @@ a.alarnd--submit-btn.alarnd--continue-btn {
   max-height: inherit !important;
 }
 
+nav.woocommerce-MyAccount-navigation
+  ul
+  li.woocommerce-MyAccount-navigation-link {
+  display: none;
+}
+.woocommerce-MyAccount-content p:nth-child(3) {
+  display: none;
+}
+
+nav.woocommerce-MyAccount-navigation
+  ul
+  li.woocommerce-MyAccount-navigation-link--dashboard {
+  display: block;
+}
+
 /* Styling for Slick Carousel */
 .allaround--slick-carousel {
   position: relative;
