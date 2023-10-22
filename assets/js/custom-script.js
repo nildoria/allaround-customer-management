@@ -361,29 +361,6 @@ jQuery(document).ready(function ($) {
     return false;
   });
 
-  //   $(document).on("click", ".alarnd__return_token_payout", function (e) {
-  //     e.preventDefault();
-
-  //     $(".alarnd--woocommerce-checkout-page")
-  //       .css({
-  //         visibility: "hidden",
-  //         position: "absolute",
-  //         opacity: "0",
-  //       })
-  //       .slideUp()
-  //       .find(".allaround-order-details-container")
-  //       .find(".alarnd__return_token_payout")
-  //       .remove();
-
-  //     $(".alrnd--shipping_address_tokenized").slideDown();
-  //     $(".alarnd--single-payout-submit").slideDown();
-  //     $(".alrnd--pay_details_tokenized")
-  //       .find('input[name="alarnd_payout"][value="tokenizer"]')
-  //       .prop("checked", true);
-
-  //     return false;
-  //   });
-
   function ml_show_tokenized_checkout() {
     $(".alarnd--woocommerce-checkout-page")
       .css({
