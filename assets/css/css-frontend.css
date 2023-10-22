@@ -152,10 +152,6 @@ td.product-quantity .quantity input[type="number"] {
   padding: 6px 5px;
 }
 
-.alanrd--single-payout-wrap {
-  /*display: flex;*/
-}
-
 .alarnd--payout-col {
   flex: 0 0 50%;
 }
@@ -523,10 +519,6 @@ ol.mlCustomDots {
   position: relative;
 }
 
-.allaround--slick-carousel .slick-dots li {
-  /* margin: 0 5px; */
-}
-
 .allaround--slick-carousel .slick-dots button,
 ol.mlCustomDots a {
   border: none;
@@ -875,6 +867,7 @@ body.rtl .ccicon {
 
 /* CREDIT CARD IMAGE STYLING */
 .preload * {
+  transition: none !important;
   -webkit-transition: none !important;
   -moz-transition: none !important;
   -ms-transition: none !important;
@@ -882,6 +875,7 @@ body.rtl .ccicon {
 }
 
 .preload .creditcard {
+  transition: transform 0.6s, -webkit-transform 0.6s !important;
   -webkit-transition: transform 0.6s, -webkit-transform 0.6s !important;
   -moz-transition: transform 0.6s, -webkit-transform 0.6s !important;
   -ms-transition: transform 0.6s, -webkit-transform 0.6s !important;
@@ -890,13 +884,7 @@ body.rtl .ccicon {
 .alarnd--payout-col.alrnd_wooz_col {
   position: relative;
 }
-.card-img-container {
-  /* width: 100%;
-  max-width: 350px;
-  max-height: 280px;
-  height: 54vw; */
-  /* padding: 20px; */
-}
+
 .payment-info-display {
   width: 100%;
   max-width: 220px;
