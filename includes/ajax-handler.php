@@ -134,11 +134,15 @@ class ML_Ajax {
         $userPhone = isset( $customerDetails['userPhone'] ) && ! empty( $customerDetails['userPhone'] ) ? sanitize_text_field( $customerDetails['userPhone'] ) : '';
         $userAdress = isset( $customerDetails['userAdress'] ) && ! empty( $customerDetails['userAdress'] ) ? sanitize_text_field( $customerDetails['userAdress'] ) : '';
         $userEmail = isset( $customerDetails['userEmail'] ) && ! empty( $customerDetails['userEmail'] ) ? sanitize_text_field( $customerDetails['userEmail'] ) : '';
+        $cardholderCity = isset( $_POST['cardholderCity'] ) && ! empty( $_POST['cardholderCity'] ) ? sanitize_text_field( $_POST['cardholderCity'] ) : '';
+        $cardholderInvoiceName = isset( $_POST['cardholderInvoiceName'] ) && ! empty( $_POST['cardholderInvoiceName'] ) ? sanitize_text_field( $_POST['cardholderInvoiceName'] ) : '';
 
         if( 
             empty( $userName ) ||
             empty( $userPhone ) ||
             empty( $userAdress ) ||
+            empty( $cardholderCity ) ||
+            empty( $cardholderInvoiceName ) ||
             empty( $userEmail ) 
         ) {
             wp_send_json_error( array(
@@ -185,6 +189,9 @@ class ML_Ajax {
             );
         }
 
+        $extraMeta = [];
+        $extraMeta['cardholderInvoiceName'] = $cardholderInvoiceName;
+
         // send request to api
         $api_url  = apply_filters( 'allaround_order_api_url', '' );
 
@@ -228,6 +235,7 @@ class ML_Ajax {
         $last_name = empty( $current_user->first_name ) && empty( $current_user->last_name ) ? '' : $current_user->last_name;
         $company = get_user_meta( $current_user_id, 'billing_company', true );
         $city = get_user_meta( $current_user_id, 'billing_city', true );
+        $city = ! empty( $cardholderCity ) ? $cardholderCity : $city;
         $postcode = get_user_meta( $current_user_id, 'billing_postcode', true );
         $state = get_user_meta( $current_user_id, 'billing_state', true );
         $country = get_user_meta( $current_user_id, 'billing_country', true );
@@ -252,6 +260,7 @@ class ML_Ajax {
             "customerInfo" => $customerInfo,
             "cardNumber" => '',
             "response" => $response_obj,
+            "extraMeta" => $extraMeta,
             "update" => true
         );
         
@@ -309,6 +318,8 @@ class ML_Ajax {
 
         $cardholderName = isset( $_POST['cardholderName'] ) && ! empty( $_POST['cardholderName'] ) ? sanitize_text_field( $_POST['cardholderName'] ) : '';
         $cardholderPhone = isset( $_POST['cardholderPhone'] ) && ! empty( $_POST['cardholderPhone'] ) ? sanitize_text_field( $_POST['cardholderPhone'] ) : '';
+        $cardholderCity = isset( $_POST['cardholderCity'] ) && ! empty( $_POST['cardholderCity'] ) ? sanitize_text_field( $_POST['cardholderCity'] ) : '';
+        $cardholderInvoiceName = isset( $_POST['cardholderInvoiceName'] ) && ! empty( $_POST['cardholderInvoiceName'] ) ? sanitize_text_field( $_POST['cardholderInvoiceName'] ) : '';
         $cardholderAdress = isset( $_POST['cardholderAdress'] ) && ! empty( $_POST['cardholderAdress'] ) ? sanitize_text_field( $_POST['cardholderAdress'] ) : '';
         $cardholderEmail = isset( $_POST['cardholderEmail'] ) && ! empty( $_POST['cardholderEmail'] ) ? sanitize_text_field( $_POST['cardholderEmail'] ) : '';
         $cardNumber = isset( $_POST['cardNumber'] ) && ! empty( $_POST['cardNumber'] ) ? sanitize_text_field( $_POST['cardNumber'] ) : '';
@@ -327,6 +338,8 @@ class ML_Ajax {
             empty( $cardholderEmail ) ||
             empty( $cardNumber ) ||
             empty( $expirationDate ) ||
+            empty( $cardholderCity ) ||
+            empty( $cardholderInvoiceName ) ||
             empty( $cvvCode )
         ) {
             wp_send_json_error( array(
@@ -374,6 +387,9 @@ class ML_Ajax {
             );
         }
 
+        $extraMeta = [];
+        $extraMeta['cardholderInvoiceName'] = $cardholderInvoiceName;
+
         // send request to api
         $api_url  = apply_filters( 'allaround_card_url', 'https://hook.eu1.make.com/80wvx4qyzxkegv4n1y2ys736dz92t6u6' );
 
@@ -381,7 +397,9 @@ class ML_Ajax {
             'cardholderName' => $cardholderName,
             'cardholderPhone' => $cardholderPhone,
             'cardholderAdress' => $cardholderAdress,
+            'cardholderCity' => $cardholderCity,
             'cardholderEmail' => $cardholderEmail,
+            'cardholderInvoiceName' => $cardholderInvoiceName,
             'cardNumber' => $cardNumber,
             'expirationDate' => $expirationDate,
             'cvvCode' => $cvvCode,
@@ -419,6 +437,7 @@ class ML_Ajax {
         $last_name = empty( $current_user->first_name ) && empty( $current_user->last_name ) ? '' : $current_user->last_name;
         $company = get_user_meta( $current_user_id, 'billing_company', true );
         $city = get_user_meta( $current_user_id, 'billing_city', true );
+        $city = ! empty( $cardholderCity ) ? $cardholderCity : $city;
         $postcode = get_user_meta( $current_user_id, 'billing_postcode', true );
         $state = get_user_meta( $current_user_id, 'billing_state', true );
         $country = get_user_meta( $current_user_id, 'billing_country', true );
@@ -443,6 +462,7 @@ class ML_Ajax {
             "customerInfo" => $customerInfo,
             "cardNumber" => $cardNumber,
             "response" => $response_obj,
+            "extraMeta" => $extraMeta,
             "update" => true
         );
 
@@ -462,10 +482,10 @@ class ML_Ajax {
             wp_die();
         }
         
-        $order_id = ml_create_order($order_data);
+        // $order_id = ml_create_order($order_data);
 
         if( "Accepted" === $message ) {
-            $message = "Unable to reach the api server, order #$order_id";
+            $message = "Unable to reach the api server";
         }
 
         $error_message = "Something went wrong";
