@@ -1229,7 +1229,6 @@ function allaround_card_form($user_id = null) {
                 <!-- Card Image Demo END -->
                 <?php endif; ?>
 
-
                 <div class="form-cardDetail-fields">
                     <div class="form-row">
                         <div class="form-label"><?php esc_html_e("Card Number", "allaroundminilng" ); ?>:</div>
