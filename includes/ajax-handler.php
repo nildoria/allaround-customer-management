@@ -128,23 +128,36 @@ class ML_Ajax {
             wp_die();
         }
 
-        $address = isset( $_POST['address'] ) && ! empty( $_POST['address'] ) ? sanitize_textarea_field( $_POST['address'] ) : '';
+        $customerDetails = isset( $_POST['customerDetails'] ) && ! empty( $_POST['customerDetails'] ) ? $_POST['customerDetails'] : [];
 
-        $user_billing_info = get_field('user_billing_info', "user_{$current_user_id}");
-        $phone = ml_get_user_phone($current_user_id);
-        
-        if( empty( $address ) ) {
-            $address = $user_billing_info;
-        }
+        $userName = isset( $customerDetails['userName'] ) && ! empty( $customerDetails['userName'] ) ? sanitize_text_field( $customerDetails['userName'] ) : '';
+        $userPhone = isset( $customerDetails['userPhone'] ) && ! empty( $customerDetails['userPhone'] ) ? sanitize_text_field( $customerDetails['userPhone'] ) : '';
+        $userAdress = isset( $customerDetails['userAdress'] ) && ! empty( $customerDetails['userAdress'] ) ? sanitize_text_field( $customerDetails['userAdress'] ) : '';
+        $userEmail = isset( $customerDetails['userEmail'] ) && ! empty( $customerDetails['userEmail'] ) ? sanitize_text_field( $customerDetails['userEmail'] ) : '';
 
-        if( empty( $phone ) ) {
+        if( 
+            empty( $userName ) ||
+            empty( $userPhone ) ||
+            empty( $userAdress ) ||
+            empty( $userEmail ) 
+        ) {
             wp_send_json_error( array(
-                "message" => "Billing phone number empty."
+                "message" => esc_html__("Required field are empty. Please fill all the field.", "allaroundminilng")
+            ) );
+            wp_die();
+        }
+        
+        if( 
+            ! is_email( $userEmail )
+        ) {
+            wp_send_json_error( array(
+                "message" => esc_html__("Please enter a valid email address.", "allaroundminilng")
             ) );
             wp_die();
         }
 
         $cart_filter_data = [];
+        $product_list = [];
         foreach ( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
             $_product = wc_get_product( $cart_item['product_id'] );
 
@@ -165,16 +178,23 @@ class ML_Ajax {
             if( $_product->is_type( 'variable' ) ) {
 
             }
+
+            $product_list[] = array(
+                "product_id" => $cart_item['product_id'],
+                "quantity" => $cart_item['quantity']
+            );
         }
 
         // send request to api
         $api_url  = apply_filters( 'allaround_order_api_url', '' );
 
         $body = array(
-            'phone' => $phone,
+            'username' => $userName,
+            'email' => $userEmail,
+            'phone' => $userPhone,
+            'address' => $userAdress,
             'token' => $token,
             'cardNum' => $four_digit,
-            'address' => $address,
             'price' => (int) WC()->cart->get_cart_contents_total(),
             'items' => $cart_filter_data
         );
@@ -192,21 +212,60 @@ class ML_Ajax {
         $args = apply_filters( 'allaround_order_api_args', $args, $current_user_id );
 
         $request = wp_remote_post( esc_url( $api_url ), $args );
-        
+
         error_log( print_r( $request, true ) );
 
-        if ( ! is_wp_error( $request ) && wp_remote_retrieve_response_code( $request ) == 200 && wp_remote_retrieve_body( $request ) !== "Accepted" ) {	
+        // retrieve reponse body
+        $message = wp_remote_retrieve_body( $request );
+
+        // decode response into array
+        $response_obj = ml_response($message);
+
+        error_log( print_r( $response_obj, true ) );
+        
+        // order data
+        $first_name = empty( $current_user->first_name ) && empty( $current_user->last_name ) ? $userName : $current_user->first_name;
+        $last_name = empty( $current_user->first_name ) && empty( $current_user->last_name ) ? '' : $current_user->last_name;
+        $company = get_user_meta( $current_user_id, 'billing_company', true );
+        $city = get_user_meta( $current_user_id, 'billing_city', true );
+        $postcode = get_user_meta( $current_user_id, 'billing_postcode', true );
+        $state = get_user_meta( $current_user_id, 'billing_state', true );
+        $country = get_user_meta( $current_user_id, 'billing_country', true );
+        $country = empty( $country ) ? "IL" : $country;
+
+        $customerInfo = array(
+            'first_name' => $first_name,
+            'last_name'  => $last_name,
+            'name'       => $userName,
+            'company'    => $company,
+            'email'      => $userEmail,
+            'phone'      => $userPhone,
+            'address_1'  => $userAdress,
+            'city'       => $city,
+            'state'      => $state,
+            'postcode'   => $postcode,
+            'country'    => $country
+        );
+
+        $order_data = array(
+            "products" => $product_list,
+            "customerInfo" => $customerInfo,
+            "cardNumber" => '',
+            "response" => $response_obj,
+            "update" => true
+        );
+        
+        if ( ! is_wp_error( $request ) && wp_remote_retrieve_response_code( $request ) == 200 && $message !== "Accepted" ) {	
             
             // Clear the cart
             WC()->cart->empty_cart();
             // Return fragments
             WC_AJAX::get_refreshed_fragments();
 
+            $order_id = ml_create_order($order_data);
+
             wp_send_json_success( array(
-                "message" => "Successfully products added to order",
-                'api_url' => $api_url,
-                'body' => $body,
-                "response" => $request 
+                "message" => "Successfully products added to order #$order_id"
             ) );
 
             wp_die();
@@ -255,18 +314,17 @@ class ML_Ajax {
         $cardNumber = isset( $_POST['cardNumber'] ) && ! empty( $_POST['cardNumber'] ) ? sanitize_text_field( $_POST['cardNumber'] ) : '';
         $expirationDate = isset( $_POST['expirationDate'] ) && ! empty( $_POST['expirationDate'] ) ? sanitize_text_field( $_POST['expirationDate'] ) : '';
         $cvvCode = isset( $_POST['cvvCode'] ) && ! empty( $_POST['cvvCode'] ) ? sanitize_text_field( $_POST['cvvCode'] ) : '';
+        
+        $cardNumber = str_replace(' ', '', $cardNumber);
 
         $current_user = wp_get_current_user();
         $current_user_id = $current_user->ID;
-
-        if( empty( $cardholderEmail ) ) {
-            $cardholderEmail = $current_user->user_email;
-        }
 
         if( 
             empty( $cardholderName ) ||
             empty( $cardholderPhone ) ||
             empty( $cardholderAdress ) ||
+            empty( $cardholderEmail ) ||
             empty( $cardNumber ) ||
             empty( $expirationDate ) ||
             empty( $cvvCode )
@@ -343,32 +401,20 @@ class ML_Ajax {
         );
         $args = apply_filters( 'allaround_card_api_args', $args, $current_user_id );
 
+        // send request to make.com
         $request = wp_remote_post( esc_url( $api_url ), $args );
+        
+        error_log( print_r( $request, true ) );
 
+        // retrieve reponse body
         $message = wp_remote_retrieve_body( $request );
 
-        $myArray = ml_response($message);
+        // decode response into array
+        $response_obj = ml_response($message);
         
-        error_log( print_r( $message, true ) );
-        error_log( print_r( $myArray, true ) );
-
-        if ( ! is_wp_error( $request ) && wp_remote_retrieve_response_code( $request ) == 200 && wp_remote_retrieve_body( $request ) !== "Accepted" ) {	
-            
-            // Clear the cart
-            WC()->cart->empty_cart();
-            // Return fragments
-            WC_AJAX::get_refreshed_fragments();
-
-            wp_send_json_success( array(
-                "message" => "Successfully products added to order",
-                'api_url' => $api_url,
-                'body' => $body,
-                "response" => $request 
-            ) );
-
-            wp_die();
-        }
-
+        error_log( print_r( $response_obj, true ) );
+        
+        // order data
         $first_name = empty( $current_user->first_name ) && empty( $current_user->last_name ) ? $cardholderName : $current_user->first_name;
         $last_name = empty( $current_user->first_name ) && empty( $current_user->last_name ) ? '' : $current_user->last_name;
         $company = get_user_meta( $current_user_id, 'billing_company', true );
@@ -381,6 +427,7 @@ class ML_Ajax {
         $customerInfo = array(
             'first_name' => $first_name,
             'last_name'  => $last_name,
+            'name'       => $cardholderName,
             'company'    => $company,
             'email'      => $cardholderEmail,
             'phone'      => $cardholderPhone,
@@ -393,12 +440,32 @@ class ML_Ajax {
 
         $order_data = array(
             "products" => $product_list,
-            "customerInfo" => $customerInfo
+            "customerInfo" => $customerInfo,
+            "cardNumber" => $cardNumber,
+            "response" => $response_obj,
+            "update" => true
         );
+
+        if ( ! is_wp_error( $request ) && wp_remote_retrieve_response_code( $request ) == 200 && $message !== "Accepted" ) {	
+            
+            // Clear the cart
+            WC()->cart->empty_cart();
+            // Return fragments
+            WC_AJAX::get_refreshed_fragments();
+
+            $order_id = ml_create_order($order_data);
+
+            wp_send_json_success( array(
+                "message" => "Successfully products added to order #$order_id"
+            ) );
+
+            wp_die();
+        }
+        
         $order_id = ml_create_order($order_data);
 
         if( "Accepted" === $message ) {
-            $message = "Unable to reach the api server, Order create #$order_id";
+            $message = "Unable to reach the api server, order #$order_id";
         }
 
         $error_message = "Something went wrong";
@@ -410,6 +477,7 @@ class ML_Ajax {
         wp_send_json_error( array(
             "body" => $body,
             "message" => $message,
+            "response_obj" => $response_obj,
             "error_message" => $error_message
         ) );
 

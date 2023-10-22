@@ -101,104 +101,108 @@ jQuery(document).ready(function ($) {
     return false;
   });
 
-  $("#customerDetails").validate({
-    rules: {
-      userEmail: {
-        required: true,
-        email: true,
-      },
-    },
-    messages: {
-      userEmail: {
-        email: "Please enter a valid email address",
-      },
-    },
-  });
-
-  $("#customerDetails").on("submit", function (e) {
-    e.preventDefault;
-    return false;
-  });
-
-  $("#cardDetailsForm").validate({
-    rules: {
-      expirationDate: {
-        required: true,
-        dateformat: true,
-      },
-      cardholderEmail: {
-        required: true,
-        email: true,
-      },
-    },
-    messages: {
-      expirationDate: {
-        dateformat: "Please enter a valid MM/YY date format",
-      },
-      cardholderEmail: {
-        email: "Please enter a valid email address",
-      },
-    },
-    submitHandler: function (form, event) {
-      event.preventDefault();
-
-      var getData = $(form).serializeArray(),
-        messagWrap = $(form).find(".form-message"),
-        button = $(form).find(".allaround_card_details_submit");
-
-      getData.push(
-        {
-          name: "action",
-          value: "ml_send_card",
+  function initilize_validate() {
+    console.log("validate initilize");
+    $("#customerDetails").validate({
+      rules: {
+        userEmail: {
+          required: true,
+          email: true,
         },
-        {
-          name: "nonce",
-          value: ajax_object.nonce,
-        }
-      );
-
-      button.addClass("ml_loading");
-      messagWrap.html("").slideUp();
-
-      // Form is valid, send data via AJAX
-      $.ajax({
-        type: "POST",
-        dataType: "json",
-        url: ajax_object.ajax_url,
-        data: getData,
-        success: function (response) {
-          button.removeClass("ml_loading");
-
-          if (response.success === false) {
-            // messagWrap.html('<p>'+response.data.message+'</p>').slideDown();
+      },
+      messages: {
+        userEmail: {
+          email: "Please enter a valid email address",
+        },
+      },
+    });
+  
+    $("#customerDetails").on("submit", function (e) {
+      e.preventDefault;
+      return false;
+    });
+  
+    $("#cardDetailsForm").validate({
+      rules: {
+        expirationDate: {
+          required: true,
+          dateformat: true,
+        },
+        cardholderEmail: {
+          required: true,
+          email: true,
+        },
+      },
+      messages: {
+        expirationDate: {
+          dateformat: "Please enter a valid MM/YY date format",
+        },
+        cardholderEmail: {
+          email: "Please enter a valid email address",
+        },
+      },
+      submitHandler: function (form, event) {
+        event.preventDefault();
+  
+        var getData = $(form).serializeArray(),
+          messagWrap = $(form).find(".form-message"),
+          button = $(form).find(".allaround_card_details_submit");
+  
+        getData.push(
+          {
+            name: "action",
+            value: "ml_send_card",
+          },
+          {
+            name: "nonce",
+            value: ajax_object.nonce,
           }
-        },
-        error: function (xhr, status, error) {
-          button.removeClass("ml_loading");
-        },
-      });
-    },
-  });
+        );
+  
+        button.addClass("ml_loading");
+        messagWrap.html("").slideUp();
+  
+        // Form is valid, send data via AJAX
+        $.ajax({
+          type: "POST",
+          dataType: "json",
+          url: ajax_object.ajax_url,
+          data: getData,
+          success: function (response) {
+            button.removeClass("ml_loading");
+  
+            if (response.success === false) {
+              // messagWrap.html('<p>'+response.data.message+'</p>').slideDown();
+            }
+          },
+          error: function (xhr, status, error) {
+            button.removeClass("ml_loading");
+          },
+        });
+      },
+    });
+  
+    $.validator.addMethod(
+      "dateformat",
+      function (value, element) {
+        // Validate MM/YY format
+        var currentYear = new Date().getFullYear() % 100; // Get the last two digits of the current year
+        var parts = value.split("/");
+        if (parts.length !== 2) return false; // Must have two parts (month and year)
+        var month = parseInt(parts[0]);
+        var year = parseInt(parts[1]);
+        return month >= 1 && month <= 12 && year >= currentYear;
+      },
+      "Invalid expiration date"
+    );
+  }
 
-  $.validator.addMethod(
-    "dateformat",
-    function (value, element) {
-      // Validate MM/YY format
-      var currentYear = new Date().getFullYear() % 100; // Get the last two digits of the current year
-      var parts = value.split("/");
-      if (parts.length !== 2) return false; // Must have two parts (month and year)
-      var month = parseInt(parts[0]);
-      var year = parseInt(parts[1]);
-      return month >= 1 && month <= 12 && year >= currentYear;
-    },
-    "Invalid expiration date"
-  );
 
   // Use JavaScript to strip non-numeric characters
-  $("#cardNumber").on("input", function () {
+  $(document).on("input", "#cardNumber",function () {
     this.value = this.value.replace(/\D/g, "");
   });
-  $("#cardholderPhone, #userPhone").on("input", function () {
+  $(document).on("input", "#cardholderPhone, #userPhone", function () {
     this.value = this.value.replace(/[^0-9+]/g, "");
   });
 
@@ -336,15 +340,13 @@ jQuery(document).ready(function ($) {
     var current = $(this);
 
     if ("woocommerce" === current.val()) {
-      $(".alrnd--shipping_address_tokenized").slideUp();
-      $(".alarnd--single-payout-submit").slideUp();
-      $(".alarnd--card-details-wrap").slideDown();
-      $(".payment-info-display").slideDown();
+      $(".alrnd--shipping_address_tokenized").hide();
+      $(".alarnd--single-payout-submit").hide();
+      $(".alarnd--card-details-wrap").show();
     } else if ("tokenizer" === current.val()) {
-      $(".alarnd--card-details-wrap").slideUp();
-      $(".payment-info-display").slideUp();
-      $(".alrnd--shipping_address_tokenized").slideDown();
-      $(".alarnd--single-payout-submit").slideDown();
+      $(".alarnd--card-details-wrap").hide();
+      $(".alrnd--shipping_address_tokenized").show();
+      $(".alarnd--single-payout-submit").show();
     }
     return false;
   });
@@ -544,6 +546,7 @@ jQuery(document).ready(function ($) {
         .toString()
         .replace("%%endpoint%%", "get_refreshed_fragments")
     ) {
+      initilize_validate();
       // Get the input value (replace this with your own logic)
       var hidden_field = $("#ml_username_hidden");
       if (hidden_field.length !== 0) {

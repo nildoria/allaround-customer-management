@@ -153,7 +153,7 @@ td.product-quantity .quantity input[type="number"] {
 }
 
 .alanrd--single-payout-wrap {
-  display: flex;
+  /*display: flex;*/
 }
 
 .alarnd--payout-col {
@@ -827,8 +827,8 @@ form.allaround--card-form .form-input {
   margin-bottom: 5px;
 }
 .allaround--card-form {
-  width: 100%;
-  max-width: 500px;
+  width: 500px;
+  max-width: 48%;
   padding-top: 10px;
 }
 .hidden-row {
@@ -868,6 +868,10 @@ form.allaround--card-form .form-input {
   top: calc(50% - 19px);
   width: 60px;
 }
+body.rtl .ccicon {
+  right: auto;
+  left: 2px;
+}
 
 /* CREDIT CARD IMAGE STYLING */
 .preload * {
@@ -875,6 +879,13 @@ form.allaround--card-form .form-input {
   -moz-transition: none !important;
   -ms-transition: none !important;
   -o-transition: none !important;
+}
+
+.preload .creditcard {
+  -webkit-transition: transform 0.6s, -webkit-transform 0.6s !important;
+  -moz-transition: transform 0.6s, -webkit-transform 0.6s !important;
+  -ms-transition: transform 0.6s, -webkit-transform 0.6s !important;
+  -o-transition: transform 0.6s, -webkit-transform 0.6s !important;
 }
 .alarnd--payout-col.alrnd_wooz_col {
   position: relative;
@@ -892,20 +903,9 @@ form.allaround--card-form .form-input {
   max-height: 280px;
   height: 54vw;
   margin-left: 20px;
-  margin-top: 25px;
-  position: absolute;
-  bottom: 40px;
-  top: auto;
-  display: none;
+  margin-top: 14px;
 }
-.no-token-payment-info-display {
-  width: 100%;
-  max-width: 350px;
-  max-height: 280px;
-  height: 54vw;
-  margin-left: 20px;
-  display: none;
-}
+
 #ccsingle {
   position: absolute;
   right: 15px;
@@ -920,8 +920,8 @@ form.allaround--card-form .form-input {
 .creditcard svg#cardfront,
 .creditcard svg#cardback {
   width: 100%;
-  /* -webkit-box-shadow: 1px 5px 6px 0px black;
-  box-shadow: 1px 5px 6px 0px black; */
+  /*-webkit-box-shadow: 1px 5px 6px 0px black;*/
+  /*box-shadow: 1px 5px 6px 0px black;*/
   border-radius: 11px;
 }
 
@@ -1140,6 +1140,7 @@ form.allaround--card-form .form-input {
   transition: transform 0.6s;
   transition: transform 0.6s, -webkit-transform 0.6s;
   cursor: pointer;
+  direction: ltr;
 }
 
 .creditcard .front,
@@ -1161,6 +1162,53 @@ form.allaround--card-form .form-input {
 .creditcard.flipped {
   -webkit-transform: rotateY(180deg);
   transform: rotateY(180deg);
+}
+
+
+.alarnd--payout-col.alrnd_tokenized_col {
+  position: relative;
+}
+.allaround_carf_form-fields {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  flex-direction: row-reverse;
+}
+.allaround_carf_form-userDetail,
+.allaround_carf_form-cardDetail {
+  flex: 0 0 48%;
+}
+.allaround_carf_form-cardDetail {
+  position: relative;
+  top: 178.3px;
+  padding-bottom: 110px;
+}
+.cardForm-wCard {
+  max-width: 100%;
+  width: 100%;
+}
+.alarnd--payout-col.alrnd_wooz_col {
+  height: 151px;
+  position: absolute;
+  right: 0;
+  width: 48%;
+}
+body.rtl .alarnd--payout-col.alrnd_wooz_col {
+  right: auto;
+  left: 0;
+}
+.alrnd--pay_details_tokenized {
+  width: 100%;
+  float: left;
+  margin-left: 0;
+}
+.alarnd--single-payout-submit {
+  padding-top: 15px;
+  width: 48%;
+}
+button.alarnd--regular-button.alarnd--payout-trigger.ml_add_loading.button {
+  width: 100%;
+  border-radius: 6px;
 }
 
 @media (max-width: 991px) {
