@@ -12,13 +12,16 @@ if ( ! defined( 'WPINC' ) ) {
 	die;
 }
 
+
 class AlrndCustomerManagement {
+
     /**
      * Plugin version.
      *
      * @var string
      */
     const version = '0.1';
+
     /**
 	 * Call this method to get the singleton
 	 *
@@ -46,7 +49,7 @@ class AlrndCustomerManagement {
 
         add_action( 'plugins_loaded', array( $this, 'init' ) );
 
-		load_plugin_textdomain( 'owfshortcodesinit', false, basename( dirname( __FILE__ ) ) . '/languages' );
+		load_plugin_textdomain( 'allaroundminilng', false, basename( dirname( __FILE__ ) ) . '/languages' );
 	}
 
     /**

@@ -23,46 +23,70 @@ class ML_Ajax {
 
         add_action('wp_ajax_alarnd_create_order', array( $this, 'alarnd_create_order' ) );
         add_action('wp_ajax_nopriv_alarnd_create_order', array( $this, 'alarnd_create_order' ) );
+        
+        add_action('wp_ajax_ml_send_card', array( $this, 'ml_send_card' ) );
+        add_action('wp_ajax_nopriv_ml_send_card', array( $this, 'ml_send_card' ) );
     }
 
     public function confirm_payout() {
         check_ajax_referer( 'aum_ajax_nonce', 'nonce' );
-        ?>
-
-        <div class="white-popup-block alarnd--payout-modal mfp-hide alarnd--info-modal">
-            
-            <div class="popup_product_details">
-                <div class="alarnd--success-wrap">
-                    <div class="alarn--popup-thankyou">
-                        <img src="<?php echo AlRNDCM_URL; ?>assets/images/tick.png" alt="">
-                        <h2>תודה שהוספת את "<?php the_title(); ?>" להזמנה שלך!</h2>
-                        <h3>דגם יישלח עם שאר המוצרים המותאמים אישית שהזמנת.</h3>
-                        <p>אתה עדיין יכול להוסיף את שאר <br>המוצרים בעמוד זה וליהנות ממבצעים מעולים :)</p>
-                        <a href="<?php echo esc_url( home_url('/') ); ?>" class="alarnd--submit-btn alarnd--continue-btn">המשך בקניות</a>
-                    </div>
-                </div>
-
-                <div class="alarnd--failed-wrap">
-                    <div class="alarn--popup-thankyou">
-                        <img src="<?php echo AlRNDCM_URL; ?>assets/images/failed.png" alt="">
-                        <h2><?php esc_html_e("Order Didn't go through", "hello-elementor"); ?></h2>
-                        <h3>לצערנו העסקה לא אושרה.</h3>
-                        <p>נטפל בבעיה וניצור איתך קשר בהקדם :)</p>
-                        <a href="<?php echo esc_url( home_url('/') ); ?>" class="alarnd--submit-btn alarnd--continue-btn"><?php esc_html_e('Continue Shopping', 'hello-elementor'); ?></a>
-                    </div>
-                </div>
-
-                <div class="alarnd--popup-confirmation">
-                    <div class="alarnd--popup-middle">
-                        <h5><?php esc_html_e( 'Thanks for adding it to your order!', 'hello-elementor' ); ?></h5>
-                        <div class="alarnd--popup-inline">
-                            <h5><?php printf( '%s %s', esc_html__( 'Please confirm by clicking on the button below and we’ll charge your card by', 'hello-elementor' ), WC()->cart->get_total() ); ?></h5>
+        
+        try {
+            $customerDetails = isset( $_POST['customerDetails'] ) && ! empty( $_POST['customerDetails'] ) ? $_POST['customerDetails'] : '';
+            // error_log( print_r( $customerDetails, true ) );
+            if (empty($customerDetails)) {
+                throw new Exception('Customer Details field is empty.');
+            } elseif( ! isset($customerDetails['userName']) || empty($customerDetails['userName']) ) {
+                throw new Exception('Customer Name field is empty.');
+            } elseif( ! isset($customerDetails['userPhone']) || empty($customerDetails['userPhone']) ) {
+                throw new Exception('Customer Phone field is empty.');
+            } elseif( ! isset($customerDetails['userEmail']) || empty($customerDetails['userEmail']) ) {
+                throw new Exception('Customer Email field is empty.');
+            } elseif( ! isset($customerDetails['userAdress']) || empty($customerDetails['userAdress']) ) {
+                throw new Exception('Customer Adress field is empty.');
+            }
+    
+            ?>
+            <div class="white-popup-block alarnd--payout-modal mfp-hide alarnd--info-modal">
+                <div class="popup_product_details">
+                    <div class="alarnd--success-wrap">
+                        <div class="alarn--popup-thankyou">
+                            <img src="<?php echo AlRNDCM_URL; ?>assets/images/tick.png" alt="">
+                            <h2>תודה שהוספת את "<?php the_title(); ?>" להזמנה שלך!</h2>
+                            <h3>דגם יישלח עם שאר המוצרים המותאמים אישית שהזמנת.</h3>
+                            <p>אתה עדיין יכול להוסיף את שאר <br>המוצרים בעמוד זה וליהנות ממבצעים מעולים :)</p>
+                            <a href="<?php echo esc_url( home_url('/') ); ?>" class="alarnd--submit-btn alarnd--continue-btn">המשך בקניות</a>
                         </div>
-                        <span class="alrnd--create-order alarnd--submit-btn ml_add_loading button"><?php esc_html_e( 'Confirm', 'hello-elementor' ); ?></span>
+                    </div>
+
+                    <div class="alarnd--failed-wrap">
+                        <div class="alarn--popup-thankyou">
+                            <img src="<?php echo AlRNDCM_URL; ?>assets/images/failed.png" alt="">
+                            <h2><?php esc_html_e("Order Didn't go through", "allaroundminilng"); ?></h2>
+                            <h3>לצערנו העסקה לא אושרה.</h3>
+                            <p>נטפל בבעיה וניצור איתך קשר בהקדם :)</p>
+                            <a href="<?php echo esc_url( home_url('/') ); ?>" class="alarnd--submit-btn alarnd--continue-btn"><?php esc_html_e('Continue Shopping', 'allaroundminilng'); ?></a>
+                        </div>
+                    </div>
+
+                    <div class="alarnd--popup-confirmation">
+                        <div class="alarnd--popup-middle">
+                            <h5><?php esc_html_e( 'Thanks for adding it to your order!', 'allaroundminilng' ); ?></h5>
+                            <div class="alarnd--popup-inline">
+                                <h5><?php printf( '%s %s', esc_html__( 'Please confirm by clicking on the button below and we’ll charge your card by', 'allaroundminilng' ), WC()->cart->get_total() ); ?></h5>
+                            </div>
+                            <span class="alrnd--create-order alarnd--submit-btn ml_add_loading button"><?php esc_html_e( 'Confirm', 'allaroundminilng' ); ?></span>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+            <?php
+        } catch (Exception $e) {
+            // Catch the error and send an error response
+            echo '<p>' .$e->getMessage() . '</p>';
+        }
+        ?>
+        
         <?php
         wp_die();
     }
@@ -104,27 +128,45 @@ class ML_Ajax {
             wp_die();
         }
 
-        $address = isset( $_POST['address'] ) && ! empty( $_POST['address'] ) ? sanitize_textarea_field( $_POST['address'] ) : '';
+        $customerDetails = isset( $_POST['customerDetails'] ) && ! empty( $_POST['customerDetails'] ) ? $_POST['customerDetails'] : [];
 
-        $user_billing_info = get_field('user_billing_info', "user_{$current_user_id}");
-        $phone = get_field('phone', "user_{$current_user_id}");
-        if( empty( $address ) ) {
-            $address = $user_billing_info;
-        }
+        $userName = isset( $customerDetails['userName'] ) && ! empty( $customerDetails['userName'] ) ? sanitize_text_field( $customerDetails['userName'] ) : '';
+        $userPhone = isset( $customerDetails['userPhone'] ) && ! empty( $customerDetails['userPhone'] ) ? sanitize_text_field( $customerDetails['userPhone'] ) : '';
+        $userAdress = isset( $customerDetails['userAdress'] ) && ! empty( $customerDetails['userAdress'] ) ? sanitize_text_field( $customerDetails['userAdress'] ) : '';
+        $userEmail = isset( $customerDetails['userEmail'] ) && ! empty( $customerDetails['userEmail'] ) ? sanitize_text_field( $customerDetails['userEmail'] ) : '';
+        $cardholderCity = isset( $_POST['cardholderCity'] ) && ! empty( $_POST['cardholderCity'] ) ? sanitize_text_field( $_POST['cardholderCity'] ) : '';
+        $cardholderInvoiceName = isset( $_POST['cardholderInvoiceName'] ) && ! empty( $_POST['cardholderInvoiceName'] ) ? sanitize_text_field( $_POST['cardholderInvoiceName'] ) : '';
 
-        if( empty( $phone ) ) {
+        if( 
+            empty( $userName ) ||
+            empty( $userPhone ) ||
+            empty( $userAdress ) ||
+            empty( $cardholderCity ) ||
+            empty( $cardholderInvoiceName ) ||
+            empty( $userEmail ) 
+        ) {
             wp_send_json_error( array(
-                "message" => "Billing phone number empty."
+                "message" => esc_html__("Required field are empty. Please fill all the field.", "allaroundminilng")
+            ) );
+            wp_die();
+        }
+        
+        if( 
+            ! is_email( $userEmail )
+        ) {
+            wp_send_json_error( array(
+                "message" => esc_html__("Please enter a valid email address.", "allaroundminilng")
             ) );
             wp_die();
         }
 
         $cart_filter_data = [];
+        $product_list = [];
         foreach ( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
             $_product = wc_get_product( $cart_item['product_id'] );
 
             $cart_filter_data[$cart_item_key]["title"] = $_product->get_title();
-            $cart_filter_data[$cart_item_key]["price"] = $cart_item['data']->get_price();
+            $cart_filter_data[$cart_item_key]["price"] = (int) $cart_item['data']->get_price();
             if( isset( $cart_item['alarnd_size'] ) && ! empty( $cart_item['alarnd_size'] ) ) {
                 $cart_filter_data[$cart_item_key]["size"] = $cart_item['alarnd_size'];
             }
@@ -133,23 +175,34 @@ class ML_Ajax {
             }
             if( isset( $cart_item['quantity'] ) && ! empty( $cart_item['quantity'] ) ) {
                 $cart_filter_data[$cart_item_key]["quantity"] = $cart_item['quantity'];
+                $cart_filter_data[$cart_item_key]["total_price"] = (int) $cart_item['quantity'] * (int) $cart_item['data']->get_price();
             }
 
             
             if( $_product->is_type( 'variable' ) ) {
 
             }
+
+            $product_list[] = array(
+                "product_id" => $cart_item['product_id'],
+                "quantity" => $cart_item['quantity']
+            );
         }
+
+        $extraMeta = [];
+        $extraMeta['cardholderInvoiceName'] = $cardholderInvoiceName;
 
         // send request to api
         $api_url  = apply_filters( 'allaround_order_api_url', '' );
 
         $body = array(
-            'phone' => $phone,
+            'username' => $userName,
+            'email' => $userEmail,
+            'phone' => $userPhone,
+            'address' => $userAdress,
             'token' => $token,
             'cardNum' => $four_digit,
-            'address' => $address,
-            'price' => WC()->cart->get_cart_contents_total(),
+            'price' => (int) WC()->cart->get_cart_contents_total(),
             'items' => $cart_filter_data
         );
         $body = apply_filters( 'allaround_order_api_body', $body, $current_user_id );
@@ -167,18 +220,61 @@ class ML_Ajax {
 
         $request = wp_remote_post( esc_url( $api_url ), $args );
 
-        if ( ! is_wp_error( $request ) && wp_remote_retrieve_response_code( $request ) == 200 && wp_remote_retrieve_body( $request ) !== "Accepted" ) {	
+        error_log( print_r( $request, true ) );
+
+        // retrieve reponse body
+        $message = wp_remote_retrieve_body( $request );
+
+        // decode response into array
+        $response_obj = ml_response($message);
+
+        error_log( print_r( $response_obj, true ) );
+        
+        // order data
+        $first_name = empty( $current_user->first_name ) && empty( $current_user->last_name ) ? $userName : $current_user->first_name;
+        $last_name = empty( $current_user->first_name ) && empty( $current_user->last_name ) ? '' : $current_user->last_name;
+        $company = get_user_meta( $current_user_id, 'billing_company', true );
+        $city = get_user_meta( $current_user_id, 'billing_city', true );
+        $city = ! empty( $cardholderCity ) ? $cardholderCity : $city;
+        $postcode = get_user_meta( $current_user_id, 'billing_postcode', true );
+        $state = get_user_meta( $current_user_id, 'billing_state', true );
+        $country = get_user_meta( $current_user_id, 'billing_country', true );
+        $country = empty( $country ) ? "IL" : $country;
+
+        $customerInfo = array(
+            'first_name' => $first_name,
+            'last_name'  => $last_name,
+            'name'       => $userName,
+            'company'    => $company,
+            'email'      => $userEmail,
+            'phone'      => $userPhone,
+            'address_1'  => $userAdress,
+            'city'       => $city,
+            'state'      => $state,
+            'postcode'   => $postcode,
+            'country'    => $country
+        );
+
+        $order_data = array(
+            "products" => $product_list,
+            "customerInfo" => $customerInfo,
+            "cardNumber" => '',
+            "response" => $response_obj,
+            "extraMeta" => $extraMeta,
+            "update" => true
+        );
+        
+        if ( ! is_wp_error( $request ) && wp_remote_retrieve_response_code( $request ) == 200 && $message !== "Accepted" ) {	
             
             // Clear the cart
             WC()->cart->empty_cart();
             // Return fragments
             WC_AJAX::get_refreshed_fragments();
 
+            $order_id = ml_create_order($order_data);
+
             wp_send_json_success( array(
-                "message" => "Successfully products added to order",
-                'api_url' => $api_url,
-                'body' => $body,
-                "response" => $request 
+                "message" => "Successfully products added to order #$order_id"
             ) );
 
             wp_die();
@@ -193,6 +289,216 @@ class ML_Ajax {
         wp_send_json_error( array(
             "body" => $body,
             "message" => $error_message
+        ) );
+
+        wp_die();
+    }
+    
+    /**
+     * Send Card Details and Cart Detais
+     *
+     * @return void
+     */
+    public function ml_send_card() {
+        check_ajax_referer( 'aum_ajax_nonce', 'nonce' );
+
+        if ( WC()->cart->get_cart_contents_count() == 0 ) {
+            wp_send_json_error( array(
+                "message" => "Cart is empty."
+            ) );
+            wp_die();
+        }
+        
+        if ( ! is_user_logged_in() ) {
+            wp_send_json_error( array(
+                "message" => "User need to logged in."
+            ) );
+            wp_die();
+        }
+
+        $cardholderName = isset( $_POST['cardholderName'] ) && ! empty( $_POST['cardholderName'] ) ? sanitize_text_field( $_POST['cardholderName'] ) : '';
+        $cardholderPhone = isset( $_POST['cardholderPhone'] ) && ! empty( $_POST['cardholderPhone'] ) ? sanitize_text_field( $_POST['cardholderPhone'] ) : '';
+        $cardholderCity = isset( $_POST['cardholderCity'] ) && ! empty( $_POST['cardholderCity'] ) ? sanitize_text_field( $_POST['cardholderCity'] ) : '';
+        $cardholderInvoiceName = isset( $_POST['cardholderInvoiceName'] ) && ! empty( $_POST['cardholderInvoiceName'] ) ? sanitize_text_field( $_POST['cardholderInvoiceName'] ) : '';
+        $cardholderAdress = isset( $_POST['cardholderAdress'] ) && ! empty( $_POST['cardholderAdress'] ) ? sanitize_text_field( $_POST['cardholderAdress'] ) : '';
+        $cardholderEmail = isset( $_POST['cardholderEmail'] ) && ! empty( $_POST['cardholderEmail'] ) ? sanitize_text_field( $_POST['cardholderEmail'] ) : '';
+        $cardNumber = isset( $_POST['cardNumber'] ) && ! empty( $_POST['cardNumber'] ) ? sanitize_text_field( $_POST['cardNumber'] ) : '';
+        $expirationDate = isset( $_POST['expirationDate'] ) && ! empty( $_POST['expirationDate'] ) ? sanitize_text_field( $_POST['expirationDate'] ) : '';
+        $cvvCode = isset( $_POST['cvvCode'] ) && ! empty( $_POST['cvvCode'] ) ? sanitize_text_field( $_POST['cvvCode'] ) : '';
+        
+        $cardNumber = str_replace(' ', '', $cardNumber);
+
+        $current_user = wp_get_current_user();
+        $current_user_id = $current_user->ID;
+
+        if( 
+            empty( $cardholderName ) ||
+            empty( $cardholderPhone ) ||
+            empty( $cardholderAdress ) ||
+            empty( $cardholderEmail ) ||
+            empty( $cardNumber ) ||
+            empty( $expirationDate ) ||
+            empty( $cardholderCity ) ||
+            empty( $cardholderInvoiceName ) ||
+            empty( $cvvCode )
+        ) {
+            wp_send_json_error( array(
+                "message" => esc_html__("Required field are empty. Please fill all the field.", "allaroundminilng")
+            ) );
+            wp_die();
+        }
+        
+        if( 
+            ! is_email( $cardholderEmail )
+        ) {
+            wp_send_json_error( array(
+                "message" => esc_html__("Please enter a valid email address.", "allaroundminilng")
+            ) );
+            wp_die();
+        }
+
+        $expirationDate = str_replace("/", '', $expirationDate);
+
+        $cart_filter_data = [];
+        $product_list = [];
+        foreach ( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
+            $_product = wc_get_product( $cart_item['product_id'] );
+
+            $cart_filter_data[$cart_item_key]["title"] = $_product->get_title();
+            $cart_filter_data[$cart_item_key]["price"] = (int) $cart_item['data']->get_price();
+            if( isset( $cart_item['alarnd_size'] ) && ! empty( $cart_item['alarnd_size'] ) ) {
+                $cart_filter_data[$cart_item_key]["size"] = $cart_item['alarnd_size'];
+            }
+            if( isset( $cart_item['alarnd_color'] ) && ! empty( $cart_item['alarnd_color'] ) ) {
+                $cart_filter_data[$cart_item_key]["color"] = $cart_item['alarnd_color'];
+            }
+            if( isset( $cart_item['quantity'] ) && ! empty( $cart_item['quantity'] ) ) {
+                $cart_filter_data[$cart_item_key]["quantity"] = $cart_item['quantity'];
+                $cart_filter_data[$cart_item_key]["total_price"] = (int) $cart_item['quantity'] * (int) $cart_item['data']->get_price();
+            }
+
+            if( $_product->is_type( 'variable' ) ) {
+
+            }
+
+            $product_list[] = array(
+                "product_id" => $cart_item['product_id'],
+                "quantity" => $cart_item['quantity']
+            );
+        }
+
+        $extraMeta = [];
+        $extraMeta['cardholderInvoiceName'] = $cardholderInvoiceName;
+
+        // send request to api
+        $api_url  = apply_filters( 'allaround_card_url', 'https://hook.eu1.make.com/80wvx4qyzxkegv4n1y2ys736dz92t6u6' );
+
+        $body = array(
+            'cardholderName' => $cardholderName,
+            'cardholderPhone' => $cardholderPhone,
+            'cardholderAdress' => $cardholderAdress,
+            'cardholderCity' => $cardholderCity,
+            'cardholderEmail' => $cardholderEmail,
+            'cardholderInvoiceName' => $cardholderInvoiceName,
+            'cardNumber' => $cardNumber,
+            'expirationDate' => $expirationDate,
+            'cvvCode' => $cvvCode,
+            'price' => (int) WC()->cart->get_cart_contents_total(),
+            'items' => $cart_filter_data
+        );
+        $body = apply_filters( 'allaround_card_api_body', $body, $current_user_id );
+
+        $args = array(
+            'method'      => 'POST',
+            'timeout'     => 15,
+            'sslverify'   => false,
+            'headers'     => array(
+                'Content-Type'  => 'application/json',
+            ),
+            'body'        => json_encode($body),
+        );
+        $args = apply_filters( 'allaround_card_api_args', $args, $current_user_id );
+
+        // send request to make.com
+        $request = wp_remote_post( esc_url( $api_url ), $args );
+        
+        error_log( print_r( $request, true ) );
+
+        // retrieve reponse body
+        $message = wp_remote_retrieve_body( $request );
+
+        // decode response into array
+        $response_obj = ml_response($message);
+        
+        error_log( print_r( $response_obj, true ) );
+        
+        // order data
+        $first_name = empty( $current_user->first_name ) && empty( $current_user->last_name ) ? $cardholderName : $current_user->first_name;
+        $last_name = empty( $current_user->first_name ) && empty( $current_user->last_name ) ? '' : $current_user->last_name;
+        $company = get_user_meta( $current_user_id, 'billing_company', true );
+        $city = get_user_meta( $current_user_id, 'billing_city', true );
+        $city = ! empty( $cardholderCity ) ? $cardholderCity : $city;
+        $postcode = get_user_meta( $current_user_id, 'billing_postcode', true );
+        $state = get_user_meta( $current_user_id, 'billing_state', true );
+        $country = get_user_meta( $current_user_id, 'billing_country', true );
+        $country = empty( $country ) ? "IL" : $country;
+
+        $customerInfo = array(
+            'first_name' => $first_name,
+            'last_name'  => $last_name,
+            'name'       => $cardholderName,
+            'company'    => $company,
+            'email'      => $cardholderEmail,
+            'phone'      => $cardholderPhone,
+            'address_1'  => $cardholderAdress,
+            'city'       => $city,
+            'state'      => $state,
+            'postcode'   => $postcode,
+            'country'    => $country
+        );
+
+        $order_data = array(
+            "products" => $product_list,
+            "customerInfo" => $customerInfo,
+            "cardNumber" => $cardNumber,
+            "response" => $response_obj,
+            "extraMeta" => $extraMeta,
+            "update" => true
+        );
+
+        if ( ! is_wp_error( $request ) && wp_remote_retrieve_response_code( $request ) == 200 && $message !== "Accepted" ) {	
+            
+            // Clear the cart
+            WC()->cart->empty_cart();
+            // Return fragments
+            WC_AJAX::get_refreshed_fragments();
+
+            $order_id = ml_create_order($order_data);
+
+            wp_send_json_success( array(
+                "message" => "Successfully products added to order #$order_id"
+            ) );
+
+            wp_die();
+        }
+        
+        // $order_id = ml_create_order($order_data);
+
+        if( "Accepted" === $message ) {
+            $message = "Unable to reach the api server";
+        }
+
+        $error_message = "Something went wrong";
+        if( is_wp_error( $request ) ) {
+            $error_message = $request->get_error_message();
+        }
+
+        // error_log( print_r( $error_message, true ) );
+        wp_send_json_error( array(
+            "body" => $body,
+            "message" => $message,
+            "response_obj" => $response_obj,
+            "error_message" => $error_message
         ) );
 
         wp_die();
@@ -474,7 +780,7 @@ class ML_Ajax {
         ?>
 
         <?php if( ! empty( $group_enable ) ) : ?>
-        <div id="ml--product_id-<?php echo $product->get_id(); ?>" class="white-popup-block alarnd--slect-opt-modal mfp-hide alarnd--info-modal<?php echo $in_cart; ?>">
+        <div id="ml--product_id-<?php echo $product->get_id(); ?>" data-product_id="<?php echo $product->get_id(); ?>" class="white-popup-block alarnd--slect-opt-modal mfp-hide alarnd--info-modal<?php echo $in_cart; ?>">
             <div class="alarnd--modal-inner alarnd--modal-chart-info">
                 <h2><?php echo get_the_title( $product->get_id() ); ?></h2>
                     
@@ -518,11 +824,11 @@ class ML_Ajax {
                     </div>
                     
                     <div class="alarnd--next-target-message">
-                        <h6><?php printf( '%1$s <span class="ml_next_target"></span> %2$s %3$s %4$s', __( "Add", "hello-elementor" ), __( "more items to reduce your cost to", "hello-elementor" ), wc_price(0, array('decimals' => 0)), __( "per item", "hello-elementor" ) ); ?></h6>
+                        <h6><?php printf( '%1$s <span class="ml_next_target"></span> %2$s %3$s %4$s', __( "Add", "allaroundminilng" ), __( "more items to reduce your cost to", "allaroundminilng" ), wc_price(0, array('decimals' => 0)), __( "per item", "allaroundminilng" ) ); ?></h6>
                     </div>
                     
                     <div class="alarnd--limit-message">
-                        <h6><?php esc_html_e("Can't order more than 999", "hello-elementor"); ?></h6>
+                        <h6><?php esc_html_e("Can't order more than 999", "allaroundminilng"); ?></h6>
                     </div>
 
                     <div class="alarnd--price-show-wrap">
@@ -533,12 +839,12 @@ class ML_Ajax {
                         ?>
                             <div class="alarnd--price-by-shirt">
                                 <p class="alarnd--group-price"><?php echo wc_price($product->get_regular_price(), array('decimals' => 0)); ?> / <?php echo $first_line_keyword; ?></p>
-                                <p><?php echo esc_html( $second_line_keyword ); ?>: <span class="alarnd__total_qty"><?php esc_html_e( '0', 'hello-elementor' ); ?></span></p>
+                                <p><?php echo esc_html( $second_line_keyword ); ?>: <span class="alarnd__total_qty"><?php esc_html_e( '0', 'allaroundminilng' ); ?></span></p>
                                 <span class="alarnd--total-price">סה"כ: <?php echo wc_price($product->get_regular_price(), array('decimals' => 0)); ?></span>
                             </div>
-                            <button type="submit" name="add-to-cart"value="<?php echo esc_attr( $product->get_id() ); ?>" class="single_add_to_cart_button button alt ml_add_loading ml_add_to_cart_trigger"><?php echo esc_html( $product->single_add_to_cart_text() ); ?></button>
+                            <button type="submit" name="add-to-cart"value="<?php echo esc_attr( $product->get_id() ); ?>" disabled="disabled" class="single_add_to_cart_button button alt ml_add_loading ml_add_to_cart_trigger"><?php echo esc_html( $product->single_add_to_cart_text() ); ?></button>
                         </div>
-                        <div class="alanrd--product-added-message"><?php esc_html_e( 'Added to Cart', 'hello-elementor' ); ?></div>
+                        <div class="alanrd--product-added-message"><?php esc_html_e( 'Added to Cart', 'allaroundminilng' ); ?></div>
                         <input type="hidden" name="ml_type" value="group">
                         <input type="hidden" name="alarnd__group_id" value="<?php echo $uniqid; ?>">
                     </div>
@@ -555,7 +861,7 @@ class ML_Ajax {
         $saving_info = get_field( 'saving_info', $product->get_id() );
         $colors = get_field( 'colors', $product->get_id() );
         $colors_title = get_field( 'title_for_colors', $product->get_id() );
-        $the_color_title = ! empty( $colors_title ) ? $colors_title : esc_html__('Select a Color', 'hello-elementor');
+        $the_color_title = ! empty( $colors_title ) ? $colors_title : esc_html__('Select a Color', 'allaroundminilng');
         $custom_quanity = get_field( 'enable_custom_quantity', $product->get_id() );
 
         $steps = get_field( 'quantity_steps', $product->get_id() );
@@ -597,13 +903,13 @@ class ML_Ajax {
                     </div>
                     <?php endif; ?>
                     <div class="alarnd--single-cart-row" data-reqular-price="<?php echo $product->get_regular_price(); ?>">
-                        <span><?php esc_html_e('Select a Quantity', 'hello-elementor'); ?></span>
+                        <span><?php esc_html_e('Select a Quantity', 'allaroundminilng'); ?></span>
                         <?php $the_price = isset( $steps[$last_step]['amount'] ) ? $steps[$last_step]['amount'] : $product->get_regular_price(); ?>
                         <div class="alarnd--custom-qtys-wrap alarnd--single-custom-qty alarnd--single-var-labelonly">
                             <div class="alarnd--single-variable alarnd--hide-price" data-min="<?php echo esc_attr( $steps[0]['quantity'] ); ?>" data-price="<?php echo esc_attr( $the_price ); ?>">
                                 <span class="alarnd--single-var-info">
                                     <input type="radio" name="cutom_quantity" id="cutom_quantity_special-custom" value="<?php echo esc_attr( $the_price ); ?>">
-                                    <label for="cutom_quantity_special-custom"><?php esc_html_e( 'Custom Quantity', 'hello-elementor' ); ?></label>
+                                    <label for="cutom_quantity_special-custom"><?php esc_html_e( 'Custom Quantity', 'allaroundminilng' ); ?></label>
                                 </span>
                                 <?php echo wc_price( 0, array('decimals' => 0)); ?>
                                 <span class="alarnd--single-saving"><span class="alarnd__cqty_amount"><?php echo esc_html( $steps[$last_step]['amount'] ); ?></span> <?php echo esc_html( $saving_info ); ?></span>
@@ -644,7 +950,7 @@ class ML_Ajax {
                 <input type="hidden" name="ml_type" value="quantity">
                 <button type="submit" name="add-to-cart" value="<?php echo esc_attr( $product->get_id() ); ?>" class="single_add_to_cart_button button alt ml_add_loading ml_quantity_product_addtocart"><?php echo esc_html( $product->single_add_to_cart_text() ); ?></button>
             </div>
-            <div class="alanrd--product-added-message"><?php esc_html_e( 'Added to Cart', 'hello-elementor' ); ?></div>
+            <div class="alanrd--product-added-message"><?php esc_html_e( 'Added to Cart', 'allaroundminilng' ); ?></div>
             </form>
            </div>
         </div>

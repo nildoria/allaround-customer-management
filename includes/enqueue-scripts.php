@@ -26,10 +26,18 @@ function enqueue_aum_script() {
 
             wp_enqueue_script('slick-js', AlRNDCM_URL . 'assets/js/slick.min.js', array('jquery'), null, true);
             wp_enqueue_style('slick-css', AlRNDCM_URL . 'assets/css/slick.css');
+            if( defined('XOO_ML_VERSION') ) {
+                wp_deregister_style('xoo-ml-style');
+                wp_enqueue_style( 'xoo-ml-style', XOO_ML_URL.'/assets/css/xoo-ml-style.css', array(), XOO_ML_VERSION );
+            }
+            
             // wp_enqueue_style('slick-theme-css', AlRNDCM_URL . 'assets/css/slick-theme.css');
-
             wp_enqueue_script('isotope-script', AlRNDCM_URL . 'assets/js/isotope.pkgd.min.js', array('jquery'), '3.0.6', true);
             wp_enqueue_script('magnific-popup', AlRNDCM_URL . 'assets/js/jquery.magnific-popup.min.js', array('jquery'), '1.0', true);
+
+            wp_enqueue_script('imask', AlRNDCM_URL . 'assets/js/imask.min.js', array('jquery'), XOO_ML_VERSION, true);
+            wp_enqueue_script('mask', AlRNDCM_URL . 'assets/js/jquery.mask.min.js', array('jquery'), XOO_ML_VERSION, true);
+            wp_enqueue_script('validate', AlRNDCM_URL . 'assets/js/jquery.validate.min.js', array('jquery'), XOO_ML_VERSION, true);
         }
 
         // wp_deregister_script( 'wc-cart' );

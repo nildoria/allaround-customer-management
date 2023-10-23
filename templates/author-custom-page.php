@@ -14,30 +14,51 @@ get_header(); // Include header template
         // Get the current author's username from the URL
         $current_author = get_query_var('author_name');
 
-        $token = get_field('token', "user_{$logged_user_id}");
-        $phone = get_field('phone', "user_{$logged_user_id}");
+        // Get the author's user data
+        $get_current_puser = get_user_by('login', $current_author);        
+        $current_user_id = $get_current_puser->ID;
+
+        $token = get_field('token', "user_{$current_user_id}");
+        $phone = ml_get_user_phone($current_user_id);
         $is_tokenpayout_show = false;
         if( 
             $current_author === $logged_user->user_login &&
-            ! empty( $token ) &&
-            ! empty( $phone )
+            ! empty( $token )
         )  {
             $is_tokenpayout_show = true;
         }
-        
 
-        // Get the author's user data
-        $current_user = get_user_by('login', $current_author);        
-        $current_user_id = $current_user->ID;
+        $is_login_form_show = false;
+        if( is_author() && ! is_user_logged_in() ) {
+            if( $current_user && isset( $current_user->ID ) ) {
+                $token = get_field('token', "user_{$current_user_id}");
+                $phone = ml_get_user_phone($current_user_id);
+                if( ! empty( $token ) && ! empty( $phone ) ) {
+                    $is_login_form_show = true;
+                }
+            }    
+        }
+        
+        if( $is_login_form_show === true ) {
+            echo '<div class="alarnd_login_form_main alarnd--load-overlay">';
+            echo '<div class="alarnd--overlay loading"></div>';
+            echo woocommerce_login_form();
+            echo '</div>';
+        } else {
 
         $profile_picture_id = get_field('profile_picture_id', "user_{$current_user_id}");
         $user_header_title = get_field('user_header_title', "user_{$current_user_id}");
         $profile_picture_url = wp_get_attachment_image_url($profile_picture_id, 'medium');
 
-        if (in_array('customer', $current_user->roles)) {
+        $tick = '';
+        if( !empty( $token ) ) {
+            $tick = '<img src="'.AlRNDCM_URL.'assets/images/verified.png" class="verified_tick" /> ';
+        }
+
+        if (in_array('customer', $get_current_puser->roles)) {
             echo '<div class="author-header aum-container">';
             echo '<div class="welcome-column">';
-            echo '<h1>היי, ' . (($user_header_title) ? esc_html($user_header_title) : esc_html($current_user->display_name)) . '</h1>';
+            echo '<h1>'.$tick.'היי, ' . (($user_header_title) ? esc_html($user_header_title) : esc_html($get_current_puser->display_name)) . '</h1>';
 
             echo '<input type="hidden" id="ml_username_hidden" value="'.$current_author.'" />';
             
@@ -69,7 +90,7 @@ get_header(); // Include header template
         echo '</div>';
 
         // Selected Product Ids for the User
-        // $selected_product_ids = get_user_meta($current_user->ID, 'selected_products', true);
+        // $selected_product_ids = get_user_meta($get_current_puser->ID, 'selected_products', true);
         $selected_product_ids = ml_get_user_products($current_user_id);
 
         // Create an array to store product categories
@@ -236,7 +257,7 @@ get_header(); // Include header template
             }
             echo '</ul></div>'; // End mini-store-product-list woocommerce
         }
-
+        
         ?>
 
         <div class="cart-page alarnd--cart-wrapper-main" id="woocommerce_cart">
@@ -252,22 +273,19 @@ get_header(); // Include header template
                 <?php
                 if( $is_tokenpayout_show === true ) : ?>
                 <?php echo alarnd_single_checkout($logged_user_id); ?>
-                <div class="alarnd--woocommerce-checkout-page">
-                    <div class="alarnd-checkout-wrap-inner">
-                        <?php echo do_shortcode('[woocommerce_checkout]'); ?>
-                    </div>
-                </div>
                 <?php else : ?>
                     <div class="alarnd--woocommerce-checkout-page alarnd--default-visible">
+                        <h2>פרטי תשלום</h2>
                         <div class="alarnd-checkout-wrap-inner">
-                            <?php echo do_shortcode('[woocommerce_checkout]'); ?>
+                            <?php echo allaround_card_form(); ?>
                         </div>
                     </div>
                 <?php endif; ?>
             <?php else : ?>
                 <div class="alarnd--woocommerce-checkout-page alarnd--default-visible">
+                    <h2>פרטי תשלום</h2>
                     <div class="alarnd-checkout-wrap-inner">
-                        <?php echo do_shortcode('[woocommerce_checkout]'); ?>
+                        <?php echo allaround_card_form(); ?>
                     </div>
                 </div>
             <?php endif; ?>
@@ -275,6 +293,7 @@ get_header(); // Include header template
         </div>
 
         <div id="product-quick-view"></div>
+        <?php } ?> <!-- $is_login_form_show end -->
     </main><!-- #main -->
 </div><!-- #primary -->
 
