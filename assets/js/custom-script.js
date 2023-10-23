@@ -116,12 +116,12 @@ jQuery(document).ready(function ($) {
         },
       },
     });
-
+  
     $("#customerDetails").on("submit", function (e) {
       e.preventDefault;
       return false;
     });
-
+  
     $("#cardDetailsForm").validate({
       rules: {
         expirationDate: {
@@ -143,11 +143,11 @@ jQuery(document).ready(function ($) {
       },
       submitHandler: function (form, event) {
         event.preventDefault();
-
+  
         var getData = $(form).serializeArray(),
           messagWrap = $(form).find(".form-message"),
           button = $(form).find(".allaround_card_details_submit");
-
+  
         getData.push(
           {
             name: "action",
@@ -158,10 +158,10 @@ jQuery(document).ready(function ($) {
             value: ajax_object.nonce,
           }
         );
-
+  
         button.addClass("ml_loading");
         messagWrap.html("").slideUp();
-
+  
         // Form is valid, send data via AJAX
         $.ajax({
           type: "POST",
@@ -170,7 +170,7 @@ jQuery(document).ready(function ($) {
           data: getData,
           success: function (response) {
             button.removeClass("ml_loading");
-
+  
             if (response.success === false) {
               // messagWrap.html('<p>'+response.data.message+'</p>').slideDown();
             }
@@ -181,7 +181,7 @@ jQuery(document).ready(function ($) {
         });
       },
     });
-
+  
     $.validator.addMethod(
       "dateformat",
       function (value, element) {
@@ -197,8 +197,9 @@ jQuery(document).ready(function ($) {
     );
   }
 
+
   // Use JavaScript to strip non-numeric characters
-  $(document).on("input", "#cardNumber", function () {
+  $(document).on("input", "#cardNumber",function () {
     this.value = this.value.replace(/\D/g, "");
   });
   $(document).on("input", "#cardholderPhone, #userPhone", function () {
@@ -342,10 +343,8 @@ jQuery(document).ready(function ($) {
       $(".alrnd--shipping_address_tokenized").hide();
       $(".alarnd--single-payout-submit").hide();
       $(".alarnd--card-details-wrap").show();
-      $(".payment-info-display").show();
     } else if ("tokenizer" === current.val()) {
       $(".alarnd--card-details-wrap").hide();
-      $(".payment-info-display").hide();
       $(".alrnd--shipping_address_tokenized").show();
       $(".alarnd--single-payout-submit").show();
     }
@@ -360,6 +359,29 @@ jQuery(document).ready(function ($) {
     }
     return false;
   });
+
+  //   $(document).on("click", ".alarnd__return_token_payout", function (e) {
+  //     e.preventDefault();
+
+  //     $(".alarnd--woocommerce-checkout-page")
+  //       .css({
+  //         visibility: "hidden",
+  //         position: "absolute",
+  //         opacity: "0",
+  //       })
+  //       .slideUp()
+  //       .find(".allaround-order-details-container")
+  //       .find(".alarnd__return_token_payout")
+  //       .remove();
+
+  //     $(".alrnd--shipping_address_tokenized").slideDown();
+  //     $(".alarnd--single-payout-submit").slideDown();
+  //     $(".alrnd--pay_details_tokenized")
+  //       .find('input[name="alarnd_payout"][value="tokenizer"]')
+  //       .prop("checked", true);
+
+  //     return false;
+  //   });
 
   function ml_show_tokenized_checkout() {
     $(".alarnd--woocommerce-checkout-page")
