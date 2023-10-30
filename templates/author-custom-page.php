@@ -52,13 +52,13 @@ get_header(); // Include header template
 
         $tick = '';
         if( !empty( $token ) ) {
-            $tick = '<img src="'.AlRNDCM_URL.'assets/images/verified.png" class="verified_tick" /> ';
+            $tick = '<img src="'.AlRNDCM_URL.'assets/images/verified.png" class="verified_tick" loading="lazy" /> ';
         }
 
         if (in_array('customer', $get_current_puser->roles)) {
             echo '<div class="author-header aum-container">';
             echo '<div class="welcome-column">';
-            echo '<h1>'.$tick.'היי, ' . (($user_header_title) ? esc_html($user_header_title) : esc_html($get_current_puser->display_name)) . '</h1>';
+            echo '<h1>היי, ' . (($user_header_title) ? esc_html($user_header_title) : esc_html($get_current_puser->display_name)) . ' '.$tick.'</h1>';
 
             echo '<input type="hidden" id="ml_username_hidden" value="'.$current_author.'" />';
             
@@ -67,7 +67,7 @@ get_header(); // Include header template
             echo '</div>';
             echo '<div class="profile-picture-column">';
             if (!empty($profile_picture_url)) {
-                echo '<img src="' . esc_url($profile_picture_url) . '" alt="Profile Picture">';
+                echo '<img src="' . esc_url($profile_picture_url) . '" alt="Profile Picture" loading="lazy">';
             } else {
                 echo 'N/A';
             }
@@ -159,15 +159,15 @@ get_header(); // Include header template
                     
                     // Product Thumbnail
                     echo '<div class="product-thumbnail">';
-                    echo '<img src="'.$thumbnail.'" />';
+                    echo '<img src="'.$thumbnail.'" loading="lazy" />';
                     echo '</div>';
                     
                     echo '<div class="product-item-details">';
                     // Product Title
                     if( ! empty( $discount_steps ) || ! empty( $pricing_description ) ) {
-                        echo '<h2 class="product-title">' . esc_html($product->get_name()) . '</h2>';
+                        echo '<h3 class="product-title">' . esc_html($product->get_name()) . '</h3>';
                     } else {
-                        echo '<h2 class="product-title">' . esc_html($product->get_name()) . '</h2>';
+                        echo '<h3 class="product-title">' . esc_html($product->get_name()) . '</h3>';
                     }
 
                     if( ! empty( $colors ) && ! empty( $group_enable ) && empty( $custom_quanity ) ) : ?>
@@ -199,7 +199,7 @@ get_header(); // Include header template
                     if( ! empty( $discount_steps ) || ! empty( $pricing_description ) ) : ?>
                         <div id="alarnd__pricing_info-<?php echo $product->get_id(); ?>" data-product_id="<?php echo $product->get_id(); ?>" class="mfp-hide white-popup-block alarnd--info-modal">
                             <div class="alarnd--modal-inner alarnd--modal-chart-info">
-                                <h2><?php echo get_the_title( $product->get_id() ); ?> ID : <?php echo $product->get_id(); ?></h2>
+                                <h2><?php echo get_the_title( $product->get_id() ); ?></h2>
 
                                 <div class="alarnd--pricing-wrapper-new">
 
@@ -267,7 +267,7 @@ get_header(); // Include header template
             </div>
         </div>
 
-        <div class="alarnd--custom-checkout-section">
+        <div class="alarnd--custom-checkout-section" id="ministore--custom-checkout-section">
 
             <?php if( is_user_logged_in() ) : ?>
                 <?php
@@ -275,7 +275,6 @@ get_header(); // Include header template
                 <?php echo alarnd_single_checkout($logged_user_id); ?>
                 <?php else : ?>
                     <div class="alarnd--woocommerce-checkout-page alarnd--default-visible">
-                        <h2>פרטי תשלום</h2>
                         <div class="alarnd-checkout-wrap-inner">
                             <?php echo allaround_card_form(); ?>
                         </div>
@@ -283,7 +282,6 @@ get_header(); // Include header template
                 <?php endif; ?>
             <?php else : ?>
                 <div class="alarnd--woocommerce-checkout-page alarnd--default-visible">
-                    <h2>פרטי תשלום</h2>
                     <div class="alarnd-checkout-wrap-inner">
                         <?php echo allaround_card_form(); ?>
                     </div>

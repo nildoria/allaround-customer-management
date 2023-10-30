@@ -1,5 +1,32 @@
 jQuery(document).ready(function ($) {
   /**
+   * Set the Same Height to all Content area.
+   */
+  function setProductDetailsHeight() {
+    var windowWidth = $(window).width();
+
+    if (windowWidth > 767) {
+      var tallestHeight = 0;
+      $(".product-item").each(function () {
+        var height = $(this).height() - 210;
+        if (height > tallestHeight) {
+          tallestHeight = height;
+        }
+      });
+
+      $(".product-item-details").css("height", tallestHeight + "px");
+    } else {
+      $(".product-item-details").css("height", "auto");
+    }
+  }
+
+  setProductDetailsHeight();
+
+  $(window).resize(function () {
+    setProductDetailsHeight();
+  });
+
+  /**
    * isotope Filtering.
    */
   var $grid = $(".product-list-container").isotope({
@@ -102,7 +129,6 @@ jQuery(document).ready(function ($) {
   });
 
   function initilize_validate() {
-    console.log("validate initilize");
     $("#customerDetails").validate({
       rules: {
         userEmail: {
@@ -115,13 +141,16 @@ jQuery(document).ready(function ($) {
           email: "Please enter a valid email address",
         },
       },
+      submitHandler: function (form, event) {
+        event.preventDefault();
+      },
     });
-  
+
     $("#customerDetails").on("submit", function (e) {
       e.preventDefault;
       return false;
     });
-  
+
     $("#cardDetailsForm").validate({
       rules: {
         expirationDate: {
@@ -143,11 +172,11 @@ jQuery(document).ready(function ($) {
       },
       submitHandler: function (form, event) {
         event.preventDefault();
-  
+
         var getData = $(form).serializeArray(),
           messagWrap = $(form).find(".form-message"),
           button = $(form).find(".allaround_card_details_submit");
-  
+
         getData.push(
           {
             name: "action",
@@ -158,10 +187,10 @@ jQuery(document).ready(function ($) {
             value: ajax_object.nonce,
           }
         );
-  
+
         button.addClass("ml_loading");
         messagWrap.html("").slideUp();
-  
+
         // Form is valid, send data via AJAX
         $.ajax({
           type: "POST",
@@ -170,9 +199,11 @@ jQuery(document).ready(function ($) {
           data: getData,
           success: function (response) {
             button.removeClass("ml_loading");
-  
+
             if (response.success === false) {
-              // messagWrap.html('<p>'+response.data.message+'</p>').slideDown();
+              messagWrap
+                .html("<p>" + response.data.message + "</p>")
+                .slideDown();
             }
           },
           error: function (xhr, status, error) {
@@ -181,7 +212,7 @@ jQuery(document).ready(function ($) {
         });
       },
     });
-  
+
     $.validator.addMethod(
       "dateformat",
       function (value, element) {
@@ -196,10 +227,44 @@ jQuery(document).ready(function ($) {
       "Invalid expiration date"
     );
   }
+  initilize_validate();
 
+  var $customerDetails = $("#customerDetails");
+  var $cardDetails = $("#cardDetailsForm");
+
+  if ($customerDetails.length) {
+    function toggleSubmitButtonCustomer() {
+      console.log($("#customerDetails").valid());
+      if ($("#customerDetails").valid()) {
+        $("button.alarnd--payout-trigger").prop("disabled", false);
+      } else {
+        $("button.alarnd--payout-trigger").prop("disabled", true);
+      }
+    }
+
+    $(document).on(
+      "input",
+      "#customerDetails input",
+      toggleSubmitButtonCustomer
+    );
+    toggleSubmitButtonCustomer();
+  }
+  if ($cardDetails.length) {
+    function toggleSubmitButtonCard() {
+      console.log($("#cardDetailsForm").valid());
+      if ($("#cardDetailsForm").valid()) {
+        $("button.allaround_card_details_submit").prop("disabled", false);
+      } else {
+        $("button.allaround_card_details_submit").prop("disabled", true);
+      }
+    }
+
+    $(document).on("input", "#cardDetailsForm input", toggleSubmitButtonCard);
+    toggleSubmitButtonCard();
+  }
 
   // Use JavaScript to strip non-numeric characters
-  $(document).on("input", "#cardNumber",function () {
+  $(document).on("input", "#cardNumber", function () {
     this.value = this.value.replace(/\D/g, "");
   });
   $(document).on("input", "#cardholderPhone, #userPhone", function () {
@@ -211,14 +276,18 @@ jQuery(document).ready(function ($) {
 
     var $self = $(this),
       item = $self.closest(".popup_product_details"),
-      address = "";
+      customerDetails = $("#customerDetails");
 
-    if (
-      $(".alarnd--user_address_edit").hasClass("alarnd--address-editing") &&
-      $(".alarnd--user_address_edit").hasClass("ready-to-save")
-    ) {
-      address = $(".user_billing_info_edit").val();
-    }
+    customerDetails.trigger("submit");
+    if (!customerDetails.valid()) return false;
+
+    var cdetails = customerDetails.serializeArray();
+    var customerDetails = {};
+
+    // Convert the serialized array to a key-value object
+    $.each(cdetails, function (index, item) {
+      customerDetails[item.name] = item.value;
+    });
 
     if ($self.hasClass("loading")) return false;
 
@@ -229,8 +298,8 @@ jQuery(document).ready(function ($) {
       url: ajax_object.ajax_url,
       data: {
         nonce: ajax_object.nonce,
-        address: address,
         action: "alarnd_create_order",
+        customerDetails,
       },
       beforeSend: function () {
         $self.addClass("loading");
@@ -343,8 +412,10 @@ jQuery(document).ready(function ($) {
       $(".alrnd--shipping_address_tokenized").hide();
       $(".alarnd--single-payout-submit").hide();
       $(".alarnd--card-details-wrap").show();
+      $(".payment-info-display").show();
     } else if ("tokenizer" === current.val()) {
       $(".alarnd--card-details-wrap").hide();
+      $(".payment-info-display").hide();
       $(".alrnd--shipping_address_tokenized").show();
       $(".alarnd--single-payout-submit").show();
     }
@@ -578,6 +649,18 @@ jQuery(document).ready(function ($) {
             hidden_field.val() +
             '">'
         );
+
+        // Trigger a click event with a delay
+        setTimeout(function () {
+          $(".white-popup-block button.mfp-close").click();
+          // Smooth scroll to #woocommerce_cart
+          $("html, body").animate(
+            {
+              scrollTop: $("#woocommerce_cart").offset().top,
+            },
+            1000
+          );
+        }, 500);
       }
     }
   });
@@ -720,17 +803,17 @@ jQuery(document).ready(function ($) {
 
   $(document).on(
     "click",
-    ".product-item-details h2.product-title",
+    ".product-item-details h2.product-title, .product-thumbnail",
     function (e) {
       e.preventDefault();
 
       if (
-        $(this).closest(".product-item").find(".ml_trigger_details").length !==
+        $(this).closest(".product-item").find(".view-details-button").length !==
         0
       ) {
         $(this)
           .closest(".product-item")
-          .find(".ml_trigger_details")
+          .find(".view-details-button")
           .trigger("click");
       }
 
@@ -940,4 +1023,19 @@ jQuery(document).ready(function ($) {
 
     $("input.xoo-ml-phone-input").val(otp).change();
   });
+
+  $(document).on(
+    "click",
+    '.wc-proceed-to-checkout a[href^="#"]',
+    function (event) {
+      event.preventDefault();
+
+      $("html, body").animate(
+        {
+          scrollTop: $($.attr(this, "href")).offset().top,
+        },
+        500
+      );
+    }
+  );
 });

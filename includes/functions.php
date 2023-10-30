@@ -320,6 +320,7 @@ function alarnd_single_checkout($user_id = false) {
 
     $four_digit = isset( $card_info['last_4_digit'] ) && ! empty( $card_info['last_4_digit'] ) ? $card_info['last_4_digit'] : '';
     $card_logo = isset( $card_info['card_type'] ) && ! empty( $card_info['card_type'] ) ? strtolower($card_info['card_type']) : 'mastercard';
+    $card_logo = str_replace(" ", "-", $card_logo);
     $card_logo_path = AlRNDCM_URL . "assets/images/$card_logo.png";
     ?>
     <div class="alarnd--payout-main">
@@ -334,7 +335,7 @@ function alarnd_single_checkout($user_id = false) {
                                 <div class="alarnd--single-payout">
                                     <label>
                                         <input type="radio" name="alarnd_payout" value="tokenizer" checked="checked">
-                                        <img src="<?php echo esc_url($card_logo_path); ?>" alt="">
+                                        <img src="<?php echo esc_url($card_logo_path); ?>" alt="Selected Card">
                                         <div class="alarnd--four-digit"><?php echo esc_html($four_digit); ?>&nbsp;<span>****&nbsp;****&nbsp;****</span></div>
                                     </label>
                                 </div>
@@ -347,6 +348,111 @@ function alarnd_single_checkout($user_id = false) {
                             </div>
                         </div>
                     </div>
+                    
+                    <!-- Card Image Demo -->
+                    <div class="payment-info-display">
+                        <div class="payment-title">
+                        </div>
+                        <div class="card-img-container preload">
+                            <div class="creditcard">
+                                <div class="front">
+                                    <div id="ccsingle"></div>
+                                    <svg version="1.1" id="cardfront" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+                                        x="0px" y="0px" viewBox="0 0 750 471" style="enable-background:new 0 0 750 471;" xml:space="preserve">
+                                        <g id="Front">
+                                            <g id="CardBackground">
+                                                <g id="Page-1_1_">
+                                                    <g id="amex_1_">
+                                                        <path id="Rectangle-1_1_" class="lightcolor grey" d="M40,0h670c22.1,0,40,17.9,40,40v391c0,22.1-17.9,40-40,40H40c-22.1,0-40-17.9-40-40V40
+                                                C0,17.9,17.9,0,40,0z" />
+                                                    </g>
+                                                </g>
+                                                <path class="darkcolor greydark" d="M750,431V193.2c-217.6-57.5-556.4-13.5-750,24.9V431c0,22.1,17.9,40,40,40h670C732.1,471,750,453.1,750,431z" />
+                                            </g>
+                                            <text transform="matrix(1 0 0 1 60.106 295.0121)" id="svgnumber" class="st2 st3 st4">1111 1111 1111 1111</text>
+                                            <text transform="matrix(1 0 0 1 54.1064 428.1723)" id="svgname" class="st2 st5 st6">JOHN DOE</text>
+                                            <text transform="matrix(1 0 0 1 54.1074 389.8793)" id="svgnameTitle" class="st7 st5 st8">cardholder name</text>
+                                            <text transform="matrix(1 0 0 1 479.7754 388.8793)" class="st7 st5 st8">expiration</text>
+                                            <text transform="matrix(1 0 0 1 65.1054 241.5)" class="st7 st5 st8">card number</text>
+                                            <g>
+                                                <text transform="matrix(1 0 0 1 574.4219 433.8095)" id="svgexpire" class="st2 st5 st9">MM/YY</text>
+                                                <text transform="matrix(1 0 0 1 479.3848 417.0097)" class="st2 st10 st11">VALID</text>
+                                                <text transform="matrix(1 0 0 1 479.3848 435.6762)" class="st2 st10 st11">THRU</text>
+                                                <polygon class="st2" points="554.5,421 540.4,414.2 540.4,427.9 		" />
+                                            </g>
+                                            <g id="cchip">
+                                                <g>
+                                                    <path class="st2" d="M168.1,143.6H82.9c-10.2,0-18.5-8.3-18.5-18.5V74.9c0-10.2,8.3-18.5,18.5-18.5h85.3
+                                            c10.2,0,18.5,8.3,18.5,18.5v50.2C186.6,135.3,178.3,143.6,168.1,143.6z" />
+                                                </g>
+                                                <g>
+                                                    <g>
+                                                        <rect x="82" y="70" class="st12" width="1.5" height="60" />
+                                                    </g>
+                                                    <g>
+                                                        <rect x="167.4" y="70" class="st12" width="1.5" height="60" />
+                                                    </g>
+                                                    <g>
+                                                        <path class="st12" d="M125.5,130.8c-10.2,0-18.5-8.3-18.5-18.5c0-4.6,1.7-8.9,4.7-12.3c-3-3.4-4.7-7.7-4.7-12.3
+                                                c0-10.2,8.3-18.5,18.5-18.5s18.5,8.3,18.5,18.5c0,4.6-1.7,8.9-4.7,12.3c3,3.4,4.7,7.7,4.7,12.3
+                                                C143.9,122.5,135.7,130.8,125.5,130.8z M125.5,70.8c-9.3,0-16.9,7.6-16.9,16.9c0,4.4,1.7,8.6,4.8,11.8l0.5,0.5l-0.5,0.5
+                                                c-3.1,3.2-4.8,7.4-4.8,11.8c0,9.3,7.6,16.9,16.9,16.9s16.9-7.6,16.9-16.9c0-4.4-1.7-8.6-4.8-11.8l-0.5-0.5l0.5-0.5
+                                                c3.1-3.2,4.8-7.4,4.8-11.8C142.4,78.4,134.8,70.8,125.5,70.8z" />
+                                                    </g>
+                                                    <g>
+                                                        <rect x="82.8" y="82.1" class="st12" width="25.8" height="1.5" />
+                                                    </g>
+                                                    <g>
+                                                        <rect x="82.8" y="117.9" class="st12" width="26.1" height="1.5" />
+                                                    </g>
+                                                    <g>
+                                                        <rect x="142.4" y="82.1" class="st12" width="25.8" height="1.5" />
+                                                    </g>
+                                                    <g>
+                                                        <rect x="142" y="117.9" class="st12" width="26.2" height="1.5" />
+                                                    </g>
+                                                </g>
+                                            </g>
+                                        </g>
+                                        <g id="Back">
+                                        </g>
+                                    </svg>
+                                </div>
+                                <div class="back">
+                                    <svg version="1.1" id="cardback" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+                                        x="0px" y="0px" viewBox="0 0 750 471" style="enable-background:new 0 0 750 471;" xml:space="preserve">
+                                        <g id="Front">
+                                            <line class="st0" x1="35.3" y1="10.4" x2="36.7" y2="11" />
+                                        </g>
+                                        <g id="Back">
+                                            <g id="Page-1_2_">
+                                                <g id="amex_2_">
+                                                    <path id="Rectangle-1_2_" class="darkcolor greydark" d="M40,0h670c22.1,0,40,17.9,40,40v391c0,22.1-17.9,40-40,40H40c-22.1,0-40-17.9-40-40V40
+                                            C0,17.9,17.9,0,40,0z" />
+                                                </g>
+                                            </g>
+                                            <rect y="61.6" class="st2" width="750" height="78" />
+                                            <g>
+                                                <path class="st3" d="M701.1,249.1H48.9c-3.3,0-6-2.7-6-6v-52.5c0-3.3,2.7-6,6-6h652.1c3.3,0,6,2.7,6,6v52.5
+                                        C707.1,246.4,704.4,249.1,701.1,249.1z" />
+                                                <rect x="42.9" y="198.6" class="st4" width="664.1" height="10.5" />
+                                                <rect x="42.9" y="224.5" class="st4" width="664.1" height="10.5" />
+                                                <path class="st5" d="M701.1,184.6H618h-8h-10v64.5h10h8h83.1c3.3,0,6-2.7,6-6v-52.5C707.1,187.3,704.4,184.6,701.1,184.6z" />
+                                            </g>
+                                            <text transform="matrix(1 0 0 1 621.999 227.2734)" id="svgsecurity" class="st6 st7">985</text>
+                                            <g class="st8">
+                                                <text transform="matrix(1 0 0 1 518.083 280.0879)" class="st9 st6 st10">security code</text>
+                                            </g>
+                                            <rect x="58.1" y="378.6" class="st11" width="375.5" height="13.5" />
+                                            <rect x="58.1" y="405.6" class="st11" width="421.7" height="13.5" />
+                                            <text transform="matrix(1 0 0 1 59.5073 228.6099)" id="svgnameback" class="st12 st13">John Doe</text>
+                                        </g>
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Card Image Demo END -->
                 </div>
                 <div class="alrnd--shipping_address_tokenized">
                     <?php echo allaround_customer_form(); ?>
@@ -360,7 +466,7 @@ function alarnd_single_checkout($user_id = false) {
         </div>
 
         <div class="alarnd--single-payout-submit">
-            <button type="button" class="alarnd--regular-button alarnd--payout-trigger ml_add_loading button">התקדם לנקודת הביקורת</button>
+            <button type="button" class="alarnd--regular-button alarnd--payout-trigger ml_add_loading button" disabled>התקדם לנקודת הביקורת</button>
         </div>
         <div class="alarnd--payout-validation"></div>
         <?php endif; ?>
@@ -993,6 +1099,8 @@ function ml_get_user_phone( $user_id, $code_or_phone = '' ){
 function allaround_card_form($user_id = null) {
 
     $name = $phone = $user_billing_info = $email = '';
+    $available_card_path = AlRNDCM_URL . "assets/images/available-cards.png";
+    $cvc_info_path = AlRNDCM_URL . "assets/images/question-circle.svg";
 
     if( is_user_logged_in() ) {
         // Get the current author's username from the URL
@@ -1006,6 +1114,8 @@ function allaround_card_form($user_id = null) {
         $the_user = get_user_by( 'id', $current_user_id );
         $phone = ml_get_user_phone($current_user_id);
         $user_billing_info = get_field('user_billing_info', "user_{$current_user_id}");
+        $invoice = get_field('invoice', "user_{$current_user_id}");
+        $city = get_user_meta( $current_user_id, 'billing_city', true );
 
         $name = $the_user->display_name;
         $email = $the_user->user_email;
@@ -1016,35 +1126,48 @@ function allaround_card_form($user_id = null) {
 
         <div class="allaround_carf_form-fields">
             <div class="allaround_carf_form-cardDetail">
-                <div class="form-row">
-                    <div class="form-label"><?php esc_html_e("Card Number", "allaroundminilng" ); ?>:</div>
-                    <div class="form-input">
-                        <input type="text" id="cardNumber" name="cardNumber" placeholder="<?php esc_attr_e("required", "allaroundminilng" ); ?>" required>
-                        <svg id="ccicon" class="ccicon" width="750" height="471" viewBox="0 0 750 471" version="1.1" xmlns="http://www.w3.org/2000/svg"
-                        xmlns:xlink="http://www.w3.org/1999/xlink">
 
-                    </svg>
-                    </div>
+                <?php if( !is_user_logged_in() ) : ?>
+                <h2>מעובד לקופה</h2>
+                <?php endif; ?>
+
+                <div class="ministore_available_pay_options">
+                    <span>יארשא סיטרכ</span> <img src="<?php echo esc_url($available_card_path); ?>" alt="Available Payment Options" loading="lazy">
                 </div>
-                <div class="form-row flex-row">
+                <div class="form-cardDetail-fields">
                     <div class="form-row">
-                        <div class="form-label"><?php esc_html_e("Expiration Date", "allaroundminilng" ); ?>:</div>
+                        <div class="form-label"><?php esc_html_e("Card Number", "allaroundminilng" ); ?></div>
                         <div class="form-input">
-                            <input type="text" inputmode="numeric" id="expirationDate" name="expirationDate" placeholder="<?php esc_attr_e("MM/YY", "allaroundminilng" ); ?>" required>
+                            <input type="text" id="cardNumber" name="cardNumber" placeholder="<?php esc_attr_e("1111 1111 1111 1111", "allaroundminilng" ); ?>" dir="ltr" required>
+                            <svg id="ccicon" class="ccicon" width="750" height="471" viewBox="0 0 750 471" version="1.1" xmlns="http://www.w3.org/2000/svg"
+                            xmlns:xlink="http://www.w3.org/1999/xlink">
+
+                        </svg>
                         </div>
                     </div>
-                    <div class="form-row">
-                        <div class="form-label"><?php esc_html_e("CVV/CVV2 Code", "allaroundminilng" ); ?>:</div>
-                        <div class="form-input">
-                            <input type="number" id="cvvCode" name="cvvCode" placeholder="<?php esc_attr_e("required", "allaroundminilng" ); ?>" required>
+                    <div class="form-row flex-row exp-cvc-con">
+                        <div class="form-row">
+                            <div class="form-label"><?php esc_html_e("Expiration Date", "allaroundminilng" ); ?></div>
+                            <div class="form-input">
+                                <input type="text" inputmode="numeric" id="expirationDate" name="expirationDate" placeholder="<?php esc_attr_e("MM/YY", "allaroundminilng" ); ?>" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-label"><?php esc_html_e("CVC", "allaroundminilng" ); ?></div>
+                            <div class="form-input">
+                                <input type="number" id="cvvCode" name="cvvCode" placeholder="<?php esc_attr_e("CVC", "allaroundminilng" ); ?>" required>
+                                <div class="cvc-info tooltip-left" data-tooltip="3 סיטרכה בגב תורפס">
+                                    <img src="<?php echo esc_url($cvc_info_path); ?>" alt="CVC Info" loading="lazy">
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
-            
+                
+                <?php if( !is_user_logged_in() ) : ?>
                 <!-- Card Image Demo -->
-                <div class="payment-info-display">
+                <div class="payment-info-display nonAuthorized-infoDisplay">
                     <div class="payment-title">
-                        <!-- <h3><?//php esc_html_e("Payment Information", "allaroundminilng" ); ?></h3> -->
                     </div>
                     <div class="card-img-container preload">
                         <div class="creditcard">
@@ -1062,9 +1185,9 @@ function allaround_card_form($user_id = null) {
                                             </g>
                                             <path class="darkcolor greydark" d="M750,431V193.2c-217.6-57.5-556.4-13.5-750,24.9V431c0,22.1,17.9,40,40,40h670C732.1,471,750,453.1,750,431z" />
                                         </g>
-                                        <text transform="matrix(1 0 0 1 60.106 295.0121)" id="svgnumber" class="st2 st3 st4">0123 4567 8910 1112</text>
+                                        <text transform="matrix(1 0 0 1 60.106 295.0121)" id="svgnumber" class="st2 st3 st4">1111 1111 1111 1111</text>
                                         <text transform="matrix(1 0 0 1 54.1064 428.1723)" id="svgname" class="st2 st5 st6">JOHN DOE</text>
-                                        <text transform="matrix(1 0 0 1 54.1074 389.8793)" class="st7 st5 st8">cardholder name</text>
+                                        <text transform="matrix(1 0 0 1 54.1074 389.8793)" class="st7 st5 st8" id="svgnameTitle">cardholder name</text>
                                         <text transform="matrix(1 0 0 1 479.7754 388.8793)" class="st7 st5 st8">expiration</text>
                                         <text transform="matrix(1 0 0 1 65.1054 241.5)" class="st7 st5 st8">card number</text>
                                         <g>
@@ -1146,25 +1269,27 @@ function allaround_card_form($user_id = null) {
                     </div>
                 </div>
                 <!-- Card Image Demo END -->
+                <?php endif; ?>
             </div>
 
             <div class="allaround_carf_form-userDetail">
+                <h3>כתובת למשלוח</h3>
                 <div class="form-row flex-row">
                     <div class="form-row">
-                        <div class="form-label"><?php esc_html_e("Name", "allaroundminilng" ); ?>:</div>
+                        <div class="form-label"><?php esc_html_e("Name", "allaroundminilng" ); ?></div>
                         <div class="form-input">
                             <input type="text" id="cardholderName" maxlength="20" name="cardholderName" placeholder="<?php esc_attr_e("required", "allaroundminilng" ); ?>" value="<?php echo esc_attr( $name ); ?>" required>
                         </div>
                     </div>
                     <div class="form-row">
-                        <div class="form-label"><?php esc_html_e("Invoice Name", "allaroundminilng" ); ?>:</div>
+                        <div class="form-label"><?php esc_html_e("Invoice Name", "allaroundminilng" ); ?></div>
                         <div class="form-input">
-                            <input type="text" id="cardholderInvoiceName" maxlength="20" name="cardholderInvoiceName" placeholder="<?php esc_attr_e("required", "allaroundminilng" ); ?>" value="" required>
+                            <input type="text" id="cardholderInvoiceName" maxlength="20" name="cardholderInvoiceName" placeholder="<?php esc_attr_e("required", "allaroundminilng" ); ?>" value="<?php echo esc_attr( $invoice ); ?>" required>
                         </div>
                     </div>
                 </div>
                 <div class="form-row">
-                    <div class="form-label"><?php esc_html_e("Email", "allaroundminilng" ); ?>:</div>
+                    <div class="form-label"><?php esc_html_e("Email", "allaroundminilng" ); ?></div>
                     <div class="form-input">
                         <input type="text" id="cardholderEmail" name="cardholderEmail" placeholder="<?php esc_attr_e("required", "allaroundminilng" ); ?>" value="<?php echo esc_attr( $email ); ?>" required>
                     </div>
@@ -1172,32 +1297,32 @@ function allaround_card_form($user_id = null) {
 
                 <div class="form-row flex-row">
                     <div class="form-row">
-                        <div class="form-label"><?php esc_html_e("Phone", "allaroundminilng" ); ?>:</div>
+                        <div class="form-label"><?php esc_html_e("Phone", "allaroundminilng" ); ?></div>
                         <div class="form-input">
                             <input type="text" id="cardholderPhone" name="cardholderPhone" placeholder="<?php esc_attr_e("required", "allaroundminilng" ); ?>" value="<?php echo esc_attr( $phone ); ?>" required>
                         </div>
                     </div>
                     <div class="form-row">
-                        <div class="form-label"><?php esc_html_e("City", "allaroundminilng" ); ?>:</div>
+                        <div class="form-label"><?php esc_html_e("City", "allaroundminilng" ); ?></div>
                         <div class="form-input">
-                            <input type="text" id="cardholderCity" name="cardholderCity" placeholder="<?php esc_attr_e("required", "allaroundminilng" ); ?>" value="" required>
+                            <input type="text" id="cardholderCity" name="cardholderCity" placeholder="<?php esc_attr_e("required", "allaroundminilng" ); ?>" value="<?php echo esc_attr( $city ); ?>" required>
                         </div>
                     </div>
                 </div>
 
                 <div class="form-row">
-                    <div class="form-label"><?php esc_html_e("Address", "allaroundminilng" ); ?>:</div>
+                    <div class="form-label"><?php esc_html_e("Address", "allaroundminilng" ); ?></div>
                     <div class="form-input">
                         <input type="text" id="cardholderAdress" name="cardholderAdress" placeholder="<?php esc_attr_e("required", "allaroundminilng" ); ?>" value="<?php echo esc_attr( $user_billing_info ); ?>" required>
                     </div>
                 </div>
 
-                <div class="form-row">
-                    <div class="form-label"></div>
-                    <div class="form-input">
-                        <button type="submit" class="ml_add_loading button allaround_card_details_submit"><?php esc_html_e("התקדם לנקודת הביקורת", "allaroundminilng" ); ?></button>
-                    </div>
-                </div>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-label"></div>
+            <div class="form-input form-submit-container">
+                <button type="submit" class="ml_add_loading button allaround_card_details_submit" disabled><?php esc_html_e("התקדם לנקודת הביקורת", "allaroundminilng" ); ?></button>
             </div>
         </div>
         <div class="form-message"></div>
@@ -1221,42 +1346,43 @@ function allaround_customer_form($user_id = null) {
     $city = get_user_meta( $current_user_id, 'billing_city', true );
     ?>
     <form action="" id="customerDetails" class="allaround--card-form">
+        <h3>כתובת למשלוח</h3>
         <div class="form-row flex-row">
             <div class="form-row">
-                <div class="form-label"><?php esc_html_e("Name", "allaroundminilng" ); ?>:</div>
+                <div class="form-label"><?php esc_html_e("Name", "allaroundminilng" ); ?></div>
                 <div class="form-input">
                     <input type="text" id="userName" name="userName" placeholder="<?php esc_attr_e("required", "allaroundminilng" ); ?>" value="<?php echo esc_attr( $the_user->display_name ); ?>" required>
                 </div>
             </div>
             <div class="form-row">
-                <div class="form-label"><?php esc_html_e("Invoice Name", "allaroundminilng" ); ?>:</div>
+                <div class="form-label"><?php esc_html_e("Invoice Name", "allaroundminilng" ); ?></div>
                 <div class="form-input">
                     <input type="text" id="userInvoiceName" name="userInvoiceName" placeholder="<?php esc_attr_e("required", "allaroundminilng" ); ?>" value="<?php echo esc_attr( $invoice ); ?>" required>
                 </div>
             </div>
         </div>
         <div class="form-row">
-            <div class="form-label"><?php esc_html_e("Email", "allaroundminilng" ); ?>:</div>
+            <div class="form-label"><?php esc_html_e("Email", "allaroundminilng" ); ?></div>
             <div class="form-input">
                 <input type="text" id="userEmail" name="userEmail" placeholder="<?php esc_attr_e("required", "allaroundminilng" ); ?>" value="<?php echo esc_attr( $the_user->user_email ); ?>" required>
             </div>
         </div>
         <div class="form-row flex-row">
             <div class="form-row">
-                <div class="form-label"><?php esc_html_e("Phone", "allaroundminilng" ); ?>:</div>
+                <div class="form-label"><?php esc_html_e("Phone", "allaroundminilng" ); ?></div>
                 <div class="form-input">
                     <input type="text" id="userPhone" name="userPhone" placeholder="<?php esc_attr_e("required", "allaroundminilng" ); ?>" value="<?php echo esc_attr( $phone ); ?>" required>
                 </div>
             </div>
             <div class="form-row">
-                <div class="form-label"><?php esc_html_e("City", "allaroundminilng" ); ?>:</div>
+                <div class="form-label"><?php esc_html_e("City", "allaroundminilng" ); ?></div>
                 <div class="form-input">
                     <input type="text" id="userCity" name="userCity" placeholder="<?php esc_attr_e("required", "allaroundminilng" ); ?>" value="<?php echo esc_attr( $city ); ?>" required>
                 </div>
             </div>
         </div>
         <div class="form-row">
-            <div class="form-label"><?php esc_html_e("Address", "allaroundminilng" ); ?>:</div>
+            <div class="form-label"><?php esc_html_e("Address", "allaroundminilng" ); ?></div>
             <div class="form-input">
                 <input type="text" id="userAdress" name="userAdress" placeholder="<?php esc_attr_e("required", "allaroundminilng" ); ?>" value="<?php echo esc_attr( $user_billing_info ); ?>" required>
             </div>
@@ -1276,7 +1402,7 @@ function ml_response($response) {
 
     if( count($parts) > 1 ) {
         foreach ($parts as $part) {
-            $pair = explode(': ', $part);
+            $pair = explode(':', $part);
             $key = trim($pair[0], '"');
             $value = trim($pair[1], '"');
             $result[$key] = $value;
@@ -1353,8 +1479,27 @@ function ml_create_order($data) {
     // Save the order
     $order->save();
 
-    
-
     return  $order->get_id();
-
 }
+
+
+function ministore_empty_cart_message($message) {
+    if (WC()->cart->is_empty()) {
+        $message = '<div class="custom-empty-cart-message">';
+        $image_url = plugins_url('../assets/images/cart-large-minimalistic-svg.svg', __FILE__);
+        $message .= '<img src="' . esc_url($image_url) . '" alt="Empty Cart Icon">';
+        $message .= '<h3>העגלה ריקה</h3>';
+        $message .= '</div>';
+    }
+    echo '<div class="cart-collaterals minstr-empt-cart-collatrl">';
+    echo '<span class="shipping-title">משלוח</span>';
+    echo '<ul id="shipping_method" class="woocommerce-shipping-methods">';
+    echo '<li><input type="radio" name="shipping_method[0]" data-index="0" id="shipping_method_0_free_shipping5" value="free_shipping:5" class="shipping_method" checked="checked"><label for="shipping_method_0_free_shipping5">איסוף עצמי מקק"ל 37, גבעתיים (1-3 ימי עסקים) - חינם!</label></li>';
+    echo '<li><input type="radio" name="shipping_method[0]" data-index="0" id="shipping_method_0_free_shipping6" value="free_shipping:6" class="shipping_method"><label for="shipping_method_0_free_shipping6">משלוח חינם ע"י שליח לכל הארץ בקניה מעל 500 ש"ח!</label></li>';
+    echo '</ul>';
+    do_action('woocommerce_cart_collaterals');
+    echo '</div>';
+    return $message;
+}
+
+add_filter('wc_empty_cart_message', 'ministore_empty_cart_message');

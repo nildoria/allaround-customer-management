@@ -76,6 +76,7 @@ class ML_Ajax {
                                 <h5><?php printf( '%s %s', esc_html__( 'Please confirm by clicking on the button below and we’ll charge your card by', 'allaroundminilng' ), WC()->cart->get_total() ); ?></h5>
                             </div>
                             <span class="alrnd--create-order alarnd--submit-btn ml_add_loading button"><?php esc_html_e( 'Confirm', 'allaroundminilng' ); ?></span>
+                            <div class="form-message"></div>
                         </div>
                     </div>
                 </div>
@@ -129,13 +130,12 @@ class ML_Ajax {
         }
 
         $customerDetails = isset( $_POST['customerDetails'] ) && ! empty( $_POST['customerDetails'] ) ? $_POST['customerDetails'] : [];
-
         $userName = isset( $customerDetails['userName'] ) && ! empty( $customerDetails['userName'] ) ? sanitize_text_field( $customerDetails['userName'] ) : '';
         $userPhone = isset( $customerDetails['userPhone'] ) && ! empty( $customerDetails['userPhone'] ) ? sanitize_text_field( $customerDetails['userPhone'] ) : '';
         $userAdress = isset( $customerDetails['userAdress'] ) && ! empty( $customerDetails['userAdress'] ) ? sanitize_text_field( $customerDetails['userAdress'] ) : '';
         $userEmail = isset( $customerDetails['userEmail'] ) && ! empty( $customerDetails['userEmail'] ) ? sanitize_text_field( $customerDetails['userEmail'] ) : '';
-        $cardholderCity = isset( $_POST['cardholderCity'] ) && ! empty( $_POST['cardholderCity'] ) ? sanitize_text_field( $_POST['cardholderCity'] ) : '';
-        $cardholderInvoiceName = isset( $_POST['cardholderInvoiceName'] ) && ! empty( $_POST['cardholderInvoiceName'] ) ? sanitize_text_field( $_POST['cardholderInvoiceName'] ) : '';
+        $cardholderCity = isset( $customerDetails['userCity'] ) && ! empty( $customerDetails['userCity'] ) ? sanitize_text_field( $customerDetails['userCity'] ) : '';
+        $cardholderInvoiceName = isset( $customerDetails['userInvoiceName'] ) && ! empty( $customerDetails['userInvoiceName'] ) ? sanitize_text_field( $customerDetails['userInvoiceName'] ) : '';
 
         if( 
             empty( $userName ) ||
@@ -146,6 +146,13 @@ class ML_Ajax {
             empty( $userEmail ) 
         ) {
             wp_send_json_error( array(
+                "details" => $customerDetails,
+                "userName" => $userName,
+                "userPhone" => $userPhone,
+                "userAdress" => $userAdress,
+                "userEmail" => $userEmail,
+                "cardholderCity" => $cardholderCity,
+                "cardholderInvoiceName" => $cardholderInvoiceName,
                 "message" => esc_html__("Required field are empty. Please fill all the field.", "allaroundminilng")
             ) );
             wp_die();
@@ -285,10 +292,20 @@ class ML_Ajax {
             $error_message = $request->get_error_message();
         }
 
+        if( "Accepted" === $message ) {
+            $error_message = "Unable to reach the api server";
+        }
+
+        if( isset( $response_obj['returnMessage'] ) && ! empty( $response_obj['returnMessage'] ) ) {
+            $error_message = $response_obj['returnMessage'];
+        }
+
         // error_log( print_r( $error_message, true ) );
         wp_send_json_error( array(
             "body" => $body,
-            "message" => $error_message
+            "message" => $error_message,
+            "server_message" => $message,
+            "server_body_obj" => $response_obj
         ) );
 
         wp_die();
@@ -422,7 +439,7 @@ class ML_Ajax {
         // send request to make.com
         $request = wp_remote_post( esc_url( $api_url ), $args );
         
-        error_log( print_r( $request, true ) );
+        // error_log( print_r( $request, true ) );
 
         // retrieve reponse body
         $message = wp_remote_retrieve_body( $request );
@@ -430,7 +447,7 @@ class ML_Ajax {
         // decode response into array
         $response_obj = ml_response($message);
         
-        error_log( print_r( $response_obj, true ) );
+        // error_log( print_r( $response_obj, true ) );
         
         // order data
         $first_name = empty( $current_user->first_name ) && empty( $current_user->last_name ) ? $cardholderName : $current_user->first_name;
@@ -484,21 +501,27 @@ class ML_Ajax {
         
         // $order_id = ml_create_order($order_data);
 
-        if( "Accepted" === $message ) {
-            $message = "Unable to reach the api server";
-        }
-
         $error_message = "Something went wrong";
         if( is_wp_error( $request ) ) {
             $error_message = $request->get_error_message();
         }
 
+        if( "Accepted" === $message ) {
+            $error_message = "Unable to reach the api server";
+        }
+
+        if( ! empty( $response_obj ) && isset( $response_obj['returnMessage'] ) && ! empty( $response_obj['returnMessage'] ) ) {
+            $error_message = $response_obj['returnMessage'];
+        }
+
+        // error_log( print_r( $response_obj, true ) );
+
         // error_log( print_r( $error_message, true ) );
         wp_send_json_error( array(
             "body" => $body,
-            "message" => $message,
-            "response_obj" => $response_obj,
-            "error_message" => $error_message
+            "message" => $error_message,
+            "server_message" => $message,
+            "server_body_obj" => $response_obj
         ) );
 
         wp_die();
@@ -908,8 +931,9 @@ class ML_Ajax {
                         <div class="alarnd--custom-qtys-wrap alarnd--single-custom-qty alarnd--single-var-labelonly">
                             <div class="alarnd--single-variable alarnd--hide-price" data-min="<?php echo esc_attr( $steps[0]['quantity'] ); ?>" data-price="<?php echo esc_attr( $the_price ); ?>">
                                 <span class="alarnd--single-var-info">
-                                    <input type="radio" name="cutom_quantity" id="cutom_quantity_special-custom" value="<?php echo esc_attr( $the_price ); ?>">
-                                    <label for="cutom_quantity_special-custom"><?php esc_html_e( 'Custom Quantity', 'allaroundminilng' ); ?></label>
+                                    <input type="radio" name="cutom_quantity" id="cutom_quantity_special-custom" value="<?php echo esc_attr( $the_price ); ?>" checked="checked">
+                                    <input type="text" name="attribute_quantity" autocomplete="off" pattern="[0-9]*" class="alarnd_custom_input" inputmode="numeric" placeholder="<?php esc_html_e( 'הקלידו כמות…', 'hello-elementor' ); ?>" id="attribute_quanity_custom_val">
+                                    <!-- <label for="cutom_quantity_special-custom"><//?//php esc_html_e( 'Custom Quantity', 'allaroundminilng' ); ?></label> -->
                                 </span>
                                 <?php echo wc_price( 0, array('decimals' => 0)); ?>
                                 <span class="alarnd--single-saving"><span class="alarnd__cqty_amount"><?php echo esc_html( $steps[$last_step]['amount'] ); ?></span> <?php echo esc_html( $saving_info ); ?></span>
