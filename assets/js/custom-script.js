@@ -26,13 +26,24 @@ jQuery(document).ready(function ($) {
     setProductDetailsHeight();
   });
 
-  /**
-   * isotope Filtering.
-   */
-  var $grid = $(".product-list-container").isotope({
-    itemSelector: ".product-item",
-    layoutMode: "fitRows",
-  });
+  var isotope_initalize = function () {
+    /**
+       * isotope Filtering.
+       */
+    var $grid = $("#allaround_products_list").isotope({
+      itemSelector: ".product-item",
+      layoutMode: "fitRows",
+    });
+
+    $(document).on("click", ".product-filter .filter-button", function () {
+      var filterValue = $(this).attr("data-filter");
+      $grid.isotope({ filter: filterValue });
+    });
+  }
+
+  isotope_initalize();
+  $(window).resize(isotope_initalize);
+  
 
   // overwrite woocommerce scroll to notices
   $.scroll_to_notices = function (scrollElement) {
@@ -79,8 +90,10 @@ jQuery(document).ready(function ($) {
     var current = $(this),
       customerDetails = $("#customerDetails");
 
-    customerDetails.trigger("submit");
-    if (!customerDetails.valid()) return false;
+    if (!customerDetails.valid()) {
+      current.prop("disabled", true);
+      return false 
+    }
 
     var cdetails = customerDetails.serializeArray();
     var customerDetails = {};
@@ -89,7 +102,7 @@ jQuery(document).ready(function ($) {
     $.each(cdetails, function (index, item) {
       customerDetails[item.name] = item.value;
     });
-    console.log("cdetails", customerDetails);
+    // console.log("cdetails", customerDetails);
 
     $.ajax({
       url: ajax_object.ajax_url,
@@ -143,6 +156,76 @@ jQuery(document).ready(function ($) {
       },
       submitHandler: function (form, event) {
         event.preventDefault();
+
+        var getData = $(form).serializeArray(),
+          messagWrap = $(form).find(".form-message"),
+          button = $(form).find(".ml_save_customer_info");
+
+        getData.push(
+          {
+            name: "action",
+            value: "ml_customer_details",
+          },
+          {
+            name: "nonce",
+            value: ajax_object.nonce,
+          }
+        );
+
+        button.addClass("ml_loading");
+        messagWrap.html("").slideUp();
+
+        // Form is valid, send data via AJAX
+        // $.ajax({
+        //   type: "POST",
+        //   dataType: "json",
+        //   url: ajax_object.ajax_url,
+        //   data: getData,
+        //   success: function (response) {
+        //     button.removeClass("ml_loading");
+
+        //     if (response.success === false) {
+        //       messagWrap
+        //         .html("<p>" + response.data.message + "</p>")
+        //         .slideDown();
+        //     }
+        //   },
+        //   error: function (xhr, status, error) {
+        //     button.removeClass("ml_loading");
+        //   },
+        // });
+
+        $.ajax({
+          type: "POST",
+          url: ajax_object.ajax_url,
+          data: getData,
+          success: function(response, status, xhr) {
+            button.removeClass("ml_loading");
+            
+            var contentType = xhr.getResponseHeader('Content-Type');
+            // console.log('contentType', contentType);
+        
+            // Check the content type to determine the dataType
+            if (contentType && contentType.indexOf('application/json') !== -1) {
+              if (response.success === false) {
+                messagWrap
+                  .html("<p>" + response.data.message + "</p>")
+                  .slideDown();
+              }
+            } else {
+              // Response is HTML or another format, set dataType to 'html'
+              $('#customerDetails').slideUp();
+              $('#alarnd__details_preview').html(response).slideDown();
+              $('.alarnd--single-payout-submit').slideDown();              
+            }
+          },
+          error: function(xhr, status, error) {
+            // Handle the error
+          }
+        });
+        
+
+
       },
     });
 
@@ -234,11 +317,13 @@ jQuery(document).ready(function ($) {
 
   if ($customerDetails.length) {
     function toggleSubmitButtonCustomer() {
-      console.log($("#customerDetails").valid());
+      // console.log($("#customerDetails").valid());
       if ($("#customerDetails").valid()) {
         $("button.alarnd--payout-trigger").prop("disabled", false);
+        $("button.ml_save_customer_info").prop("disabled", false);
       } else {
         $("button.alarnd--payout-trigger").prop("disabled", true);
+        $("button.ml_save_customer_info").prop("disabled", true);
       }
     }
 
@@ -247,11 +332,11 @@ jQuery(document).ready(function ($) {
       "#customerDetails input",
       toggleSubmitButtonCustomer
     );
-    toggleSubmitButtonCustomer();
+    // toggleSubmitButtonCustomer();
   }
   if ($cardDetails.length) {
     function toggleSubmitButtonCard() {
-      console.log($("#cardDetailsForm").valid());
+      // console.log($("#cardDetailsForm").valid());
       if ($("#cardDetailsForm").valid()) {
         $("button.allaround_card_details_submit").prop("disabled", false);
       } else {
@@ -369,32 +454,28 @@ jQuery(document).ready(function ($) {
     $.ajax($fragment_refresh);
   }
 
-  $(".product-filter").on("click", ".filter-button", function () {
-    var filterValue = $(this).attr("data-filter");
-    $grid.isotope({ filter: filterValue });
-  });
-
   // Close quick view modal
 
   $(document).on("click", ".alarnd--user_address_edit", function () {
     var current = $(this);
-    if (current.hasClass("alarnd--address-editing")) {
-      $(".alarnd--user-address-wrap")
-        .slideDown()
-        .addClass("alrnd_saved_user_address");
-      $(".user_billing_info_edit")
-        .slideUp()
-        .removeClass("alrnd_edit_user_address_textarea");
-      current.removeClass("alarnd--address-editing").text("שינוי פרטי משלוח");
-    } else {
-      $(".alarnd--user-address-wrap")
-        .slideUp()
-        .removeClass("alrnd_saved_user_address");
-      $(".user_billing_info_edit")
-        .slideDown()
-        .addClass("alrnd_edit_user_address_textarea");
-      current.addClass("alarnd--address-editing").text("לַחֲזוֹר");
-    }
+    $('#alarnd__details_preview').slideUp();
+    $('#customerDetails').slideDown(function(){
+      $(this).find(".form-message").html('').slideUp();
+    });
+    $('.alarnd--single-payout-submit').slideUp();
+
+    return false;
+  });
+  
+  $(document).on("click", ".ml_customer_info_edit_cancel", function () {
+    var current = $(this);
+    $('#customerDetails').slideUp(function(){
+      $(this).find(".form-message").html('').slideUp();
+    });
+    $('#alarnd__details_preview').slideDown();
+    $('.alarnd--single-payout-submit').slideDown();
+
+    return false;
   });
 
   $(document).on("change paste keyup", ".user_billing_info_edit", function () {
@@ -566,6 +647,58 @@ jQuery(document).ready(function ($) {
     });
   });
 
+  $(document).on("click", ".alarnd--loadmore-trigger", function(e){
+    e.preventDefault();
+
+    var current = $(this),
+      page_num = current.data("page_num"),
+      section = $('.allaround--products-section'),
+      wrapper = $('#allaround_products_list'),
+      user_id = wrapper.data('user_id');
+
+    section.addClass("loading");
+    current.addClass("ml_loading");
+
+    console.log("page_num", page_num);
+    console.log( $('.alarnd--loadmore-trigger').data('page_num') );
+
+    $.ajax({
+      type: "POST",
+      dataType: "html",
+      url: ajax_object.ajax_url,
+      data: {
+        action: "ml_pagination",
+        page_num: page_num,
+        user_id: user_id,
+        nonce: ajax_object.nonce,
+      },
+      success: function (response) {
+        section.removeClass("loading");
+        current.removeClass("ml_loading");
+
+        if (response.length === 0) {
+          current.slideUp();
+        } else {
+          wrapper.append(response);
+
+          var $items = $( response );
+          wrapper.isotope( 'appended', $items );
+          wrapper.isotope( 'reloadItems' );
+
+          current.data("page_num", page_num+1);
+        }
+
+      },
+      complete: function(){
+        section.removeClass("loading");
+        current.removeClass("ml_loading");
+        initi_prive_view_modal();
+        isotope_initalize();
+      }
+    });
+
+  });
+
   $(document).on("submit", "form.variations_form", function (e) {
     e.preventDefault();
 
@@ -603,7 +736,7 @@ jQuery(document).ready(function ($) {
 
         refresh_cart_fragment();
 
-        console.log(data);
+        // console.log(data);
       },
     });
   });
@@ -631,7 +764,7 @@ jQuery(document).ready(function ($) {
   });
 
   $(document).ajaxComplete(function (event, xhr, settings) {
-    console.log("ajaxComplete");
+    // console.log("ajaxComplete");
     // Check if the AJAX request is for refreshing fragments
     if (
       settings.url ===
@@ -639,11 +772,11 @@ jQuery(document).ready(function ($) {
         .toString()
         .replace("%%endpoint%%", "get_refreshed_fragments")
     ) {
-      console.log(settings.url);
+      // console.log(settings.url);
       // Get the input value (replace this with your own logic)
       var hidden_field = $("#ml_username_hidden");
       if (hidden_field.length !== 0) {
-        console.log("added", hidden_field.val());
+        // console.log("added", hidden_field.val());
         $("form.woocommerce-checkout").append(
           '<input type="hidden" name="user_profile_username" value="' +
             hidden_field.val() +
@@ -685,7 +818,7 @@ jQuery(document).ready(function ($) {
     function () {
       var product_id = $(this).data("product_id");
 
-      console.log("product_id", product_id);
+      // console.log("product_id", product_id);
 
       if (
         $(this)
@@ -693,113 +826,118 @@ jQuery(document).ready(function ($) {
           .find('a.remove[data-product_id="' + product_id + '"]')
           .not(this).length === 0
       ) {
-        console.log("i'm innnnnnnn");
+        // console.log("i'm innnnnnnn");
         $("#ml--product_id-" + product_id).removeClass("is_already_in_cart");
       }
     }
   );
 
-  var isApplicable = null;
+  function initi_prive_view_modal() {
+    var isApplicable = null;
 
-  $(".alarnd_view_pricing_cb").magnificPopup({
-    type: "inline",
-    midClick: true,
-    removalDelay: 300,
-    mainClass: "mfp-fade",
-    callbacks: {
-      open: function () {
-        const currentInstance = this;
+    $(".alarnd_view_pricing_cb").magnificPopup({
+      type: "inline",
+      midClick: true,
+      removalDelay: 300,
+      mainClass: "mfp-fade",
+      callbacks: {
+        open: function () {
+          const currentInstance = this;
 
-        $(".alarnd_trigger_details_modal").removeClass("ml_loading");
+          $(".alarnd_trigger_details_modal").removeClass("ml_loading");
 
-        var slickCarousel = this.content.find(".allaround--slick-carousel");
+          var slickCarousel = this.content.find(".allaround--slick-carousel");
 
-        if (slickCarousel.hasClass("slick-slider")) {
-          slickCarousel.slick("unslick");
-        }
-
-        var customDots = this.content.find(".mlCustomDots a"); // Your custom dot links
-
-        slickCarousel.slick({
-          arrows: true,
-          dots: false,
-          infinite: true,
-          speed: 500,
-          slidesToShow: 1,
-          nextArrow:
-            '<button class="slick-next" aria-label="Next" type="button"></button>',
-          prevArrow:
-            '<button class="slick-prev" aria-label="Previous" type="button"></button>',
-          customPaging: function (slider, i) {
-            return '<button class="slick-dot" type="button"></button>';
-          },
-          adaptiveHeight: true,
-        });
-        slickCarousel.slick("refresh");
-
-        // Click event handler for custom dots
-        customDots.on("click", function (e) {
-          e.preventDefault();
-          var slideIndex = $(this).data("slide");
-          slickCarousel.slick("slickGoTo", slideIndex); // Go to the selected slide
-        });
-
-        // Update custom dots when the slider changes
-        slickCarousel.on(
-          "beforeChange",
-          function (event, slick, currentSlide, nextSlide) {
-            customDots.removeClass("active");
-            customDots.eq(nextSlide).addClass("active");
+          if (slickCarousel.hasClass("slick-slider")) {
+            slickCarousel.slick("unslick");
           }
-        );
 
-        slickCarousel.find(".gallery-item").on("click", function () {
-          isApplicable = true;
-          currentInstance.close();
-        });
-      },
-      afterClose: function () {
-        const product_id = this.st.el.data("product_id");
-        if (
-          isApplicable === true &&
-          product_id !== undefined &&
-          $("#alarnd__pricing_info-" + product_id).length !== 0
-        ) {
-          isApplicable = false;
-          $("#alarnd__pricing_info-" + product_id)
-            .find(".mlGallerySingle")
-            .magnificPopup("open");
-        }
-      },
-    },
-  });
+          var customDots = this.content.find(".mlCustomDots a"); // Your custom dot links
 
-  $(".mlGallerySingle").magnificPopup({
-    type: "image",
-    gallery: {
-      enabled: true,
-    },
-    titleSrc: function (item) {
-      // Retrieve the title from the data-title attribute
-      return item.el.attr("data-title");
-    },
-    callbacks: {
-      afterClose: function () {
-        const product_id = this.st.el
-          .closest(".alarnd--info-modal")
-          .data("product_id");
-        if (
-          product_id !== undefined &&
-          $('.alarnd_view_pricing_cb[data-product_id="' + product_id + '"]')
-            .length !== 0
-        ) {
-          $(
-            '.alarnd_view_pricing_cb[data-product_id="' + product_id + '"]'
-          ).trigger("click");
-        }
+          slickCarousel.slick({
+            arrows: true,
+            dots: false,
+            infinite: true,
+            speed: 500,
+            slidesToShow: 1,
+            nextArrow:
+              '<button class="slick-next" aria-label="Next" type="button"></button>',
+            prevArrow:
+              '<button class="slick-prev" aria-label="Previous" type="button"></button>',
+            customPaging: function (slider, i) {
+              return '<button class="slick-dot" type="button"></button>';
+            },
+            adaptiveHeight: true,
+          });
+          slickCarousel.slick("refresh");
+
+          // Click event handler for custom dots
+          customDots.on("click", function (e) {
+            e.preventDefault();
+            var slideIndex = $(this).data("slide");
+            slickCarousel.slick("slickGoTo", slideIndex); // Go to the selected slide
+          });
+
+          // Update custom dots when the slider changes
+          slickCarousel.on(
+            "beforeChange",
+            function (event, slick, currentSlide, nextSlide) {
+              customDots.removeClass("active");
+              customDots.eq(nextSlide).addClass("active");
+            }
+          );
+
+          slickCarousel.find(".gallery-item").on("click", function () {
+            isApplicable = true;
+            currentInstance.close();
+          });
+        },
+        afterClose: function () {
+          const product_id = this.st.el.data("product_id");
+          if (
+            isApplicable === true &&
+            product_id !== undefined &&
+            $("#alarnd__pricing_info-" + product_id).length !== 0
+          ) {
+            isApplicable = false;
+            $("#alarnd__pricing_info-" + product_id)
+              .find(".mlGallerySingle")
+              .magnificPopup("open");
+          }
+        },
       },
-    },
-  });
+    });
+
+    $(".mlGallerySingle").magnificPopup({
+      type: "image",
+      gallery: {
+        enabled: true,
+      },
+      titleSrc: function (item) {
+        // Retrieve the title from the data-title attribute
+        return item.el.attr("data-title");
+      },
+      callbacks: {
+        afterClose: function () {
+          const product_id = this.st.el
+            .closest(".alarnd--info-modal")
+            .data("product_id");
+          if (
+            product_id !== undefined &&
+            $('.alarnd_view_pricing_cb[data-product_id="' + product_id + '"]')
+              .length !== 0
+          ) {
+            $(
+              '.alarnd_view_pricing_cb[data-product_id="' + product_id + '"]'
+            ).trigger("click");
+          }
+        },
+      },
+    });
+
+  }
+
+  initi_prive_view_modal();
 
   $(document).on(
     "click",
@@ -891,7 +1029,7 @@ jQuery(document).ready(function ($) {
           slickCarousel.find(".gallery-item").on("click", function () {
             if (gallery.find(".mlGallerySingle").length !== 0) {
               if ($.magnificPopup.instance.isOpen) {
-                console.log("magnificPopup.instance.close");
+                // console.log("magnificPopup.instance.close");
                 $.magnificPopup.instance.close();
                 setTimeout(function () {
                   gallery.find(".mlGallerySingle").magnificPopup("open");
@@ -907,7 +1045,7 @@ jQuery(document).ready(function ($) {
   });
 
   $(document).on("click", ".gallery-item", function () {
-    console.log("gallery item clicked - document on click");
+    // console.log("gallery item clicked - document on click");
   });
 
   $(document).on("click", ".alarnd_trigger_details_modal", function (e) {

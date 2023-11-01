@@ -63,30 +63,35 @@ class ALRN_Genrator {
             // Calculate the new dimensions while preserving the aspect ratio
             list($original_width, $original_height) = getimagesize($original_image_path);
             $max_dimension = 600; // Maximum dimension for the resized image
-    
-            if ($original_width > $original_height) {
-                $new_width = $max_dimension;
-                $new_height = ($original_height / $original_width) * $max_dimension;
-            } else {
-                $new_height = $max_dimension;
-                $new_width = ($original_width / $original_height) * $max_dimension;
-            }
-    
-            // Create an empty image with the new dimensions
-            $resized_image = imagecreatetruecolor($new_width, $new_height);
-    
-            // Resize the image while preserving the aspect ratio
-            imagecopyresampled($resized_image, $original_image, 0, 0, 0, 0, $new_width, $new_height, $original_width, $original_height);
-    
-            // Construct the full path to save the resized image
-            $resized_image_path = $user_directory . '/resized_' . $filename;
-    
-            // Save the resized image
-            imagejpeg($resized_image, $resized_image_path, 90); // You can adjust the quality (90 in this example)
+
+            $resize_data = array(
+                "width" => 400,
+                "original_height" => $original_height,
+                "original_width" => $original_width,
+                "original_image" => $original_image,
+                "filename" => $filename,
+                "user_directory" => $user_directory,
+                "name" => "resized_"
+            );
+
+            $this->create_resize_image($resize_data);
+            
+            $resize_data = array(
+                "width" => 400,
+                "height" => 300,
+                "original_height" => $original_height,
+                "original_width" => $original_width,
+                "original_image" => $original_image,
+                "filename" => $filename,
+                "user_directory" => $user_directory,
+                "name" => "wc_thumb_"
+            );
+
+            $this->create_resize_image($resize_data);
     
             // Free up memory
             imagedestroy($original_image);
-            imagedestroy($resized_image);
+
     
             return rest_ensure_response('Original and resized images saved successfully');
         } else {
@@ -94,6 +99,50 @@ class ALRN_Genrator {
         }
     }
     
+    function create_resize_image($data) {
+        $max_dimension_width = $data['width'];
+        $max_dimension_height = isset( $data['height'] ) ? $data['height'] : '';
+        $original_height = $data['original_height'];
+        $original_width = $data['original_width'];
+        $original_image = $data['original_image'];
+        $filename = $data['filename'];
+        $user_directory = $data['user_directory'];
+        $name = $data['name'];
+
+        if( ! empty( $max_dimension_height ) ) {
+            $aspect_ratio = $original_width / $original_height;
+            $new_width = min($max_dimension_width, $max_dimension_width); // Limit the width to 400 pixels
+            $new_height = $new_width / $aspect_ratio;
+            
+            // Check if the calculated height exceeds the maximum height
+            if ($new_height > $max_dimension_height) {
+                $new_height = $max_dimension_height;
+                $new_width = $new_height * $aspect_ratio;
+            }
+        } else {
+            if ($original_width > $original_height) {
+                $new_width = $max_dimension_width;
+                $new_height = ($original_height / $original_width) * $max_dimension_width;
+            } else {
+                $new_height = $max_dimension_width;
+                $new_width = ($original_width / $original_height) * $max_dimension_width;
+            }
+        }
+
+        // Create an empty image with the new dimensions
+        $resized_image = imagecreatetruecolor($new_width, $new_height);
+    
+        // Resize the image while preserving the aspect ratio
+        imagecopyresampled($resized_image, $original_image, 0, 0, 0, 0, $new_width, $new_height, $original_width, $original_height);
+
+        // Construct the full path to save the resized image
+        $resized_image_path = $user_directory . '/' . $name . $filename;
+
+        // Save the resized image
+        imagejpeg($resized_image, $resized_image_path, 90); // You can adjust the quality (90 in this example)
+
+        imagedestroy($resized_image);
+    }
 
 
     // Enqueue jQuery and the JavaScript file

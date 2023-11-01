@@ -307,6 +307,8 @@ function alarnd_single_checkout($user_id = false) {
 
     $current_user = wp_get_current_user();
     $current_user_id = $current_user->ID;
+    $user_email = $current_user->user_email;
+    $display_name = $current_user->display_name;
 
     if( ! empty( $user_id ) ) {
         $current_user_id = $user_id;
@@ -315,13 +317,30 @@ function alarnd_single_checkout($user_id = false) {
     $token = get_field('token', "user_{$current_user_id}");
     $phone = ml_get_user_phone($current_user_id);
 
-    $user_billing_info = get_field('user_billing_info', "user_{$current_user_id}");
     $card_info = get_field('card_info', "user_{$current_user_id}");
+    $invoice = get_field('invoice', "user_{$current_user_id}");
+    $city = get_user_meta( $current_user_id, 'billing_city', true );
+    $billing_address = get_user_meta( $current_user_id, 'billing_address_1', true );
 
     $four_digit = isset( $card_info['last_4_digit'] ) && ! empty( $card_info['last_4_digit'] ) ? $card_info['last_4_digit'] : '';
     $card_logo = isset( $card_info['card_type'] ) && ! empty( $card_info['card_type'] ) ? strtolower($card_info['card_type']) : 'mastercard';
     $card_logo = str_replace(" ", "-", $card_logo);
     $card_logo_path = AlRNDCM_URL . "assets/images/$card_logo.png";
+
+
+    $is_disabled = false;
+    if(
+        empty( $phone ) ||
+        empty( $billing_address ) ||
+        empty( $city ) ||
+        empty( $invoice ) ||
+        empty( $display_name ) ||
+        empty( $user_email )
+    ) {
+        $is_disabled = true;
+    }
+
+
     ?>
     <div class="alarnd--payout-main">
         <?php if( ! WC()->cart->is_empty() ) : ?>
@@ -455,7 +474,24 @@ function alarnd_single_checkout($user_id = false) {
                     <!-- Card Image Demo END -->
                 </div>
                 <div class="alrnd--shipping_address_tokenized">
-                    <?php echo allaround_customer_form(); ?>
+                    <?php if( $is_disabled === false ) : ?>
+                    <div id="alarnd__details_preview">
+                        <div class="alarnd--payout-col alarnd--details-previewer">
+                            <h2>פרטי משלוח</h2>
+                            <h3><?php echo $current_user->display_name; ?></h3>
+
+                            <div class="alarnd--user-address">
+                                <div class="alarnd--user-address-wrap">
+                                    <?php echo ! empty( $billing_address ) ? '<p>'. esc_html( $billing_address ) .'</p>' : ''; ?>
+                                    <?php echo ! empty( $phone ) ? '<p>'. esc_html( $phone ) .'</p>' : ''; ?>
+                                    <?php echo ! empty( $city ) ? '<p>'. esc_html( $city ) .'</p>' : ''; ?>
+                                </div>
+                                <span class="alarnd--user_address_edit">שינוי</span>
+                            </div>
+                        </div>
+                    </div>
+                    <?php endif; ?>
+                    <?php echo allaround_customer_form($is_disabled); ?>
                 </div>
 
                 <div class="alarnd--card-details-wrap">
@@ -466,7 +502,7 @@ function alarnd_single_checkout($user_id = false) {
         </div>
 
         <div class="alarnd--single-payout-submit">
-            <button type="button" class="alarnd--regular-button alarnd--payout-trigger ml_add_loading button" disabled>התקדם לנקודת הביקורת</button>
+            <button type="submit" class="alarnd--regular-button alarnd--payout-trigger ml_add_loading button" <?php echo $is_disabled === true ? 'disabled="disabled"' : ""; ?>>התקדם לנקודת הביקורת</button>
         </div>
         <div class="alarnd--payout-validation"></div>
         <?php endif; ?>
@@ -762,6 +798,7 @@ function update_user_meta_if_different($user_id, $meta_key, $new_value) {
         update_user_meta($user_id, $meta_key, $new_value);
     }
 }
+
 function update_acf_usermeta($user_id, $meta_key, $new_value) {
     $current_value = get_field($meta_key, "user_{$user_id}");
     if ($new_value && $new_value !== $current_value) {
@@ -1330,14 +1367,10 @@ function allaround_card_form($user_id = null) {
     <?php
 }
 
-function allaround_customer_form($user_id = null) {
+function allaround_customer_form($is_disabled = false) {
 
     $current_user = wp_get_current_user();
     $current_user_id = $current_user->ID;
-
-    if( ! empty( $user_id ) ) {
-        $current_user_id = $user_id;
-    }
 
     $the_user = get_user_by( 'id', $current_user_id );
     $phone = ml_get_user_phone($current_user_id);
@@ -1345,7 +1378,7 @@ function allaround_customer_form($user_id = null) {
     $invoice = get_field('invoice', "user_{$current_user_id}");
     $city = get_user_meta( $current_user_id, 'billing_city', true );
     ?>
-    <form action="" id="customerDetails" class="allaround--card-form">
+    <form action="" id="customerDetails" class="allaround--card-form<?php echo $is_disabled === false ? ' hidden_form' : ''; ?>">
         <h3>כתובת למשלוח</h3>
         <div class="form-row flex-row">
             <div class="form-row">
@@ -1387,11 +1420,11 @@ function allaround_customer_form($user_id = null) {
                 <input type="text" id="userAdress" name="userAdress" placeholder="<?php esc_attr_e("required", "allaroundminilng" ); ?>" value="<?php echo esc_attr( $user_billing_info ); ?>" required>
             </div>
         </div>
-
-
-        <div class="hidden-row">
-            <input type="submit" value="submit">
+        <div class="form-row form-submit-row">
+            <button type="submit" class="button alarnd--regular-button alt ml_add_loading ml_save_customer_info" disabled><?php esc_html_e( "Save", "allaroundminilng" ); ?></button>
+            <a href="#" class="ml_customer_info_edit_cancel"><?php esc_html_e("Cancel", "allaroundminilng"); ?></a>
         </div>
+        <div class="form-message"></div>
     </form>
     <?php
 }
@@ -1419,8 +1452,9 @@ function ml_create_order($data) {
 
     $products = $data['products'];
     $customerInfo = $data['customerInfo'];
-    $response = isset( $data['response'] ) ? $data['response'] : [];
+    $cardNumber = isset( $data['cardNumber'] ) && ! empty( $data['cardNumber'] ) ? $data['cardNumber'] : '';
     $extraMeta = isset( $data['extraMeta'] ) ? $data['extraMeta'] : [];
+    $response = isset( $data['response'] ) ? $data['response'] : [];
     $update = isset( $data['update'] ) ? true : false;
 
     // Assuming you have received payment response and details
@@ -1448,22 +1482,53 @@ function ml_create_order($data) {
     }
 
     if( ! empty( $response ) && isset( $response['referenceID'] ) ) {
-        update_post_meta( $order->get_id(), 'zc_payment_token', $response['token'] );
-        update_post_meta( $order->get_id(), 'zc_transaction_id', $response['referenceID'] );
+
+        if( isset( $response['token'] ) && ! empty( $response['token'] ) ) {
+            update_post_meta( $order->get_id(), 'zc_payment_token', $response['token'] );
+            update_post_meta( $order->get_id(), 'zc_transaction_id', $response['referenceID'] );
+        }
         
         if( true === $update ) {
             //TODO - update token and customer info if new or change input.
 
-            // ACF field update
-            update_acf_usermeta( $user_id, 'token', $response['token'] );
-            update_acf_usermeta( $user_id, 'phone', $customerInfo['cardholderPhone'] );
-            if( isset( $extraMeta['cardholderInvoiceName'] ) && ! empty( $extraMeta['cardholderInvoiceName'] ) ) {
-                update_acf_usermeta($user_id, 'invoice', $extraMeta['cardholderInvoiceName']);
+            if( isset( $response['token'] ) && ! empty( $response['token'] ) ) {
+                // ACF field update
+                update_acf_usermeta( $user_id, 'token', $response['token'] );
             }
+
+            if( isset( $extraMeta['invoice'] ) && ! empty( $extraMeta['invoice'] ) ) {
+                update_acf_usermeta($user_id, 'invoice', $extraMeta['invoice']);
+            }
+            
+            if( isset( $extraMeta['city'] ) && ! empty( $extraMeta['city'] ) ) {
+                update_user_meta_if_different($user_id, 'billing_city', $Meta['city']);
+            }
+
+            $phoneNumber = ml_get_phone_no( $customerInfo['phone'] );
+            $countryCode = ml_get_country_code();
+
+            if( ! empty( $cardNumber ) ) {
+                $last_four_digit = ml_get_last_four_digit($cardNumber);
+                $card_type = ml_get_card_type($cardNumber);
+    
+                $card_info = [];
+                $card_info['last_4_digit'] = $last_four_digit;
+                $card_info['card_type'] = $card_type;
+    
+                update_acf_usermeta( $user_id, 'card_info', $card_info);
+            }
+
+            $phoneNumber = ml_get_phone_no( $customerInfo['phone'] );
+            $countryCode = ml_get_country_code();
+            
 
             // WcooCommerce user field update
             update_user_meta_if_different($user_id, 'billing_address_1', $customerInfo['cardholderAdress']);
             update_user_meta_if_different($user_id, 'billing_phone', $customerInfo['cardholderPhone']);
+
+            update_user_meta_if_different($user_id, 'billing_phone', $customerInfo['phone']);
+            update_user_meta_if_different($user_id, 'xoo_ml_phone_code', $countryCode);
+            update_user_meta_if_different($user_id, 'xoo_ml_phone_no', $phoneNumber);
 
             // Email address
             update_user_email_if_different($user_id, $customerInfo['cardholderEmail']);
@@ -1503,3 +1568,199 @@ function ministore_empty_cart_message($message) {
 }
 
 add_filter('wc_empty_cart_message', 'ministore_empty_cart_message');
+
+
+function ml_get_wc_thumbnail_url( $image_id, $product_id, $user_id ) {
+    $thumbnail = wp_get_attachment_image_src($image_id, 'woocommerce_thumbnail');
+    if( ! $thumbnail ) {
+        return '';
+    }
+
+    $thumbnail = ml_get_wc_thumbnail($thumbnail, $user_id, $product_id );
+    return $thumbnail;
+}
+
+
+function ml_get_wc_thumbnail( $thumbnail, $user_id, $product_id ) {
+    $filetype = wp_check_filetype($thumbnail[0]);
+    $ext = $filetype['ext'];
+
+    $upload_dir = wp_upload_dir();
+    $gen_thumbnail = $upload_dir['baseurl'] . '/'. AlRNDCM_UPLOAD_FOLDER . '/' . $user_id . '/wc_thumb_' . $product_id . '.'.$ext;
+    if( is_image_url_exists( $gen_thumbnail ) ) {
+        return $gen_thumbnail;
+    }
+
+    return $thumbnail[0];
+}
+
+
+function ml_get_phone_no($phone) {
+    if( empty( $phone ) )
+        return;
+
+    $countryCode = ml_get_country_code();
+
+    if(strpos($phone, $countryCode) !== false){
+        $number = substr($phone, strlen($countryCode));
+        return $number;
+    }
+
+    return $phone;
+}
+
+function ml_get_country_code() {
+    $settings = xoo_ml_helper()->get_phone_option();
+
+    $countryCode = $settings['r-default-country-code-type'] === 'geolocation' ? Xoo_Ml_Geolocation::get_phone_code() : $settings['r-default-country-code'];
+
+    return $countryCode;
+}
+
+function ml_get_last_four_digit( $cardnumber ) {
+    $lastFourCharacters = substr($cardnumber, -4);
+
+    return $lastFourCharacters;
+}
+
+function ml_get_card_type($cardNumber) {
+    // Define regular expressions and associated card types
+    $patterns = array(
+        '/^4\d{12}(\d{3})?$/' => 'Visa',
+        '/^5[1-5]\d{14}$/' => 'MasterCard',
+        '/^3[47]\d{13}$/' => 'American Express',
+        '/^6(011|5\d{2})\d{12}$/' => 'Discover',
+    );
+
+    // Check the card number against each pattern and return the card type
+    foreach ($patterns as $pattern => $type) {
+        if (preg_match($pattern, $cardNumber)) {
+            return $type;
+        }
+    }
+
+    // If no match is found, return an unknown card type
+    return 'Unknown';
+}
+
+function ml_custom_product_image_cart_item( $_product_img, $cart_item, $cart_item_key ) {
+
+    if( ! is_user_logged_in() ) {
+        return $_product_img;
+    }
+
+    $current_user = wp_get_current_user();
+    $current_user_id = $current_user->ID;
+
+    $class = 'attachment-woocommerce_thumbnail size-woocommerce_thumbnail'; // Default cart thumbnail class.
+
+    $product_id = apply_filters( 'woocommerce_cart_item_product_id', $cart_item['product_id'], $cart_item, $cart_item_key );
+    $_product = wc_get_product( $product_id );
+    $image_id = $_product->get_image_id();
+
+    if( empty( $product_id ) || empty( $image_id ) ) {
+        return $_product_img;
+    }
+    
+    $gen_thumbnail = ml_get_wc_thumbnail_url( $image_id, $product_id, $current_user_id );
+    if( empty( $gen_thumbnail ) ) {
+        return $_product_img;
+    }
+
+    $src = $gen_thumbnail;
+
+    // Construct your img tag.
+    $a = '<img';
+    $a .= ' src="' . $src . '"';
+    $a .= ' class="' . $class . '"';
+    $a .= ' />';
+
+    // Output.
+    return $a;
+}
+
+add_filter( 'woocommerce_cart_item_thumbnail', 'ml_custom_product_image_cart_item', 10, 3 );
+
+
+function ml_discount_obj_valid($obj) {
+    if( empty( $obj ) || ! is_array( $obj ) ) {
+        return false;
+    }
+
+    $valid = false;
+    
+    foreach ($obj as $item) {
+        if ($item['amount'] > 0) {
+            $valid = true;
+            break; // You can break the loop as soon as you find a non-zero value
+        }
+    }
+
+    return $valid;
+}
+
+// Custom function to modify the price display
+function ml_modify_price_html($price, $product) {
+
+    $discount_steps = get_field( 'discount_steps', $product->get_id() );
+    $regular_price = (int) get_post_meta($product->get_id(), '_regular_price', true);
+    // error_log( print_r( $discount_steps, true ) );
+
+    if( 
+        empty( $discount_steps ) ||
+        ! isset( $discount_steps[0] ) ||
+        ! isset( $discount_steps[0]['amount'] ) ||
+        ! ml_discount_obj_valid($discount_steps) ||
+        empty( $regular_price ) 
+    ) {
+        return $price;
+    }
+    
+    $the_last_steps = end($discount_steps);
+    if( ! isset( $the_last_steps['amount'] ) ) {
+        return $price;
+    }
+
+    $min_price = isset( $the_last_steps['amount'] ) ? (int) $the_last_steps['amount'] : '';
+
+    // check if last key has any amount.
+    // if not then return regular price
+    if( empty( $min_price ) )
+        return $price;
+
+    $max_price = isset( $discount_steps[0]['amount'] ) ? (int) $discount_steps[0]['amount'] : '';
+    if( 0 == $max_price || empty( $max_price ) || $max_price > $regular_price ) {
+        $max_price = $regular_price;
+    }
+
+    if ( $min_price && $max_price ) {
+        return wc_price($min_price) . ' - ' . wc_price($max_price);
+    }
+    
+    // For other products, use the default price display
+    return $price;
+}
+
+add_filter('woocommerce_get_price_html', 'ml_modify_price_html', 10, 2);
+
+function ml_get_current_list($url) {
+    // Parse the URL to get the query string
+    $query = parse_url($url, PHP_URL_QUERY);
+
+    // Parse the query string to get the parameter value
+    parse_str($query, $params);
+
+    if (isset($params['list'])) {
+        return (int) $params['list'];
+    } else {
+        return null; // Parameter not found in the URL
+    }
+}
+
+function ml_products_per_page() {
+    $products_per_page = get_field('products_per_page', 'option');
+    if( empty( $products_per_page ) ) {
+        return 3;
+    }
+    return (int) $products_per_page;
+}

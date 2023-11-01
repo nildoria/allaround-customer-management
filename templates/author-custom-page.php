@@ -89,6 +89,9 @@ get_header(); // Include header template
         echo do_shortcode('[elementor-template id="1907"]');
         echo '</div>';
 
+        echo '<section class="allaround--products-section">';
+        echo '<div class="alarnd--overlay"></div>';
+
         // Selected Product Ids for the User
         // $selected_product_ids = get_user_meta($get_current_puser->ID, 'selected_products', true);
         $selected_product_ids = ml_get_user_products($current_user_id);
@@ -115,16 +118,28 @@ get_header(); // Include header template
             }
 
             // Display category filters
-            echo '<button class="filter-button" data-filter="*">All</button>';
+            echo '<button class="filter-button" data-filter="*">'.esc_html__("All", "allaroundminilng").'</button>';
             foreach ($product_categories as $category) {
                 echo '<button class="filter-button" data-filter=".category-' . $category->term_id . '">' . esc_html($category->name) . '</button>';
             }
             
             echo '</div>';
 
+            echo '<div class="woocommerce">';
 
-            echo '<div class="woocommerce"><ul class="mini-store-product-list product-list-container products columns-3">';
-            foreach ($selected_product_ids as $prod_object) {
+            $items = $selected_product_ids;
+            $itemsPerPage = ml_products_per_page();
+            $totalItems = count($items);
+            $totalPages = ceil($totalItems / $itemsPerPage);
+            $currentpage = isset($_GET['list']) ? (int)$_GET['list'] : 1;
+
+            $start = ($currentpage - 1) * $itemsPerPage;
+            $end = $start + $itemsPerPage;
+            $itemsToDisplay = array_slice($items, $start, $itemsPerPage);
+            $big = 999999999; // need an unlikely integer
+
+            echo '<ul id="allaround_products_list" data-user_id="'.esc_attr( $current_user_id ).'" class="mini-store-product-list product-list-container products columns-3">';
+            foreach ($itemsToDisplay as $prod_object) {
                 if( ! isset( $prod_object['value'] ) || empty( $prod_object['value'] ) )
                     continue;
 
@@ -255,9 +270,15 @@ get_header(); // Include header template
                     echo '</li>'; // End product-item
                 }
             }
-            echo '</ul></div>'; // End mini-store-product-list woocommerce
+            echo '</ul>';
+            ?>
+            <div class="allaround--loadmore-wrap">
+                <button type="button" class="alarnd--regular-button alarnd--loadmore-trigger ml_add_loading button" data-page_num="1"><?php esc_html_e("Load More", "allaroundminilng"); ?></button>
+            </div>
+            <?php
+            echo '</div>'; // End mini-store-product-list woocommerce
         }
-        
+        echo '</section>'; // end .allaround--products-section section
         ?>
 
         <div class="cart-page alarnd--cart-wrapper-main" id="woocommerce_cart">

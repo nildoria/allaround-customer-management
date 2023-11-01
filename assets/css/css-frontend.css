@@ -42,6 +42,14 @@ textarea {
   padding-right: calc((100vw - 100%) / 2);
   background-color: #f7f7f7;
 }
+.allaround--products-section {
+  margin-left: calc((-100vw + 100%) / 2);
+  margin-right: calc((-100vw + 100%) / 2);
+  padding-left: calc((100vw - 100%) / 2);
+  padding-right: calc((100vw - 100%) / 2);
+  position: relative;
+}
+
 .aum_auth_page .profile-picture-column img {
   max-width: 280px;
   max-height: 125px;
@@ -390,14 +398,6 @@ button.button.alarnd--regular-button {
   display: inline-block;
   position: relative;
   padding-left: 45px;
-}
-
-span.alarnd--user_address_edit {
-  color: #2673e7;
-  position: absolute;
-  right: 0;
-  bottom: -20px;
-  cursor: pointer;
 }
 
 span.alarnd--user_address_edit.ml_normal_loading {
@@ -953,10 +953,9 @@ form.allaround--card-form .form-input {
 }
 .form-message {
   display: none;
-}
-.form-message {
   color: red;
   line-height: 1.5;
+  padding-top: 15px;
 }
 .alarnd--woocommerce-checkout-page h2 {
   text-align: center;
@@ -1478,4 +1477,69 @@ button.button.alarnd--regular-button[disabled],
   .payment-info-display {
     display: none !important;
   }
+}
+
+
+.alarnd--details-previewer {
+  padding-bottom: 80px;
+}
+
+.alarnd--user-address-wrap {
+  max-width: 230px;
+}
+
+button.ml_save_customer_info.alarnd--regular-button {
+  padding: 8px 30px;
+  border-radius: 5px;
+}
+
+.allaround--card-form.hidden_form {
+  display: none;
+}
+
+.alarnd--user-address-wrap p {
+  margin-bottom: 5px;
+}
+
+span.alarnd--user_address_edit {
+  color: #2673e7;
+  margin-top: 20px;
+  display: block;
+  cursor: pointer;
+}
+
+.allaround--card-form:not(.hidden_form) .form-submit-row {
+  position: absolute;
+  opacity: 0;
+  visibility: hidden;
+}
+
+.ml_customer_info_edit_cancel {
+  display: inline-block;
+  margin-right: 20px;
+  text-decoration: underline;
+}
+
+form#customerDetails {
+  padding-bottom: 40px;
+}
+
+.allaround--pagination-wrap.allaround--minisite-pagination {
+  margin-bottom: 50px !important;
+}
+
+section.allaround--products-section.loading .alarnd--overlay {
+  opacity: 0.6;
+  visibility: visible;
+  z-index: 99;
+}
+
+.allaround--loadmore-wrap {
+  display: block;
+  padding-bottom: 50px;
+  text-align: center;
+}
+
+.allaround--loadmore-wrap button.alarnd--regular-button.alarnd--loadmore-trigger {
+  padding: 20px 60px;
 }
