@@ -477,8 +477,8 @@ function alarnd_single_checkout($user_id = false) {
                     <?php if( $is_disabled === false ) : ?>
                     <div id="alarnd__details_preview">
                         <div class="alarnd--payout-col alarnd--details-previewer">
-                            <h2>פרטי משלוח</h2>
-                            <h3><?php echo $current_user->display_name; ?></h3>
+                            <h3>כתובת למשלוח</h3>
+                            <p class="tokenized_user_name"><?php echo $current_user->display_name; ?></p>
 
                             <div class="alarnd--user-address">
                                 <div class="alarnd--user-address-wrap">

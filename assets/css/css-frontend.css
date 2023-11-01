@@ -341,6 +341,10 @@ table.shop_table.shop_table_responsive.cart.woocommerce-cart-form__contents {
   font-size: 14px;
   font-weight: 700;
 }
+input#cardholderPhone {
+  text-align: right;
+  direction: ltr;
+}
 button.button.alarnd--regular-button {
   display: inline-block;
   background-color: #66de93;
@@ -562,7 +566,11 @@ h3#order_review_heading {
 .allaround--slick-carousel .slick-slide img {
   max-height: inherit !important;
 }
-
+.alarnd--payout-col.alarnd--details-previewer .tokenized_user_name {
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
 nav.woocommerce-MyAccount-navigation
   ul
   li.woocommerce-MyAccount-navigation-link {
@@ -1023,6 +1031,12 @@ input#cardNumber {
   align-items: center;
   justify-content: center;
   cursor: help;
+  z-index: 9;
+}
+.alarnd--woocommerce-checkout-page.alarnd--default-visible
+  .form-row.flex-row.exp-cvc-con {
+  flex-direction: column;
+  gap: 0;
 }
 /* Chrome, Safari, Edge, Opera */
 input#cvvCode::-webkit-outer-spin-button,
@@ -1461,10 +1475,9 @@ body.rtl .alarnd--payout-col.alrnd_wooz_col {
   position: relative;
   margin-right: 0;
   margin-bottom: 4px;
-  top: 0px;
-  float: none;
-  overflow: hidden;
-  clear: both;
+  bottom: -15px;
+  float: left;
+  top: auto;
 }
 
 button.button.alarnd--regular-button[disabled],
@@ -1478,7 +1491,6 @@ button.button.alarnd--regular-button[disabled],
     display: none !important;
   }
 }
-
 
 .alarnd--details-previewer {
   padding-bottom: 80px;
@@ -1498,7 +1510,9 @@ button.ml_save_customer_info.alarnd--regular-button {
 }
 
 .alarnd--user-address-wrap p {
-  margin-bottom: 5px;
+  margin-bottom: 0px;
+  font-size: 14px;
+  line-height: 1.5;
 }
 
 span.alarnd--user_address_edit {
@@ -1540,6 +1554,7 @@ section.allaround--products-section.loading .alarnd--overlay {
   text-align: center;
 }
 
-.allaround--loadmore-wrap button.alarnd--regular-button.alarnd--loadmore-trigger {
+.allaround--loadmore-wrap
+  button.alarnd--regular-button.alarnd--loadmore-trigger {
   padding: 20px 60px;
 }

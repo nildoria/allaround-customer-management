@@ -766,8 +766,8 @@ class ML_Ajax {
         update_user_name_if_different($current_user_id, $userName);
         ?>
         <div class="alarnd--payout-col alarnd--details-previewer">
-            <h2>פרטי משלוח</h2>
-            <h3><?php echo $userName; ?></h3>
+            <h3>כתובת למשלוח</h3>
+            <p class="tokenized_user_name"><?php echo $userName; ?></p>
 
             <div class="alarnd--user-address">
                 <div class="alarnd--user-address-wrap">
