@@ -384,7 +384,8 @@ table.shop_table.shop_table_responsive.cart.woocommerce-cart-form__contents {
   font-size: 14px;
   font-weight: 700;
 }
-input#cardholderPhone {
+input#cardholderPhone,
+input#userPhone {
   text-align: right;
   direction: ltr;
 }
@@ -1537,6 +1538,7 @@ button.button.alarnd--regular-button[disabled],
 
 .alarnd--details-previewer {
   padding-bottom: 80px;
+  margin-top: -10px;
 }
 
 .alarnd--user-address-wrap {

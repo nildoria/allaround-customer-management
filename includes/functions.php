@@ -1679,7 +1679,7 @@ function ml_custom_product_image_cart_item( $_product_img, $cart_item, $cart_ite
     return $a;
 }
 
-add_filter( 'woocommerce_cart_item_thumbnail', 'ml_custom_product_image_cart_item', 10, 3 );
+// add_filter( 'woocommerce_cart_item_thumbnail', 'ml_custom_product_image_cart_item', 10, 3 );
 
 
 function ml_discount_obj_valid($obj) {
