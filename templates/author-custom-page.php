@@ -83,12 +83,43 @@ get_header(); // Include header template
                 echo '<p>Access denied.</p>';
             }
         }
+        ?>
+        <div class="aum-customer-elementor-widget">
+        <!-- Customer page Promo Section -->
+        <section class="minStore-profile-promi-section">
+            <div class="miniStore-promo-container">
+                <div class="miniStore-promo-item">
+                    <div class="miniStore-promo-icon">
+                        <img src="<?php echo (AlRNDCM_URL); ?>/assets/images/device-mini.svg" class="miniStore-promo-icon-img" loading="lazy" alt="Promo Icon" />
+                    </div>
+                    <h3 class="miniStore-promo-title">משלוחים מהירים</h3>
+                    <div class="miniStore-promo-text">
+                        <p>משלוח מהיר לכל הארץ ע"י שליח בעלות של 29 ש"ח או איסוף עצמי בתאום מראש מגבעתיים.</p>
+                    </div>
+                </div>
+                <div class="miniStore-promo-item">
+                    <div class="miniStore-promo-icon">
+                        <img src="<?php echo (AlRNDCM_URL); ?>/assets/images/rocket-mini.svg" class="miniStore-promo-icon-img" loading="lazy" alt="Promo Icon" />
+                    </div>
+                    <h3 class="miniStore-promo-title">משלוחים מהירים</h3>
+                    <div class="miniStore-promo-text">
+                        <p>משלוח מהיר לכל הארץ ע"י שליח בעלות של 29 ש"ח או איסוף עצמי בתאום מראש מגבעתיים.</p>
+                    </div>
+                </div>
+                <div class="miniStore-promo-item">
+                    <div class="miniStore-promo-icon">
+                        <img src="<?php echo (AlRNDCM_URL); ?>/assets/images/hand-mini.svg" class="miniStore-promo-icon-img" loading="lazy" alt="Promo Icon" />
+                    </div>
+                    <h3 class="miniStore-promo-title">משלוחים מהירים</h3>
+                    <div class="miniStore-promo-text">
+                        <p>משלוח מהיר לכל הארץ ע"י שליח בעלות של 29 ש"ח או איסוף עצמי בתאום מראש מגבעתיים.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        </div>
 
-        echo '<div class="aum-customer-elementor-widget">';
-        // Load the Customer page Promo Section
-        echo do_shortcode('[elementor-template id="1907"]');
-        echo '</div>';
-
+        <?php
         echo '<section class="allaround--products-section">';
         echo '<div class="alarnd--overlay"></div>';
 

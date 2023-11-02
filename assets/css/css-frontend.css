@@ -21,6 +21,46 @@ textarea {
   font-weight: 400;
   color: #1a1a1a;
 }
+/* Promo Section CSS */
+section.minStore-profile-promi-section {
+  margin-bottom: 40px;
+  padding: 50px 0px 50px 0px;
+}
+.miniStore-promo-container {
+  display: flex;
+  margin-right: auto;
+  margin-left: auto;
+  position: relative;
+}
+.miniStore-promo-item {
+  padding: 10px 10px 10px 10px;
+  text-align: center !important;
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: column;
+  align-items: center;
+}
+.miniStore-promo-icon {
+  transform: rotate(0deg);
+  width: 70px;
+}
+.miniStore-promo-icon img {
+  max-width: 70px;
+  max-height: 70px;
+}
+h3.miniStore-promo-title {
+  padding: 0px 0px 0px 0px;
+  color: #1a1a1a;
+  font-size: 24px;
+  font-weight: 500;
+  margin: 0.5rem 0 1rem 0;
+}
+.miniStore-promo-text {
+  color: #656565;
+  font-size: 14px;
+  font-weight: 400;
+}
+/* Promo Section CSS */
 .aum_auth_page .author-header {
   display: flex;
   align-items: center;
@@ -1557,4 +1597,36 @@ section.allaround--products-section.loading .alarnd--overlay {
 .allaround--loadmore-wrap
   button.alarnd--regular-button.alarnd--loadmore-trigger {
   padding: 20px 60px;
+}
+img.verified_tick {
+  height: 30px;
+  width: 30px;
+}
+
+/*For pad/Tablet Layout*/
+@media (max-width: 991px) {
+}
+
+/*For Wide Mobile Layout*/
+@media (max-width: 767px) {
+  .welcome-column h1 {
+    font-size: 30px;
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    line-height: 30px;
+  }
+}
+/*For 320-384px up Mobile Layout*/
+@media (max-width: 479px) {
+  .aum_auth_page .author-header {
+    flex-direction: column;
+  }
+  .allaround--card-form {
+    max-width: 100%;
+  }
+  .alarnd--payout-col.alrnd_wooz_col {
+    position: relative;
+    width: 100%;
+  }
 }
