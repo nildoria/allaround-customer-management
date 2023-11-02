@@ -21,6 +21,9 @@ textarea {
   font-weight: 400;
   color: #1a1a1a;
 }
+.elementor-section .elementor-container {
+  display: flex;
+}
 /* Promo Section CSS */
 section.minStore-profile-promi-section {
   margin-bottom: 40px;
@@ -1605,6 +1608,18 @@ img.verified_tick {
 
 /*For pad/Tablet Layout*/
 @media (max-width: 991px) {
+  .site-header .header-inner,
+  .site-header:not(.dynamic-header),
+  .site-footer .footer-inner,
+  .site-footer:not(.dynamic-footer),
+  body:not([class*="elementor-page-"]) .site-main,
+  body:not([class*="elementor-page-"]) .alarnd--elm-container,
+  body:not([class*="elementor-page-"]) .alarnd--content-wrap,
+  body.single-product .site-main,
+  .alarnd--product-bottom,
+  .alarnd--container {
+    max-width: 750px;
+  }
 }
 
 /*For Wide Mobile Layout*/
@@ -1621,12 +1636,65 @@ img.verified_tick {
 @media (max-width: 479px) {
   .aum_auth_page .author-header {
     flex-direction: column;
+    align-items: flex-start;
+    padding-top: 30px;
+    padding-bottom: 30px;
   }
   .allaround--card-form {
     max-width: 100%;
+    overflow: hidden;
   }
   .alarnd--payout-col.alrnd_wooz_col {
     position: relative;
     width: 100%;
+  }
+  .aum_auth_page .profile-picture-column img {
+    max-height: 80px;
+  }
+  .miniStore-promo-container {
+    flex-direction: column;
+  }
+  .woocommerce ul.products[class*="columns-"] li.product,
+  .woocommerce-page ul.products[class*="columns-"] li.product {
+    width: 98%;
+  }
+  .allaround_carf_form-fields {
+    flex-direction: column-reverse;
+  }
+  .allaround_carf_form-userDetail {
+    flex: 0 0 100%;
+    margin-top: 0px;
+  }
+  .alrnd--pay_details_tokenized {
+    width: 100%;
+  }
+  .allaround_carf_form-cardDetail {
+    top: 0px;
+    padding-bottom: 0px;
+    flex: 0 0 100%;
+    max-height: max-content;
+  }
+  form#customerDetails {
+    top: 0px;
+  }
+  .alarnd--cart-wrapper-inner {
+    padding-top: 40px;
+    padding-bottom: 40px;
+  }
+  .exp-cvc-con .tooltip-left:before,
+  .exp-cvc-con .tooltip-left:after {
+    right: auto;
+    top: auto;
+    left: 0;
+    bottom: -75px;
+  }
+  .ministore_available_pay_options {
+    margin-top: 20px;
+  }
+  .exp-cvc-con [data-tooltip]:before {
+    -webkit-transform: translate3d(1px, 0px, 0) rotate(-90deg) !important;
+    -moz-transform: translate3d(1px, 0px, 0) rotate(-90deg) !important;
+    transform: translate3d(1px, 0px, 0) rotate(-90deg) !important;
+    bottom: -14px !important;
   }
 }
