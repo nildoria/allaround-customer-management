@@ -32,7 +32,10 @@ class ALRN_Genrator {
     function save_image_callback($request) {
         $image_data = $request->get_param('imageData'); // Retrieve image data from the request
         $filename = $request->get_param('filename'); // Retrieve image data from the request
+        $is_feature_image = $request->get_param('is_feature_image'); // Retrieve image data from the request
         $user_id = $request->get_param('user_id'); // Retrieve image data from the request
+
+        $is_feature_image = ! empty($is_feature_image) ? boolval($is_feature_image) : '';
     
         // Ensure the user_id is numeric and not empty
         if (empty($user_id)) {
@@ -75,23 +78,24 @@ class ALRN_Genrator {
             );
 
             $this->create_resize_image($resize_data);
-            
-            $resize_data = array(
-                "width" => 400,
-                "height" => 300,
-                "original_height" => $original_height,
-                "original_width" => $original_width,
-                "original_image" => $original_image,
-                "filename" => $filename,
-                "user_directory" => $user_directory,
-                "name" => "wc_thumb_"
-            );
 
-            $this->create_resize_image($resize_data);
+            if( true === $is_feature_image ) {
+                $resize_data = array(
+                    "width" => 400,
+                    "height" => 300,
+                    "original_height" => $original_height,
+                    "original_width" => $original_width,
+                    "original_image" => $original_image,
+                    "filename" => $filename,
+                    "user_directory" => $user_directory,
+                    "name" => "wc_thumb_"
+                );
+    
+                $this->create_resize_image($resize_data);
+            }
     
             // Free up memory
             imagedestroy($original_image);
-
     
             return rest_ensure_response('Original and resized images saved successfully');
         } else {

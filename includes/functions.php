@@ -581,12 +581,16 @@ function ml_get_thumbnail( $thumbnail, $user_id, $product_id ) {
     $ext = $filetype['ext'];
 
     $upload_dir = wp_upload_dir();
-    $gen_thumbnail = $upload_dir['baseurl'] . '/'. AlRNDCM_UPLOAD_FOLDER . '/' . $user_id . '/resized_' . $product_id . '.'.$ext;
-    if( is_image_url_exists( $gen_thumbnail ) ) {
+    $gen_thumbnail = $upload_dir['baseurl'] . DIRECTORY_SEPARATOR . AlRNDCM_UPLOAD_FOLDER . DIRECTORY_SEPARATOR  . $user_id . DIRECTORY_SEPARATOR  . 'resized_' . $product_id . '.'.$ext;
+    $gen_thumbnail = str_replace('\\', '/', $gen_thumbnail);
+    $basedir_url = $upload_dir['basedir'] . DIRECTORY_SEPARATOR . AlRNDCM_UPLOAD_FOLDER . DIRECTORY_SEPARATOR  . $user_id . DIRECTORY_SEPARATOR . 'resized_' . $product_id . '.'.$ext;
+    if( file_exists( $basedir_url ) ) {
         return $gen_thumbnail;
     }
-    $full_gen_thumbnail = $upload_dir['baseurl'] . '/'. AlRNDCM_UPLOAD_FOLDER . '/' . $user_id . '/' . $product_id . '.'.$ext;
-    if( is_image_url_exists( $full_gen_thumbnail ) ) {
+    $full_gen_thumbnail = $upload_dir['baseurl'] . DIRECTORY_SEPARATOR. AlRNDCM_UPLOAD_FOLDER . DIRECTORY_SEPARATOR . $user_id . DIRECTORY_SEPARATOR . $product_id . '.'.$ext;
+    $full_gen_thumbnail = str_replace('\\', '/', $full_gen_thumbnail);
+    $full_basedir_url = $upload_dir['basedir'] . DIRECTORY_SEPARATOR. AlRNDCM_UPLOAD_FOLDER . DIRECTORY_SEPARATOR . $user_id . DIRECTORY_SEPARATOR . $product_id . '.'.$ext;
+    if( file_exists( $full_basedir_url ) ) {
         return $full_gen_thumbnail;
     }
 
@@ -600,18 +604,20 @@ function ml_get_gallery_thumbnail($key, $attachment_id, $user_id, $product_id, $
     $ext = $filetype['ext'];
 
     $upload_dir = wp_upload_dir();
-    $gen_thumbnail = $upload_dir['baseurl'] . '/'. AlRNDCM_UPLOAD_FOLDER . '/' . $user_id . '/resized_' . $product_id . '-' . $key . '-' . $attachment_id . '.'.$ext;
-    if( false === $full && is_image_url_exists( $gen_thumbnail ) ) {
+    $gen_thumbnail = $upload_dir['baseurl'] . DIRECTORY_SEPARATOR. AlRNDCM_UPLOAD_FOLDER . DIRECTORY_SEPARATOR . $user_id . DIRECTORY_SEPARATOR . 'resized_' . $product_id . '-' . $key . '-' . $attachment_id . '.'.$ext;
+    $gen_thumbnail = str_replace('\\', '/', $gen_thumbnail);
+    $basedir_url = $upload_dir['basedir'] . DIRECTORY_SEPARATOR. AlRNDCM_UPLOAD_FOLDER . DIRECTORY_SEPARATOR . $user_id . DIRECTORY_SEPARATOR . 'resized_' . $product_id . '-' . $key . '-' . $attachment_id . '.'.$ext;
+    if( false === $full && file_exists( $basedir_url ) ) {
         // error_log( "gen_thumbnail $gen_thumbnail" );
         return $gen_thumbnail;
     }
-    $full_gen_thumbnail = $upload_dir['baseurl'] . '/'. AlRNDCM_UPLOAD_FOLDER . '/' . $user_id . '/' . $product_id . '-' . $key . '-' . $attachment_id . '.'.$ext;
-    if( true === $full && is_image_url_exists( $full_gen_thumbnail ) ) {
+    $full_gen_thumbnail = $upload_dir['baseurl'] . DIRECTORY_SEPARATOR. AlRNDCM_UPLOAD_FOLDER . DIRECTORY_SEPARATOR . $user_id . DIRECTORY_SEPARATOR . $product_id . '-' . $key . '-' . $attachment_id . '.'.$ext;
+    $full_gen_thumbnail = str_replace('\\', '/', $full_gen_thumbnail);
+    $full_basedir_url = $upload_dir['basedir'] . DIRECTORY_SEPARATOR. AlRNDCM_UPLOAD_FOLDER . DIRECTORY_SEPARATOR . $user_id . DIRECTORY_SEPARATOR . $product_id . '-' . $key . '-' . $attachment_id . '.'.$ext;
+    if( true === $full && file_exists( $full_basedir_url ) ) {
         // error_log( "full_gen_thumbnail $full_gen_thumbnail" );
         return $full_gen_thumbnail;
     }
-    // error_log( "thumbnail $thumbnail[0], userId $user_id, productId $product_id, key => $key" );
-    // error_log( "gen_thumbnail url $gen_thumbnail" );
     return $thumbnail[0];
 }
 
@@ -1569,29 +1575,104 @@ function ministore_empty_cart_message($message) {
 
 add_filter('wc_empty_cart_message', 'ministore_empty_cart_message');
 
+/**
+ * Replace src from cart item image
+ *
+ * @param string $content
+ * @param array $cart_item
+ * @param string $cart_item_key
+ * @return string|$content
+ */
+function ml_cart_item_thumbnail( $content, $cart_item, $cart_item_key ) {
 
-function ml_get_wc_thumbnail_url( $image_id, $product_id, $user_id ) {
-    $thumbnail = wp_get_attachment_image_src($image_id, 'woocommerce_thumbnail');
-    if( ! $thumbnail ) {
+    $product_id = apply_filters( 'woocommerce_cart_item_product_id', $cart_item['product_id'], $cart_item, $cart_item_key );
+    $wc_thumb = ml_get_cart_thumb($product_id);
+
+    // Normal image
+    $matches = array();
+    preg_match_all( '/<img[\s\r\n]+.*?>/is', $content, $matches );
+
+    $search = array();
+    $replace = array();
+
+    $i = 0;
+    foreach ( $matches[0] as $imgHTML ) {
+
+        $i++;
+        // replace the src and add the data-src attribute
+        $replaceHTML = $imgHTML;
+
+        if ( ! empty( $wc_thumb ) && preg_match( "/ src=['\"]/is", $replaceHTML ) ) {
+            $replaceHTML = preg_replace( '/ src=(["\'])(.*?)["\']/is', ' src="' . $wc_thumb . '"', $replaceHTML );
+        }
+
+        array_push( $search, $imgHTML );
+        array_push( $replace, $replaceHTML );
+    }
+
+    if( ! empty( $replace ) ) {
+        $content = str_replace( $search, $replace, $content );
+    }
+
+    return $content;
+}
+add_filter( 'woocommerce_cart_item_thumbnail', 'ml_cart_item_thumbnail', 3, 250 );
+
+/**
+ * Get generate cart thumbnail
+ *
+ * @param int $product_id
+ * @return void
+ */
+function ml_get_cart_thumb($product_id) {
+
+    if( ! is_user_logged_in() ) {
         return '';
     }
 
-    $thumbnail = ml_get_wc_thumbnail($thumbnail, $user_id, $product_id );
-    return $thumbnail;
+    $current_user = wp_get_current_user();
+    $current_user_id = $current_user->ID;
+
+    $class = 'attachment-woocommerce_thumbnail size-woocommerce_thumbnail'; // Default cart thumbnail class.
+
+    $_product = wc_get_product( $product_id );
+    $image_id = $_product->get_image_id();
+
+    if( empty( $product_id ) || empty( $image_id ) ) {
+        return '';
+    }
+    
+    $gen_thumbnail = ml_get_wc_thumbnail_url( $image_id, $product_id, $current_user_id );
+    if( empty( $gen_thumbnail ) ) {
+        return '';
+    }
+
+    // Output.
+    return $gen_thumbnail;
 }
 
 
-function ml_get_wc_thumbnail( $thumbnail, $user_id, $product_id ) {
-    $filetype = wp_check_filetype($thumbnail[0]);
+function ml_get_wc_thumbnail_url( $attachment_id, $product_id, $user_id ) {
+
+    $fullsize_path = get_attached_file( $attachment_id ); // Full path
+    if( empty( $fullsize_path ) ) {
+        return '';
+    }
+
+    $filename_only = basename( get_attached_file( $attachment_id ) ); // Just the file name
+    $filetype = wp_check_filetype($filename_only);
     $ext = $filetype['ext'];
 
     $upload_dir = wp_upload_dir();
-    $gen_thumbnail = $upload_dir['baseurl'] . '/'. AlRNDCM_UPLOAD_FOLDER . '/' . $user_id . '/wc_thumb_' . $product_id . '.'.$ext;
-    if( is_image_url_exists( $gen_thumbnail ) ) {
+    $gen_thumbnail = $upload_dir['baseurl'] . DIRECTORY_SEPARATOR . AlRNDCM_UPLOAD_FOLDER . DIRECTORY_SEPARATOR  . $user_id . DIRECTORY_SEPARATOR . 'wc_thumb_' . $product_id . '.'.$ext;
+    $gen_thumbnail = str_replace('\\', '/', $gen_thumbnail);
+    $basedir_url = $upload_dir['basedir'] . DIRECTORY_SEPARATOR . AlRNDCM_UPLOAD_FOLDER . DIRECTORY_SEPARATOR  . $user_id . DIRECTORY_SEPARATOR . 'wc_thumb_' . $product_id . '.'.$ext;
+
+    if( file_exists( $basedir_url ) ) {
         return $gen_thumbnail;
     }
 
-    return $thumbnail[0];
+    return '';
 }
 
 
@@ -1643,43 +1724,6 @@ function ml_get_card_type($cardNumber) {
     return 'Unknown';
 }
 
-function ml_custom_product_image_cart_item( $_product_img, $cart_item, $cart_item_key ) {
-
-    if( ! is_user_logged_in() ) {
-        return $_product_img;
-    }
-
-    $current_user = wp_get_current_user();
-    $current_user_id = $current_user->ID;
-
-    $class = 'attachment-woocommerce_thumbnail size-woocommerce_thumbnail'; // Default cart thumbnail class.
-
-    $product_id = apply_filters( 'woocommerce_cart_item_product_id', $cart_item['product_id'], $cart_item, $cart_item_key );
-    $_product = wc_get_product( $product_id );
-    $image_id = $_product->get_image_id();
-
-    if( empty( $product_id ) || empty( $image_id ) ) {
-        return $_product_img;
-    }
-    
-    $gen_thumbnail = ml_get_wc_thumbnail_url( $image_id, $product_id, $current_user_id );
-    if( empty( $gen_thumbnail ) ) {
-        return $_product_img;
-    }
-
-    $src = $gen_thumbnail;
-
-    // Construct your img tag.
-    $a = '<img';
-    $a .= ' src="' . $src . '"';
-    $a .= ' class="' . $class . '"';
-    $a .= ' />';
-
-    // Output.
-    return $a;
-}
-
-// add_filter( 'woocommerce_cart_item_thumbnail', 'ml_custom_product_image_cart_item', 10, 3 );
 
 
 function ml_discount_obj_valid($obj) {

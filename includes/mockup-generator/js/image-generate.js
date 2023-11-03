@@ -26,14 +26,13 @@ self.addEventListener('message', function (e) {
             console.log( "total bgcs", totalBackgrounds );
             let completedBackgrounds = 0;
 
-
-
             // Function to generate an image with logos
             const generateImageWithLogos = async (backgroundUrl, product_id, logo, logoData, logo_type, gallery = false) => {
                 try {
                     // Extract the filename from the background URL
                     const file_ext = getFileExtensionFromUrl(backgroundUrl);
                     let filename = product_id + '.' + file_ext;
+                    let is_feature_image = false === gallery ? true : false;
 
                     console.log("gallery", gallery);
                     if( gallery && gallery !== false && gallery.length !== 0 ) {
@@ -121,10 +120,10 @@ self.addEventListener('message', function (e) {
                             const imageData = ctx.getImageData(0, 0, staticCanvas.width, staticCanvas.height);
 
                             // console.log( filename );
-                            // console.log( "user_id " + user_id );
+                            console.log( "is_feature_image", is_feature_image );
 
                             // Send the image data back to the main page
-                            self.postMessage({ type: 'imageGenerated', imageData, filename, user_id });
+                            self.postMessage({ type: 'imageGenerated', imageData, filename, user_id, is_feature_image });
 
                             // Increment the completed backgrounds count
                             completedBackgrounds++;

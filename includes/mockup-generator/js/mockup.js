@@ -171,6 +171,7 @@ function processQueue() {
         // Get the imageData from the message
         const imageData = e.data.imageData;
         const filename = e.data.filename;
+        const is_feature_image = e.data.is_feature_image;
         const user_id = e.data.user_id;
 
         // Create a new Canvas element
@@ -186,9 +187,10 @@ function processQueue() {
         const dataURL = canvas.toDataURL('image/png'); // You can change the format to 'image/jpeg' or others if needed
 
         console.log("user_id", user_id);
+        console.log("is_feature_image from mockupjs", is_feature_image);
 
         // Send the dataURL to your server to save the image
-        saveImageToServer(dataURL, filename, user_id);
+        saveImageToServer(dataURL, filename, user_id, is_feature_image);
       }
 
       // Remove the completed task from the queue
@@ -205,7 +207,7 @@ function processQueue() {
 }
 
 // Function to send the dataURL to the server
-function saveImageToServer(dataURL, filename, user_id) {
+function saveImageToServer(dataURL, filename, user_id, is_feature_image) {
   // You can use AJAX or Fetch to send the dataURL to your server
   // Here's an example using Fetch:
 
@@ -213,7 +215,7 @@ function saveImageToServer(dataURL, filename, user_id) {
 
   fetch(mockupGeneratorAjax.image_save_endpoint, {
     method: 'POST',
-    body: JSON.stringify({ imageData: dataURL, filename, user_id }),
+    body: JSON.stringify({ imageData: dataURL, filename, user_id, is_feature_image }),
     headers: {
       'Content-Type': 'application/json'
     }

@@ -57,9 +57,6 @@ class ML_Ajax {
         $end = $start + $itemsPerPage;
         $itemsToDisplay = array_slice($items, $start, $itemsPerPage);
 
-        error_log( print_r( $currentpage, true ) );
-        error_log( print_r( $itemsToDisplay, true ) );
-
         ob_start();
         foreach ($itemsToDisplay as $prod_object) {
             if( ! isset( $prod_object['value'] ) || empty( $prod_object['value'] ) )
