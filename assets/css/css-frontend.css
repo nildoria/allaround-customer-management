@@ -323,6 +323,9 @@ span.shipping-title {
 .woocommerce-page .cart-collaterals {
   background-color: #ffffff;
 }
+.woocommerce .cart-collaterals .alarnd--payment-methods {
+  display: none;
+}
 .alarnd--variable-modal .woocommerce div.product form.cart {
   float: none !important;
   margin: 0 auto;
@@ -788,6 +791,9 @@ ol.mlCustomDots a {
 }
 .woocommerce-product-gallery.alarn--pricing-column {
   direction: ltr;
+}
+.woocommerce-product-gallery.alarn--pricing-column .slick-list {
+  min-height: 151px;
 }
 .woocommerce-product-gallery.alarn--pricing-column .slick-slide {
   float: left !important;
@@ -1600,8 +1606,9 @@ button.button.alarnd--regular-button[disabled],
 }
 
 button.ml_save_customer_info.alarnd--regular-button {
-  padding: 8px 30px;
+  padding: 6px 20px;
   border-radius: 5px;
+  font-size: 14px;
 }
 
 .allaround--card-form.hidden_form {
@@ -1616,9 +1623,10 @@ button.ml_save_customer_info.alarnd--regular-button {
 
 span.alarnd--user_address_edit {
   color: #2673e7;
-  margin-top: 20px;
+  margin-top: 10px;
   display: block;
   cursor: pointer;
+  font-size: 14px;
 }
 
 .allaround--card-form:not(.hidden_form) .form-submit-row {
@@ -1630,7 +1638,7 @@ span.alarnd--user_address_edit {
 .ml_customer_info_edit_cancel {
   display: inline-block;
   margin-right: 20px;
-  text-decoration: underline;
+  font-size: 14px;
 }
 
 form#customerDetails {

@@ -28,8 +28,8 @@ jQuery(document).ready(function ($) {
 
   var isotope_initalize = function () {
     /**
-       * isotope Filtering.
-       */
+     * isotope Filtering.
+     */
     var $grid = $("#allaround_products_list").isotope({
       itemSelector: ".product-item",
       layoutMode: "fitRows",
@@ -39,11 +39,10 @@ jQuery(document).ready(function ($) {
       var filterValue = $(this).attr("data-filter");
       $grid.isotope({ filter: filterValue });
     });
-  }
+  };
 
   isotope_initalize();
   $(window).resize(isotope_initalize);
-  
 
   // overwrite woocommerce scroll to notices
   $.scroll_to_notices = function (scrollElement) {
@@ -92,7 +91,7 @@ jQuery(document).ready(function ($) {
 
     if (!customerDetails.valid()) {
       current.prop("disabled", true);
-      return false 
+      return false;
     }
 
     var cdetails = customerDetails.serializeArray();
@@ -199,14 +198,14 @@ jQuery(document).ready(function ($) {
           type: "POST",
           url: ajax_object.ajax_url,
           data: getData,
-          success: function(response, status, xhr) {
+          success: function (response, status, xhr) {
             button.removeClass("ml_loading");
-            
-            var contentType = xhr.getResponseHeader('Content-Type');
+
+            var contentType = xhr.getResponseHeader("Content-Type");
             // console.log('contentType', contentType);
-        
+
             // Check the content type to determine the dataType
-            if (contentType && contentType.indexOf('application/json') !== -1) {
+            if (contentType && contentType.indexOf("application/json") !== -1) {
               if (response.success === false) {
                 messagWrap
                   .html("<p>" + response.data.message + "</p>")
@@ -214,18 +213,15 @@ jQuery(document).ready(function ($) {
               }
             } else {
               // Response is HTML or another format, set dataType to 'html'
-              $('#customerDetails').slideUp();
-              $('#alarnd__details_preview').html(response).slideDown();
-              $('.alarnd--single-payout-submit').slideDown();              
+              $("#customerDetails").slideUp();
+              $("#alarnd__details_preview").html(response).slideDown();
+              $(".alarnd--single-payout-submit").slideDown();
             }
           },
-          error: function(xhr, status, error) {
+          error: function (xhr, status, error) {
             // Handle the error
-          }
+          },
         });
-        
-
-
       },
     });
 
@@ -458,22 +454,22 @@ jQuery(document).ready(function ($) {
 
   $(document).on("click", ".alarnd--user_address_edit", function () {
     var current = $(this);
-    $('#alarnd__details_preview').slideUp();
-    $('#customerDetails').slideDown(function(){
-      $(this).find(".form-message").html('').slideUp();
+    $("#alarnd__details_preview").slideUp();
+    $("#customerDetails").slideDown(function () {
+      $(this).find(".form-message").html("").slideUp();
     });
-    $('.alarnd--single-payout-submit').slideUp();
+    $(".alarnd--single-payout-submit").slideUp();
 
     return false;
   });
-  
+
   $(document).on("click", ".ml_customer_info_edit_cancel", function () {
     var current = $(this);
-    $('#customerDetails').slideUp(function(){
-      $(this).find(".form-message").html('').slideUp();
+    $("#customerDetails").slideUp(function () {
+      $(this).find(".form-message").html("").slideUp();
     });
-    $('#alarnd__details_preview').slideDown();
-    $('.alarnd--single-payout-submit').slideDown();
+    $("#alarnd__details_preview").slideDown();
+    $(".alarnd--single-payout-submit").slideDown();
 
     return false;
   });
@@ -647,20 +643,20 @@ jQuery(document).ready(function ($) {
     });
   });
 
-  $(document).on("click", ".alarnd--loadmore-trigger", function(e){
+  $(document).on("click", ".alarnd--loadmore-trigger", function (e) {
     e.preventDefault();
 
     var current = $(this),
       page_num = current.data("page_num"),
-      section = $('.allaround--products-section'),
-      wrapper = $('#allaround_products_list'),
-      user_id = wrapper.data('user_id');
+      section = $(".allaround--products-section"),
+      wrapper = $("#allaround_products_list"),
+      user_id = wrapper.data("user_id");
 
     section.addClass("loading");
     current.addClass("ml_loading");
 
     console.log("page_num", page_num);
-    console.log( $('.alarnd--loadmore-trigger').data('page_num') );
+    console.log($(".alarnd--loadmore-trigger").data("page_num"));
 
     $.ajax({
       type: "POST",
@@ -681,22 +677,21 @@ jQuery(document).ready(function ($) {
         } else {
           wrapper.append(response);
 
-          var $items = $( response );
-          wrapper.isotope( 'appended', $items );
-          wrapper.isotope( 'reloadItems' );
+          var $items = $(response);
+          wrapper.isotope("appended", $items);
+          wrapper.isotope("reloadItems");
 
-          current.data("page_num", page_num+1);
+          current.data("page_num", page_num + 1);
         }
-
       },
-      complete: function(){
+      complete: function () {
         section.removeClass("loading");
         current.removeClass("ml_loading");
         initi_prive_view_modal();
         isotope_initalize();
-      }
+        setProductDetailsHeight();
+      },
     });
-
   });
 
   $(document).on("submit", "form.variations_form", function (e) {
@@ -934,7 +929,6 @@ jQuery(document).ready(function ($) {
         },
       },
     });
-
   }
 
   initi_prive_view_modal();

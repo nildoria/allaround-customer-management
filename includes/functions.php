@@ -1427,8 +1427,8 @@ function allaround_customer_form($is_disabled = false) {
             </div>
         </div>
         <div class="form-row form-submit-row">
-            <button type="submit" class="button alarnd--regular-button alt ml_add_loading ml_save_customer_info" disabled><?php esc_html_e( "Save", "allaroundminilng" ); ?></button>
-            <a href="#" class="ml_customer_info_edit_cancel"><?php esc_html_e("Cancel", "allaroundminilng"); ?></a>
+            <button type="submit" class="button alarnd--regular-button alt ml_add_loading ml_save_customer_info" disabled><?php esc_html_e( "Update", "allaroundminilng" ); ?></button>
+            <a href="#" class="ml_customer_info_edit_cancel"><?php esc_html_e("Return", "allaroundminilng"); ?></a>
         </div>
         <div class="form-message"></div>
     </form>
