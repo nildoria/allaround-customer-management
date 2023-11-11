@@ -1,3 +1,7 @@
+@import url("https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700&display=swap");
+body {
+  font-family: "Heebo", sans-serif;
+}
 * {
   min-height: 0;
   min-width: 0;
@@ -20,6 +24,23 @@ textarea {
   font-size: 14px;
   font-weight: 400;
   color: #1a1a1a;
+}
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  /* display: none; <- Crashes Chrome on hover */
+  -webkit-appearance: none;
+  margin: 0; /* <-- Apparently some margin are still there even though it's hidden */
+}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-weight: 700;
+}
+input[type="number"] {
+  -moz-appearance: textfield; /* Firefox */
 }
 .elementor-section .elementor-container {
   display: flex;
@@ -54,9 +75,9 @@ section.minStore-profile-promi-section {
 h3.miniStore-promo-title {
   padding: 0px 0px 0px 0px;
   color: #1a1a1a;
-  font-size: 24px;
-  font-weight: 500;
-  margin: 0.5rem 0 1rem 0;
+  font-size: 19px;
+  font-weight: 700;
+  margin: 0.5rem 0 0.8rem 0;
 }
 .miniStore-promo-text {
   color: #656565;
@@ -122,10 +143,12 @@ h3.miniStore-promo-title {
 }
 .aum_auth_page .product-filter button.filter-button:hover,
 .aum_auth_page .product-filter button.filter-button:active,
+.aum_auth_page .product-filter button.filter-button:focus-visible,
 .aum_auth_page .product-filter button.filter-button:focus {
   color: #0baaf7;
   background-color: transparent;
   border-bottom: 3px solid #0baaf7;
+  outline: none;
 }
 .aum_auth_page .product-item-details {
   padding: 10px 10px 25px 10px;
@@ -146,7 +169,7 @@ h3.miniStore-promo-title {
   display: inline-block;
   background-color: #66de93;
   color: #1a1a1a;
-  font-size: 18px;
+  font-size: 16px;
   border-radius: 11px;
   -webkit-border-radius: 11px;
   -moz-border-radius: 11px;
@@ -190,7 +213,10 @@ h3.miniStore-promo-title {
 .woocommerce-page ul.products.columns-3 li.product {
   margin: 0 2.5% 2.992em 0;
 }
-
+.woocommerce ul#shipping_method li label {
+  font-size: 14px;
+  font-weight: 700;
+}
 button,
 [type="submit"],
 [type="button"] {
@@ -239,6 +265,32 @@ button,
 }
 span.shipping-title {
   padding: 0px 0 9px;
+}
+.cart-collaterals a.checkout-button.button.wc-forward {
+  text-align: center;
+}
+.woocommerce .product-remove a.remove {
+  font-size: 15px;
+  width: 20px;
+  height: 20px;
+  line-height: 20px;
+}
+.woocommerce
+  table.shop_table.shop_table_responsive.cart.woocommerce-cart-form__contents
+  tr.woocommerce-cart-form__cart-item.cart_item
+  > td.product-name
+  > a {
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 20px;
+}
+.woocommerce
+  table.shop_table_responsive
+  tr.woocommerce-cart-form__cart-item.cart_item
+  td.product-name
+  .variation {
+  font-size: 12px;
+  line-height: 1.5;
 }
 .cart-empty.woocommerce-info {
   display: flex;
@@ -599,12 +651,14 @@ h3#order_review_heading {
 }
 .alrnd--pay_details_tokenized h2 {
   margin-bottom: 20px;
+  font-size: 20px;
 }
 .product-item-details h3.product-title {
   color: #1a1a1a;
   cursor: pointer;
   font-size: 20px !important;
   padding-bottom: 5px !important;
+  font-weight: 500;
 }
 
 .allaround--slick-carousel .slick-slide img {

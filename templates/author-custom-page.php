@@ -50,10 +50,9 @@ get_header(); // Include header template
         $user_header_title = get_field('user_header_title', "user_{$current_user_id}");
         $profile_picture_url = wp_get_attachment_image_url($profile_picture_id, 'medium');
 
-        $tick = '';
-        if( !empty( $token ) ) {
-            $tick = '<img src="'.AlRNDCM_URL.'assets/images/verified.png" class="verified_tick" loading="lazy" /> ';
-        }
+       
+        $tick = '<img src="'.AlRNDCM_URL.'assets/images/verified.png" class="verified_tick" loading="lazy" /> ';
+        
 
         if (in_array('customer', $get_current_puser->roles)) {
             echo '<div class="author-header aum-container">';
