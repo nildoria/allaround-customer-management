@@ -645,7 +645,7 @@ function ml_gallery_carousels( $product_id, $user_id ) {
             echo '<div class="mlHiddenGallery">';
             foreach ($galleries as $key => $gallery) {
                 $full_thumbnail = ml_get_gallery_thumbnail($key, $gallery['attachment_id'], $user_id, $product_id, true);
-                echo '<a class="mlGallerySingle" href="'.$full_thumbnail.'" data-title="'.$gallery['title'].'"></a>';
+                echo '<a class="mlGallerySingle '. esc_attr($product_id) .'" href="'.$full_thumbnail.'" data-title="'.$gallery['title'].'"></a>';
             }
             echo '</div>';
         echo '</div>';
