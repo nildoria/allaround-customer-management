@@ -198,32 +198,30 @@ function woocommerce_header_add_to_cart_fragment( $fragments ) {
 	return $fragments;
 }
 
-add_filter( 'woocommerce_add_to_cart_fragments', 'woocommerce_header_add_to_cart_fragment_checkout' );
 
-function woocommerce_header_add_to_cart_fragment_checkout( $fragments ) {
-	ob_start();
+// functions.php or your custom plugin file
 
-    echo '<div class="alarnd-checkout-wrap-inner">';
-         echo allaround_card_form();
-    echo '</div>';
-	
-	$fragments['div.alarnd-checkout-wrap-inner'] = ob_get_clean();
-	
-	return $fragments;
+add_action('init', 'set_author_name_global_variable_anohter');
+
+function set_author_name_global_variable_anohter() {
+    
+    if (is_author()) {
+        // Get the author object
+        $author = get_queried_object();
+
+        // Set the author name as a global variable
+        $GLOBALS['ml_author_name_var'] = $author->ID;
+    }
 }
 
-add_filter( 'woocommerce_add_to_cart_fragments', 'woocommerce_add_to_cart_fragment_token' );
+add_filter('woocommerce_add_to_cart_fragments', 'remove_element_from_cart_fragments', 10, 1);
 
-function woocommerce_add_to_cart_fragment_token( $fragments ) {
-    $current_user = wp_get_current_user();
-    $current_user_id = $current_user->ID;
-	ob_start();
+function remove_element_from_cart_fragments($fragments) {
+    // Remove the element with the specified key from fragments
+    unset($fragments['div.alarnd-checkout-wrap-inner']);
+    unset($fragments['div.alarnd--payout-main']);
 
-    echo alarnd_single_checkout($current_user_id);
-	
-	$fragments['div.alarnd--payout-main'] = ob_get_clean();
-	
-	return $fragments;
+    return $fragments;
 }
 
 
@@ -343,7 +341,6 @@ function alarnd_single_checkout($user_id = false) {
 
     ?>
     <div class="alarnd--payout-main">
-        <?php if( ! WC()->cart->is_empty() ) : ?>
         <div class="alanrd--single-payout-wrap">
             <div class="alarnd--payout-col alrnd_tokenized_col">
                 <div class="alarnd--payout-col alrnd_wooz_col">
@@ -478,7 +475,7 @@ function alarnd_single_checkout($user_id = false) {
                     <div id="alarnd__details_preview">
                         <div class="alarnd--payout-col alarnd--details-previewer">
                             <h3>כתובת למשלוח</h3>
-                            <p class="tokenized_user_name"><?php echo $current_user->display_name; ?></p>
+                            <div class="tokenized_inv_name_cont"><?php esc_html_e( 'חשבונית על שם', 'hello-elementor' ); ?>:<p class="tokenized_user_name"><?php echo $invoice ?></p></div>
 
                             <div class="alarnd--user-address">
                                 <div class="alarnd--user-address-wrap">
@@ -505,7 +502,6 @@ function alarnd_single_checkout($user_id = false) {
             <button type="submit" class="alarnd--regular-button alarnd--payout-trigger ml_add_loading button" <?php echo $is_disabled === true ? 'disabled="disabled"' : ""; ?>>התקדם לנקודת הביקורת</button>
         </div>
         <div class="alarnd--payout-validation"></div>
-        <?php endif; ?>
     </div>
     <?php
 }
@@ -645,7 +641,7 @@ function ml_gallery_carousels( $product_id, $user_id ) {
             echo '<div class="mlHiddenGallery">';
             foreach ($galleries as $key => $gallery) {
                 $full_thumbnail = ml_get_gallery_thumbnail($key, $gallery['attachment_id'], $user_id, $product_id, true);
-                echo '<a class="mlGallerySingle '. esc_attr($product_id) .'" href="'.$full_thumbnail.'" data-title="'.$gallery['title'].'"></a>';
+                echo '<a class="mlGallerySingle" href="'.$full_thumbnail.'" data-title="'.$gallery['title'].'"></a>';
             }
             echo '</div>';
         echo '</div>';
@@ -1139,33 +1135,67 @@ function ml_get_user_phone( $user_id, $code_or_phone = '' ){
     return $number;
 }
 
-function allaround_card_form($user_id = null) {
-
-    $name = $phone = $user_billing_info = $email = '';
-    $available_card_path = AlRNDCM_URL . "assets/images/available-cards.png";
-    $cvc_info_path = AlRNDCM_URL . "assets/images/question-circle.svg";
+function ml_get_author_page_userid() {
+    global $wp_query;
 
     if( is_user_logged_in() ) {
         // Get the current author's username from the URL
         $current_user = wp_get_current_user();
         $current_user_id = $current_user->ID;
 
-        if( ! empty( $user_id ) ) {
-            $current_user_id = $user_id;
+        return $current_user_id;
+    }
+
+    if( WC()->session->get('ml_author_id') ) {
+        return WC()->session->get('ml_author_id');
+    }
+
+    // Check if the query is for an author
+    if (isset($wp_query->query_vars['author_name'])) {
+        $username = $wp_query->query_vars['author_name'];
+
+        $get_current_puser = get_user_by('login', $username);
+        if( ! $get_current_puser ) {
+            return false;
         }
 
-        $the_user = get_user_by( 'id', $current_user_id );
-        $phone = ml_get_user_phone($current_user_id);
-        $user_billing_info = get_field('user_billing_info', "user_{$current_user_id}");
-        $invoice = get_field('invoice', "user_{$current_user_id}");
-        $city = get_user_meta( $current_user_id, 'billing_city', true );
-
-        $name = $the_user->display_name;
-        $email = $the_user->user_email;
+        return $get_current_puser->ID;
     }
+
+    return false;
+}
+
+
+
+
+function allaround_card_form($user_id = '') {
+
+    $current_user_id = ml_get_author_page_userid();
+
+    if( ! empty( $user_id ) ) {
+        $current_user_id = $user_id;
+    }
+
+    error_log("he id $current_user_id");
+
+    $name = $phone = $user_billing_info = $email = '';
+    $available_card_path = AlRNDCM_URL . "assets/images/available-cards.png";
+    $cvc_info_path = AlRNDCM_URL . "assets/images/question-circle.svg";
+
+    $the_user = get_user_by( 'id', $current_user_id );
+
+    $phone = ml_get_user_phone($current_user_id);
+    $user_billing_info = get_field('user_billing_info', "user_{$current_user_id}");
+    $invoice = get_field('invoice', "user_{$current_user_id}");
+    $city = get_user_meta( $current_user_id, 'billing_city', true );
+
+    $name = isset( $the_user->display_name ) && ! empty( $the_user->display_name ) ? $the_user->display_name : $current_user_id;
+    $email = $the_user->user_email;
+    error_log("email $email");
     
     ?>
-    <form action="" id="cardDetailsForm" class="allaround--card-form cardForm-wCard">
+
+    <form action="" id="cardDetailsForm" class="allaround--card-form cardForm-wCard" data-user_id="<?php echo $user_id; ?>">
 
         <div class="allaround_carf_form-fields">
             <div class="allaround_carf_form-cardDetail">
@@ -1179,9 +1209,9 @@ function allaround_card_form($user_id = null) {
                 </div>
                 <div class="form-cardDetail-fields">
                     <div class="form-row">
-                        <div class="form-label"><?php esc_html_e("Card Number", "allaroundminilng" ); ?></div>
+                        <div class="form-label"><?php esc_html_e("Card Number", "mini-store" ); ?></div>
                         <div class="form-input">
-                            <input type="text" id="cardNumber" name="cardNumber" placeholder="<?php esc_attr_e("1111 1111 1111 1111", "allaroundminilng" ); ?>" dir="ltr" required>
+                            <input type="text" id="cardNumber" name="cardNumber" placeholder="<?php esc_attr_e("1111 1111 1111 1111", "mini-store" ); ?>" dir="ltr" required>
                             <svg id="ccicon" class="ccicon" width="750" height="471" viewBox="0 0 750 471" version="1.1" xmlns="http://www.w3.org/2000/svg"
                             xmlns:xlink="http://www.w3.org/1999/xlink">
 
@@ -1190,15 +1220,15 @@ function allaround_card_form($user_id = null) {
                     </div>
                     <div class="form-row flex-row exp-cvc-con">
                         <div class="form-row">
-                            <div class="form-label"><?php esc_html_e("Expiration Date", "allaroundminilng" ); ?></div>
+                            <div class="form-label"><?php esc_html_e("Expiration Date", "mini-store" ); ?></div>
                             <div class="form-input">
-                                <input type="text" inputmode="numeric" id="expirationDate" name="expirationDate" placeholder="<?php esc_attr_e("MM/YY", "allaroundminilng" ); ?>" required>
+                                <input type="text" inputmode="numeric" id="expirationDate" name="expirationDate" placeholder="<?php esc_attr_e("MM/YY", "mini-store" ); ?>" required>
                             </div>
                         </div>
                         <div class="form-row">
-                            <div class="form-label"><?php esc_html_e("CVC", "allaroundminilng" ); ?></div>
+                            <div class="form-label"><?php esc_html_e("CVC", "mini-store" ); ?></div>
                             <div class="form-input">
-                                <input type="number" id="cvvCode" name="cvvCode" placeholder="<?php esc_attr_e("CVC", "allaroundminilng" ); ?>" required>
+                                <input type="number" id="cvvCode" name="cvvCode" placeholder="<?php esc_attr_e("CVC", "mini-store" ); ?>" required>
                                 <div class="cvc-info tooltip-left" data-tooltip="3 סיטרכה בגב תורפס">
                                     <img src="<?php echo esc_url($cvc_info_path); ?>" alt="CVC Info" loading="lazy">
                                 </div>
@@ -1319,44 +1349,44 @@ function allaround_card_form($user_id = null) {
                 <h3>כתובת למשלוח</h3>
                 <div class="form-row flex-row">
                     <div class="form-row">
-                        <div class="form-label"><?php esc_html_e("Name", "allaroundminilng" ); ?></div>
+                        <div class="form-label"><?php esc_html_e("Name", "mini-store" ); ?></div>
                         <div class="form-input">
-                            <input type="text" id="cardholderName" maxlength="20" name="cardholderName" placeholder="<?php esc_attr_e("required", "allaroundminilng" ); ?>" value="<?php echo esc_attr( $name ); ?>" required>
+                            <input type="text" id="cardholderName" maxlength="20" name="cardholderName" placeholder="<?php esc_attr_e("required", "mini-store" ); ?>" value="<?php echo esc_attr( $name ); ?>" required>
                         </div>
                     </div>
                     <div class="form-row">
-                        <div class="form-label"><?php esc_html_e("Invoice Name", "allaroundminilng" ); ?></div>
+                        <div class="form-label"><?php esc_html_e("Invoice Name", "mini-store" ); ?></div>
                         <div class="form-input">
-                            <input type="text" id="cardholderInvoiceName" maxlength="20" name="cardholderInvoiceName" placeholder="<?php esc_attr_e("required", "allaroundminilng" ); ?>" value="<?php echo esc_attr( $invoice ); ?>" required>
+                            <input type="text" id="cardholderInvoiceName" maxlength="20" name="cardholderInvoiceName" placeholder="<?php esc_attr_e("required", "mini-store" ); ?>" value="<?php echo esc_attr( $invoice ); ?>" required>
                         </div>
                     </div>
                 </div>
                 <div class="form-row">
-                    <div class="form-label"><?php esc_html_e("Email", "allaroundminilng" ); ?></div>
+                    <div class="form-label"><?php esc_html_e("Email", "mini-store" ); ?></div>
                     <div class="form-input">
-                        <input type="text" id="cardholderEmail" name="cardholderEmail" placeholder="<?php esc_attr_e("required", "allaroundminilng" ); ?>" value="<?php echo esc_attr( $email ); ?>" required>
+                        <input type="text" id="cardholderEmail" name="cardholderEmail" placeholder="<?php esc_attr_e("required", "mini-store" ); ?>" value="<?php echo esc_attr( $email ); ?>" required>
                     </div>
                 </div>
 
                 <div class="form-row flex-row">
                     <div class="form-row">
-                        <div class="form-label"><?php esc_html_e("Phone", "allaroundminilng" ); ?></div>
+                        <div class="form-label"><?php esc_html_e("Phone", "mini-store" ); ?></div>
                         <div class="form-input">
-                            <input type="text" id="cardholderPhone" name="cardholderPhone" placeholder="<?php esc_attr_e("required", "allaroundminilng" ); ?>" value="<?php echo esc_attr( $phone ); ?>" required>
+                            <input type="text" id="cardholderPhone" name="cardholderPhone" placeholder="<?php esc_attr_e("required", "mini-store" ); ?>" value="<?php echo esc_attr( $phone ); ?>" required>
                         </div>
                     </div>
                     <div class="form-row">
-                        <div class="form-label"><?php esc_html_e("City", "allaroundminilng" ); ?></div>
+                        <div class="form-label"><?php esc_html_e("City", "mini-store" ); ?></div>
                         <div class="form-input">
-                            <input type="text" id="cardholderCity" name="cardholderCity" placeholder="<?php esc_attr_e("required", "allaroundminilng" ); ?>" value="<?php echo esc_attr( $city ); ?>" required>
+                            <input type="text" id="cardholderCity" name="cardholderCity" placeholder="<?php esc_attr_e("required", "mini-store" ); ?>" value="<?php echo esc_attr( $city ); ?>" required>
                         </div>
                     </div>
                 </div>
 
                 <div class="form-row">
-                    <div class="form-label"><?php esc_html_e("Address", "allaroundminilng" ); ?></div>
+                    <div class="form-label"><?php esc_html_e("Address", "mini-store" ); ?></div>
                     <div class="form-input">
-                        <input type="text" id="cardholderAdress" name="cardholderAdress" placeholder="<?php esc_attr_e("required", "allaroundminilng" ); ?>" value="<?php echo esc_attr( $user_billing_info ); ?>" required>
+                        <input type="text" id="cardholderAdress" name="cardholderAdress" placeholder="<?php esc_attr_e("required", "mini-store" ); ?>" value="<?php echo esc_attr( $user_billing_info ); ?>" required>
                     </div>
                 </div>
 
@@ -1365,7 +1395,7 @@ function allaround_card_form($user_id = null) {
         <div class="form-row">
             <div class="form-label"></div>
             <div class="form-input form-submit-container">
-                <button type="submit" class="ml_add_loading button allaround_card_details_submit" disabled><?php esc_html_e("התקדם לנקודת הביקורת", "allaroundminilng" ); ?></button>
+                <button type="submit" class="ml_add_loading button allaround_card_details_submit" disabled><?php esc_html_e("התקדם לנקודת הביקורת", "mini-store" ); ?></button>
             </div>
         </div>
         <div class="form-message"></div>
@@ -1375,8 +1405,7 @@ function allaround_card_form($user_id = null) {
 
 function allaround_customer_form($is_disabled = false) {
 
-    $current_user = wp_get_current_user();
-    $current_user_id = $current_user->ID;
+    $current_user_id = ml_get_author_page_userid();
 
     $the_user = get_user_by( 'id', $current_user_id );
     $phone = ml_get_user_phone($current_user_id);
@@ -1388,47 +1417,47 @@ function allaround_customer_form($is_disabled = false) {
         <h3>כתובת למשלוח</h3>
         <div class="form-row flex-row">
             <div class="form-row">
-                <div class="form-label"><?php esc_html_e("Name", "allaroundminilng" ); ?></div>
+                <div class="form-label"><?php esc_html_e("Name", "mini-store" ); ?></div>
                 <div class="form-input">
-                    <input type="text" id="userName" name="userName" placeholder="<?php esc_attr_e("required", "allaroundminilng" ); ?>" value="<?php echo esc_attr( $the_user->display_name ); ?>" required>
+                    <input type="text" id="userName" name="userName" placeholder="<?php esc_attr_e("required", "mini-store" ); ?>" value="<?php echo esc_attr( $the_user->display_name ); ?>" required>
                 </div>
             </div>
             <div class="form-row">
-                <div class="form-label"><?php esc_html_e("Invoice Name", "allaroundminilng" ); ?></div>
+                <div class="form-label"><?php esc_html_e("Invoice Name", "mini-store" ); ?></div>
                 <div class="form-input">
-                    <input type="text" id="userInvoiceName" name="userInvoiceName" placeholder="<?php esc_attr_e("required", "allaroundminilng" ); ?>" value="<?php echo esc_attr( $invoice ); ?>" required>
+                    <input type="text" id="userInvoiceName" name="userInvoiceName" placeholder="<?php esc_attr_e("required", "mini-store" ); ?>" value="<?php echo esc_attr( $invoice ); ?>" required>
                 </div>
             </div>
         </div>
         <div class="form-row">
-            <div class="form-label"><?php esc_html_e("Email", "allaroundminilng" ); ?></div>
+            <div class="form-label"><?php esc_html_e("Email", "mini-store" ); ?></div>
             <div class="form-input">
-                <input type="text" id="userEmail" name="userEmail" placeholder="<?php esc_attr_e("required", "allaroundminilng" ); ?>" value="<?php echo esc_attr( $the_user->user_email ); ?>" required>
+                <input type="text" id="userEmail" name="userEmail" placeholder="<?php esc_attr_e("required", "mini-store" ); ?>" value="<?php echo esc_attr( $the_user->user_email ); ?>" required>
             </div>
         </div>
         <div class="form-row flex-row">
             <div class="form-row">
-                <div class="form-label"><?php esc_html_e("Phone", "allaroundminilng" ); ?></div>
+                <div class="form-label"><?php esc_html_e("Phone", "mini-store" ); ?></div>
                 <div class="form-input">
-                    <input type="text" id="userPhone" name="userPhone" placeholder="<?php esc_attr_e("required", "allaroundminilng" ); ?>" value="<?php echo esc_attr( $phone ); ?>" required>
+                    <input type="text" id="userPhone" name="userPhone" placeholder="<?php esc_attr_e("required", "mini-store" ); ?>" value="<?php echo esc_attr( $phone ); ?>" required>
                 </div>
             </div>
             <div class="form-row">
-                <div class="form-label"><?php esc_html_e("City", "allaroundminilng" ); ?></div>
+                <div class="form-label"><?php esc_html_e("City", "mini-store" ); ?></div>
                 <div class="form-input">
-                    <input type="text" id="userCity" name="userCity" placeholder="<?php esc_attr_e("required", "allaroundminilng" ); ?>" value="<?php echo esc_attr( $city ); ?>" required>
+                    <input type="text" id="userCity" name="userCity" placeholder="<?php esc_attr_e("required", "mini-store" ); ?>" value="<?php echo esc_attr( $city ); ?>" required>
                 </div>
             </div>
         </div>
         <div class="form-row">
-            <div class="form-label"><?php esc_html_e("Address", "allaroundminilng" ); ?></div>
+            <div class="form-label"><?php esc_html_e("Address", "mini-store" ); ?></div>
             <div class="form-input">
-                <input type="text" id="userAdress" name="userAdress" placeholder="<?php esc_attr_e("required", "allaroundminilng" ); ?>" value="<?php echo esc_attr( $user_billing_info ); ?>" required>
+                <input type="text" id="userAdress" name="userAdress" placeholder="<?php esc_attr_e("required", "mini-store" ); ?>" value="<?php echo esc_attr( $user_billing_info ); ?>" required>
             </div>
         </div>
         <div class="form-row form-submit-row">
-            <button type="submit" class="button alarnd--regular-button alt ml_add_loading ml_save_customer_info" disabled><?php esc_html_e( "Update", "allaroundminilng" ); ?></button>
-            <a href="#" class="ml_customer_info_edit_cancel"><?php esc_html_e("Return", "allaroundminilng"); ?></a>
+            <button type="submit" class="button alarnd--regular-button alt ml_add_loading ml_save_customer_info" disabled><?php esc_html_e( "Update", "mini-store" ); ?></button>
+            <a href="#" class="ml_customer_info_edit_cancel"><?php esc_html_e("Return", "mini-store"); ?></a>
         </div>
         <div class="form-message"></div>
     </form>
@@ -1585,8 +1614,10 @@ add_filter('wc_empty_cart_message', 'ministore_empty_cart_message');
  */
 function ml_cart_item_thumbnail( $content, $cart_item, $cart_item_key ) {
 
+    // error_log( print_r( $cart_item, true ) );
+
     $product_id = apply_filters( 'woocommerce_cart_item_product_id', $cart_item['product_id'], $cart_item, $cart_item_key );
-    $wc_thumb = ml_get_cart_thumb($product_id);
+    $wc_thumb = ml_get_cart_thumb($product_id, $cart_item);
 
     // Normal image
     $matches = array();
@@ -1624,14 +1655,11 @@ add_filter( 'woocommerce_cart_item_thumbnail', 'ml_cart_item_thumbnail', 3, 250 
  * @param int $product_id
  * @return void
  */
-function ml_get_cart_thumb($product_id) {
+function ml_get_cart_thumb($product_id, $cart_item) {
 
-    if( ! is_user_logged_in() ) {
-        return '';
-    }
+    // error_log( print_r( $cart_item, true ) );
 
-    $current_user = wp_get_current_user();
-    $current_user_id = $current_user->ID;
+    $current_user_id = ml_get_author_page_userid();
 
     $class = 'attachment-woocommerce_thumbnail size-woocommerce_thumbnail'; // Default cart thumbnail class.
 
@@ -1641,8 +1669,19 @@ function ml_get_cart_thumb($product_id) {
     if( empty( $product_id ) || empty( $image_id ) ) {
         return '';
     }
+
+    if( isset( $cart_item['user_id'] ) && ! empty( $cart_item['user_id'] ) ) {
+        $current_user_id = $cart_item['user_id'];
+    }
+
+    $alarnd_color_key = '';
     
-    $gen_thumbnail = ml_get_wc_thumbnail_url( $image_id, $product_id, $current_user_id );
+    if( isset( $cart_item['alarnd_color_key'] ) ) {
+        $alarnd_color_key = $cart_item['alarnd_color_key'];
+    }
+    
+    $gen_thumbnail = ml_get_wc_thumbnail_url( $image_id, $product_id, $current_user_id, $alarnd_color_key );
+    error_log( "cart thumb $gen_thumbnail" );
     if( empty( $gen_thumbnail ) ) {
         return '';
     }
@@ -1652,18 +1691,41 @@ function ml_get_cart_thumb($product_id) {
 }
 
 
-function ml_get_wc_thumbnail_url( $attachment_id, $product_id, $user_id ) {
+function ml_get_wc_thumbnail_url( $attachment_id, $product_id, $user_id, $alarnd_color_key ) {
 
     $fullsize_path = get_attached_file( $attachment_id ); // Full path
     if( empty( $fullsize_path ) ) {
         return '';
-    }
+    }    
 
     $filename_only = basename( get_attached_file( $attachment_id ) ); // Just the file name
     $filetype = wp_check_filetype($filename_only);
     $ext = $filetype['ext'];
 
     $upload_dir = wp_upload_dir();
+
+    if( $alarnd_color_key !== '' ) {
+        $colors = get_field( 'color', $product_id );
+        $attachment_id = isset( $colors[$alarnd_color_key]['thumbnail']['ID'] ) ? $colors[$alarnd_color_key]['thumbnail']['ID'] : '';
+        if( ! empty( $attachment_id ) ) {
+            $gen_thumbnail = $upload_dir['baseurl'] . DIRECTORY_SEPARATOR. AlRNDCM_UPLOAD_FOLDER . DIRECTORY_SEPARATOR . $user_id . DIRECTORY_SEPARATOR . 'resized_' . $product_id . '-' . $alarnd_color_key . '-' . $attachment_id . '.'.$ext;
+            $gen_thumbnail = str_replace('\\', '/', $gen_thumbnail);
+            $basedir_url = $upload_dir['basedir'] . DIRECTORY_SEPARATOR. AlRNDCM_UPLOAD_FOLDER . DIRECTORY_SEPARATOR . $user_id . DIRECTORY_SEPARATOR . 'resized_' . $product_id . '-' . $alarnd_color_key . '-' . $attachment_id . '.'.$ext;
+
+            if( file_exists( $basedir_url ) ) {
+                return $gen_thumbnail;
+            }
+
+            $full_gen_thumbnail = $upload_dir['baseurl'] . DIRECTORY_SEPARATOR. AlRNDCM_UPLOAD_FOLDER . DIRECTORY_SEPARATOR . $user_id . DIRECTORY_SEPARATOR . $product_id . '-' . $alarnd_color_key . '-' . $attachment_id . '.'.$ext;
+            $full_gen_thumbnail = str_replace('\\', '/', $full_gen_thumbnail);
+            $full_basedir_url = $upload_dir['basedir'] . DIRECTORY_SEPARATOR. AlRNDCM_UPLOAD_FOLDER . DIRECTORY_SEPARATOR . $user_id . DIRECTORY_SEPARATOR . $product_id . '-' . $alarnd_color_key . '-' . $attachment_id . '.'.$ext;
+            if( file_exists( $full_basedir_url ) ) {
+                return $full_gen_thumbnail;
+            }
+        }
+    }
+
+    
     $gen_thumbnail = $upload_dir['baseurl'] . DIRECTORY_SEPARATOR . AlRNDCM_UPLOAD_FOLDER . DIRECTORY_SEPARATOR  . $user_id . DIRECTORY_SEPARATOR . 'wc_thumb_' . $product_id . '.'.$ext;
     $gen_thumbnail = str_replace('\\', '/', $gen_thumbnail);
     $basedir_url = $upload_dir['basedir'] . DIRECTORY_SEPARATOR . AlRNDCM_UPLOAD_FOLDER . DIRECTORY_SEPARATOR  . $user_id . DIRECTORY_SEPARATOR . 'wc_thumb_' . $product_id . '.'.$ext;
@@ -1691,6 +1753,10 @@ function ml_get_phone_no($phone) {
 }
 
 function ml_get_country_code() {
+    if( ! function_exists( 'xoo_ml_helper' ) ) {
+        return '';
+    }
+
     $settings = xoo_ml_helper()->get_phone_option();
 
     $countryCode = $settings['r-default-country-code-type'] === 'geolocation' ? Xoo_Ml_Geolocation::get_phone_code() : $settings['r-default-country-code'];

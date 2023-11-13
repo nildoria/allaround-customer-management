@@ -328,7 +328,6 @@ jQuery(document).ready(function ($) {
       "#customerDetails input",
       toggleSubmitButtonCustomer
     );
-    // toggleSubmitButtonCustomer();
   }
   if ($cardDetails.length) {
     function toggleSubmitButtonCard() {
@@ -341,7 +340,6 @@ jQuery(document).ready(function ($) {
     }
 
     $(document).on("input", "#cardDetailsForm input", toggleSubmitButtonCard);
-    toggleSubmitButtonCard();
   }
 
   // Use JavaScript to strip non-numeric characters
@@ -577,6 +575,7 @@ jQuery(document).ready(function ($) {
     var $self = $(this),
       button = $self.find('button[name="add-to-cart"]'),
       productId = button.val(),
+      user_id = $('#main').data('user_id'),
       getData = $self.serializeArray();
 
     getData.push(
@@ -587,6 +586,10 @@ jQuery(document).ready(function ($) {
       {
         name: "product_id",
         value: productId,
+      },
+      {
+        name: "user_id",
+        value: user_id,
       },
       {
         name: "nonce",
@@ -634,6 +637,8 @@ jQuery(document).ready(function ($) {
             $self.find(".alanrd--product-added-message").slideUp();
           }, 3000);
         }
+
+        $('#ministore--custom-checkout-section').removeClass('ml_pay_hidden');
 
         console.log(data);
       },
@@ -701,6 +706,7 @@ jQuery(document).ready(function ($) {
       product_id = current.find('input[name="product_id"]').val(),
       quantity = current.find('input[name="quantity"]').val(),
       button = current.find(".single_add_to_cart_button"),
+      user_id = $('#main').data('user_id'),
       variation_id = current.find('input[name="variation_id"]').val();
 
     var getvariation = {};
@@ -723,17 +729,98 @@ jQuery(document).ready(function ($) {
         product_id: product_id,
         variation_id: variation_id,
         quantity: quantity,
+        user_id: user_id,
         variation: getvariation,
         nonce: ajax_object.nonce,
       },
       success: function (data) {
         button.removeClass("ml_loading");
 
+        checkCartStatus();
         refresh_cart_fragment();
 
         // console.log(data);
       },
     });
+  });
+  
+  $(document).on("submit", "form.cart", function (e) {
+    e.preventDefault();
+
+    var current = $(this),
+      button = current.find(".single_add_to_cart_button"),
+      product_id = button.val(),
+      user_id = $('#main').data('user_id'),
+      quantity = current.find('input[name="quantity"]').val();
+
+    button.addClass("ml_loading");
+
+    $.ajax({
+      type: "POST",
+      dataType: "json",
+      url: ajax_object.ajax_url,
+      data: {
+        action: "add_simple_to_cart",
+        product_id: product_id,
+        quantity: quantity,
+        user_id: user_id,
+        nonce: ajax_object.nonce,
+      },
+      success: function (data) {
+        button.removeClass("ml_loading");
+
+        checkCartStatus();
+        refresh_cart_fragment();
+
+        // console.log(data);
+      },
+    });
+  });
+
+  // Check cart status on page load
+  checkCartStatus();
+
+  // Update cart status when an item is added or removed
+  $(document).on('added_to_cart removed_from_cart', function() {
+      checkCartStatus();
+  });
+
+  // Function to check cart status
+  function checkCartStatus() {
+      // Perform AJAX request to check the cart status
+      $.ajax({
+          type: 'POST',
+          url: ajax_object.ajax_url,
+          data: {
+              action: 'check_cart_status',
+              nonce: ajax_object.nonce,
+          },
+          success: function(response) {
+              // Show or hide the element based on the response
+              if (response && response.data.cart_has_items) {
+                  // Cart has items, show the element
+                  $('#ministore--custom-checkout-section').removeClass('ml_pay_hidden');
+              } else {
+                  // Cart is empty, hide the element
+                  $('#ministore--custom-checkout-section').addClass('ml_pay_hidden');
+              }
+          },
+      });
+  }
+  
+  $(document).ajaxSend(function(event, xhr, settings) {
+    // Check if the AJAX request is a cart update
+    if (settings.url.indexOf('/cart') !== -1) {
+        // It's a cart update AJAX request
+        $('.alarnd--cart-wrapper-inner').addClass('loading');
+        console.log("started update");
+    }
+  });
+
+  $(document.body).on('updated_wc_div', function(){
+      // Add your class to the element you want to target
+      $('.alarnd--cart-wrapper-inner').removeClass('loading');
+      console.log("completed update");
   });
 
   // Listen for the WooCommerce AJAX complete event

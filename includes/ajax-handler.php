@@ -17,6 +17,9 @@ class ML_Ajax {
 
         add_action('wp_ajax_add_variation_to_cart', array($this, 'add_variation_to_cart') );
         add_action('wp_ajax_nopriv_add_variation_to_cart', array($this, 'add_variation_to_cart') );
+        
+        add_action('wp_ajax_add_simple_to_cart', array($this, 'add_simple_to_cart') );
+        add_action('wp_ajax_nopriv_add_simple_to_cart', array($this, 'add_simple_to_cart') );
 
         add_action('wp_ajax_ml_customer_details', array($this, 'ml_customer_details') );
         add_action('wp_ajax_nopriv_ml_customer_details', array($this, 'ml_customer_details') );
@@ -29,6 +32,21 @@ class ML_Ajax {
         
         add_action('wp_ajax_ml_pagination', array( $this, 'ml_pagination' ) );
         add_action('wp_ajax_nopriv_ml_pagination', array( $this, 'ml_pagination' ) );
+
+        add_action('wp_ajax_check_cart_status', array( $this, 'check_cart_status_callback') );
+        add_action('wp_ajax_nopriv_check_cart_status', array( $this, 'check_cart_status_callback') );
+    }
+
+    function check_cart_status_callback() {
+        check_ajax_referer( 'aum_ajax_nonce', 'nonce' );
+
+        $cart_contents = WC()->cart->get_cart_contents_count();
+
+        // Check if the cart has items
+        $is_item_has = $cart_contents > 0 ? true : false;
+    
+        // Send back the cart status
+        wp_send_json_success(array('cart_has_items' => $is_item_has));
     }
 
     public function ml_pagination() {
@@ -764,7 +782,7 @@ class ML_Ajax {
         ?>
         <div class="alarnd--payout-col alarnd--details-previewer">
             <h3>כתובת למשלוח</h3>
-            <p class="tokenized_user_name"><?php echo $userName; ?></p>
+            <div class="tokenized_inv_name_cont"><?php esc_html_e( 'חשבונית על שם', 'hello-elementor' ); ?>:<p class="tokenized_user_name"><?php echo $userInvoiceName ?></p></div>
 
             <div class="alarnd--user-address">
                 <div class="alarnd--user-address-wrap">
@@ -786,13 +804,52 @@ class ML_Ajax {
 
         $product_id        = apply_filters( 'woocommerce_add_to_cart_product_id', absint( $_POST['product_id'] ) );
         $quantity          = empty( $_POST['quantity'] ) ? 1 : wc_stock_amount( $_POST['quantity'] );
+        $user_id = isset( $_POST['user_id'] ) && ! empty( $_POST['user_id'] ) ? intval( $_POST['user_id'] ) : '';
+        $cart_item_data = [];
+        if( ! is_user_logged_in() && ! empty( $user_id ) ) {
+            $cart_item_data['user_id'] = $user_id;
+        }
 
         $variation_id      = isset( $_POST['variation_id'] ) ? absint( $_POST['variation_id'] ) : '';
         $variations         = ! empty( $_POST['variation'] ) ? (array) $_POST['variation'] : '';
 
         $passed_validation = apply_filters( 'woocommerce_add_to_cart_validation', true, $product_id, $quantity, $variation_id, $variations );
 
-        if ( $passed_validation && WC()->cart->add_to_cart( $product_id, $quantity, $variation_id, $variations ) ) {
+        if ( $passed_validation && WC()->cart->add_to_cart( $product_id, $quantity, $variation_id, $variations, $cart_item_data ) ) {
+
+            do_action( 'woocommerce_ajax_added_to_cart', $product_id );
+
+            // Return fragments
+            WC_AJAX::get_refreshed_fragments();
+
+        } else {
+
+            // If there was an error adding to the cart, redirect to the product page to show any errors
+            $data = array(
+                'error' => true,
+                'product_url' => apply_filters( 'woocommerce_cart_redirect_after_error', get_permalink( $product_id ), $product_id )
+            );
+
+            wp_send_json( $data );
+
+        }
+
+        die();
+    }
+    
+    function add_simple_to_cart() {
+
+        check_ajax_referer( 'aum_ajax_nonce', 'nonce' );
+
+        $product_id        = apply_filters( 'woocommerce_add_to_cart_product_id', absint( $_POST['product_id'] ) );
+        $quantity          = empty( $_POST['quantity'] ) ? 1 : wc_stock_amount( $_POST['quantity'] );
+        $user_id = isset( $_POST['user_id'] ) && ! empty( $_POST['user_id'] ) ? intval( $_POST['user_id'] ) : '';
+        $cart_item_data = [];
+        if( ! is_user_logged_in() && ! empty( $user_id ) ) {
+            $cart_item_data['user_id'] = $user_id;
+        }
+
+        if ( WC()->cart->add_to_cart( $product_id, $quantity, '', '', $cart_item_data ) ) {
 
             do_action( 'woocommerce_ajax_added_to_cart', $product_id );
 
@@ -824,6 +881,12 @@ class ML_Ajax {
         check_ajax_referer( 'aum_ajax_nonce', 'nonce' );
 
         $product_id = isset( $_POST['product_id'] ) && ! empty( $_POST['product_id'] ) ? intval( $_POST['product_id'] ) : '';
+        $user_id = isset( $_POST['user_id'] ) && ! empty( $_POST['user_id'] ) ? intval( $_POST['user_id'] ) : '';
+
+        $cart_item_data = [];
+        if( ! is_user_logged_in() && ! empty( $user_id ) ) {
+            $cart_item_data['user_id'] = $user_id;
+        }
 
         $product = wc_get_product( $product_id );
 
@@ -851,7 +914,7 @@ class ML_Ajax {
             $passed_validation = apply_filters( 'woocommerce_add_to_cart_validation', true, $product_id, $quantity );
 
 
-            if ( $passed_validation && WC()->cart->add_to_cart( $product_id, $quantity ) ) {
+            if ( $passed_validation && WC()->cart->add_to_cart( $product_id, $quantity, '', '', $cart_item_data ) ) {
                 do_action( 'woocommerce_ajax_added_to_cart', $product_id );
 
                 // Return fragments
@@ -891,9 +954,12 @@ class ML_Ajax {
         $alarnd__color_qty = (isset( $_POST['alarnd__color_qty'] ) && ! empty( $_POST['alarnd__color_qty'] )) ? $_POST['alarnd__color_qty'] : '';
         $get_total_qtys = ml_get_total_qty($alarnd__color_qty);
 
-        // error_log( "get_total_qtys & alarnd__color_qty" );
-        // error_log( print_r($get_total_qtys, true) );
-        // error_log( print_r($alarnd__color_qty, true) );
+        $user_id = isset( $_POST['user_id'] ) && ! empty( $_POST['user_id'] ) ? intval( $_POST['user_id'] ) : '';
+
+        $cart_item_data = [];
+        if( ! is_user_logged_in() && ! empty( $user_id ) ) {
+            $cart_item_data['user_id'] = $user_id;
+        }
 
         $alarnd__group_id = (isset( $_POST['alarnd__group_id'] ) && ! empty( $_POST['alarnd__group_id'] )) ? $_POST['alarnd__group_id'] : '';
 
@@ -925,6 +991,7 @@ class ML_Ajax {
 
                     // check if product_id already exists in cart with color_hex_code & size
                     // then do not add to the cart but add quantity that already cart item
+                    $skip_item = false;
                     foreach ( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
                         if ( 
                             $cart_item['product_id'] === $product_id &&
@@ -935,20 +1002,25 @@ class ML_Ajax {
                         ) {
                             WC()->cart->cart_contents[$cart_item_key]['quantity'] += $i_qty;
                             WC()->cart->cart_contents[$cart_item_key]['alarnd_quantity'] += $i_qty;
+                            $skip_item = true;
                             continue;
                        }
                     }
-                
-                    $cart_item_meta = array();
-                    $cart_item_meta['alarnd_color'] = $colors[$color_key]['title'];
-                    $cart_item_meta['alarnd_color_hex'] = $colors[$color_key]['color_hex_code'];
-                    $cart_item_meta['alarnd_size'] = $i_size;
-                    $cart_item_meta['alarnd_group_qty'] = $get_total_qtys;
-                    $cart_item_meta['alarnd_quantity'] = $i_qty;
-                    $cart_item_meta['alarnd_group_id'] = $alarnd__group_id;
-
-                    // error_log( print_r( $cart_item_meta, true ) );
-                    WC()->cart->add_to_cart( $product->get_id(), (int) $i_qty, '', '', $cart_item_meta );
+                    
+                    if( true !== $skip_item ) {
+                        $cart_item_meta = array();
+                        $cart_item_meta['alarnd_color'] = $colors[$color_key]['title'];
+                        $cart_item_meta['alarnd_color_hex'] = $colors[$color_key]['color_hex_code'];
+                        $cart_item_meta['alarnd_color_key'] = $color_key;
+                        $cart_item_meta['alarnd_size'] = $i_size;
+                        $cart_item_meta['alarnd_group_qty'] = $get_total_qtys;
+                        $cart_item_meta['alarnd_quantity'] = $i_qty;
+                        $cart_item_meta['user_id'] = $user_id;
+                        $cart_item_meta['alarnd_group_id'] = $alarnd__group_id;
+    
+                        // error_log( print_r( $cart_item_meta, true ) );
+                        WC()->cart->add_to_cart( $product->get_id(), (int) $i_qty, '', '', $cart_item_meta );
+                    }
                 }
             }
             

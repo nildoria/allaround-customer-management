@@ -1,22 +1,24 @@
 <?php
 
 get_header(); // Include header template
+
+$logged_user = wp_get_current_user();
+$logged_user_id = $logged_user->ID;
+
+// Get the current author's username from the URL
+$current_author = get_query_var('author_name');
+
+// Get the author's user data
+$get_current_puser = get_user_by('login', $current_author);        
+$current_user_id = $get_current_puser->ID;
 ?>
 
 <div id="primary" class="content-area aum_auth_page">
-    <main id="main" class="site-main" role="main">    
+    <main id="main" class="site-main" role="main" data-user_id="<?php echo esc_attr( $current_user_id ); ?>">    
 
         <?php
 
-        $logged_user = wp_get_current_user();
-        $logged_user_id = $logged_user->ID;
-
-        // Get the current author's username from the URL
-        $current_author = get_query_var('author_name');
-
-        // Get the author's user data
-        $get_current_puser = get_user_by('login', $current_author);        
-        $current_user_id = $get_current_puser->ID;
+        
 
         $token = get_field('token', "user_{$current_user_id}");
         $phone = ml_get_user_phone($current_user_id);
@@ -200,7 +202,7 @@ get_header(); // Include header template
                     foreach ($terms as $term) {
                         echo 'category-' . $term->term_id . ' ';
                     }
-                    echo '" data-product-id="' . esc_attr($product->get_id()) . '">';
+                    echo '" data-product_type="'.esc_attr($product->get_type()).'" data-product-id="' . esc_attr($product->get_id()) . '">';
                     
                     // Product Thumbnail
                     echo '<div class="product-thumbnail">';
@@ -230,7 +232,7 @@ get_header(); // Include header template
 
                     // Price
 
-                    echo '<p>' . $product->get_price_html() . '</p>';
+                    echo '<p class="mini_productCard_price">' . $product->get_price_html() . '</p>';
                     
                     // Buttons
                     echo '<div class="product-buttons">';
@@ -318,7 +320,7 @@ get_header(); // Include header template
             </div>
         </div>
 
-        <div class="alarnd--custom-checkout-section" id="ministore--custom-checkout-section">
+        <div class="alarnd--custom-checkout-section<?php echo WC()->cart->is_empty() ? ' ml_pay_hidden' : ''; ?>" id="ministore--custom-checkout-section">
 
             <?php if( is_user_logged_in() ) : ?>
                 <?php

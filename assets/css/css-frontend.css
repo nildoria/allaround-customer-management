@@ -352,6 +352,9 @@ span.shipping-title {
 .woocommerce .woocommerce-notices-wrapper {
   display: none !important;
 }
+.mini_productCard_price {
+  direction: ltr;
+}
 .woocommerce button.button[name="update_cart"] {
   background-color: #66de93;
   color: #1a1a1a;
@@ -683,10 +686,15 @@ h3#order_review_heading {
 .allaround--slick-carousel .slick-slide img {
   max-height: inherit !important;
 }
+.tokenized_inv_name_cont {
+    font-size: 14px;
+}
 .alarnd--payout-col.alarnd--details-previewer .tokenized_user_name {
-  font-size: 14px;
-  font-weight: 700;
-  margin-bottom: 6px;
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 0;
+    display: inline-block;
+    margin-right: 5px;
 }
 nav.woocommerce-MyAccount-navigation
   ul
@@ -1034,6 +1042,10 @@ button.xoo-ml-login-otp-btn.ml_add_loading.button.btn {
 }
 .alarnd--load-overlay .alarnd--overlay.loading {
   opacity: 1 !important;
+}
+
+.alarnd--custom-checkout-section.ml_pay_hidden {
+  display: none;
 }
 
 /* New addition */
