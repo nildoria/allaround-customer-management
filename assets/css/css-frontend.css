@@ -1586,7 +1586,6 @@ text#svgnameback {
 }
 form#customerDetails {
   position: relative;
-  top: -20px;
 }
 .alarnd--woocommerce-checkout-page.alarnd--default-visible
   .allaround_carf_form-userDetail {
@@ -1656,7 +1655,7 @@ button.button.alarnd--regular-button[disabled],
 
 .alarnd--details-previewer {
   padding-bottom: 80px;
-  margin-top: -10px;
+  padding-top: 10px;
 }
 
 .alarnd--user-address-wrap {
@@ -1728,6 +1727,36 @@ img.verified_tick {
   width: 30px;
 }
 
+/* Checkout Saved UserInfo fixes */
+.alrnd--shipping_address_tokenized.allrnd_keepSaved_userData, .alarnd--woocommerce-checkout-page .alrnd--shipping_address_tokenized {
+    opacity: 1;
+    position: absolute;
+}
+.alarnd--card-details-wrap.pix_all_user_data_filled .allaround_carf_form-userDetail, .allaround--card-form.pix_all_user_data_filled .allaround_carf_form-userDetail {
+    flex: 0 0 0;
+    width: 0;
+    height: 0;
+    opacity: 0;
+    visibility: hidden;
+}
+.alarnd--card-details-wrap.pix_all_user_data_filled .allaround_carf_form-cardDetail {
+    min-height: 412px;
+}
+.alarnd--card-details-wrap.pix_all_user_data_filled {
+    min-height: 450px;
+}
+.alrnd--shipping_address_tokenized.allrnd_keepSaved_userData form#customerDetails {
+    max-width: 96%;
+}
+form.allaround--card-form .form-input.form-submit-container {
+	margin-bottom: 0;
+	margin-left: auto;
+	margin-right: auto;
+	margin-top: 40px;
+}
+.alarnd--woocommerce-checkout-page.alarnd--default-visible {
+	position: relative;
+}
 /*For pad/Tablet Layout*/
 @media (max-width: 991px) {
   .site-header .header-inner,

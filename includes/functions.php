@@ -1151,7 +1151,7 @@ function alarnd_single_checkout($user_id = false) {
                     <?php echo allaround_customer_form($is_disabled); ?>
                 </div>
 
-                <div class="alarnd--card-details-wrap">
+                <div class="alarnd--card-details-wrap <?php echo $is_disabled === false ? 'pix_all_user_data_filled' : ''; ?>">
                     <?php echo allaround_card_form(); ?>
                 </div>
             </div>
@@ -1194,9 +1194,44 @@ function allaround_card_form($user_id = '') {
     $email = $the_user->user_email;
     error_log("email $email");
     
-    ?>
+    
+    $is_disabled = false;
+    if(
+        empty( $phone ) ||
+        empty( $billing_address ) ||
+        empty( $city ) ||
+        empty( $invoice ) ||
+        empty( $name ) ||
+        empty( $email )
+    ) {
+        $is_disabled = true;
+    }
 
-    <form action="" id="cardDetailsForm" class="allaround--card-form cardForm-wCard" data-user_id="<?php echo $user_id; ?>">
+    ?>
+    <?php if( !is_user_logged_in() ) : ?>
+    <div class="alrnd--shipping_address_tokenized">
+        <?php if( $is_disabled === false ) : ?>
+        <div id="alarnd__details_preview">
+            <div class="alarnd--payout-col alarnd--details-previewer">
+                <h3>כתובת למשלוח</h3>
+                <div class="tokenized_inv_name_cont"><?php esc_html_e( 'חשבונית על שם', 'hello-elementor' ); ?>:<p class="tokenized_user_name"><?php echo $invoice ?></p></div>
+
+                <div class="alarnd--user-address">
+                    <div class="alarnd--user-address-wrap">
+                        <?php echo ! empty( $billing_address ) ? '<p>'. esc_html( $billing_address ) .'</p>' : ''; ?>
+                        <?php echo ! empty( $phone ) ? '<p>'. esc_html( $phone ) .'</p>' : ''; ?>
+                        <?php echo ! empty( $city ) ? '<p>'. esc_html( $city ) .'</p>' : ''; ?>
+                    </div>
+                    <span class="alarnd--user_address_edit">שינוי</span>
+                </div>
+            </div>
+        </div>
+        <?php endif; ?>
+        <?php echo allaround_customer_form($is_disabled); ?>
+    </div>
+    <?php endif; ?>
+
+    <form action="" id="cardDetailsForm" class="allaround--card-form cardForm-wCard <?php echo $is_disabled === false ? 'pix_all_user_data_filled' : ''; ?>" data-user_id="<?php echo $user_id; ?>">
 
         <div class="allaround_carf_form-fields">
             <div class="allaround_carf_form-cardDetail">

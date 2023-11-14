@@ -456,7 +456,7 @@ jQuery(document).ready(function ($) {
     $("#customerDetails").slideDown(function () {
       $(this).find(".form-message").html("").slideUp();
     });
-    $(".alarnd--single-payout-submit").slideUp();
+    // $(".alarnd--single-payout-submit").slideUp();
 
     return false;
   });
@@ -467,7 +467,7 @@ jQuery(document).ready(function ($) {
       $(this).find(".form-message").html("").slideUp();
     });
     $("#alarnd__details_preview").slideDown();
-    $(".alarnd--single-payout-submit").slideDown();
+    // $(".alarnd--single-payout-submit").slideDown();
 
     return false;
   });
@@ -484,15 +484,17 @@ jQuery(document).ready(function ($) {
     var current = $(this);
 
     if ("woocommerce" === current.val()) {
-      $(".alrnd--shipping_address_tokenized").hide();
+      // $(".alrnd--shipping_address_tokenized").hide();
       $(".alarnd--single-payout-submit").hide();
       $(".alarnd--card-details-wrap").show();
       $(".payment-info-display").show();
+      $(".alrnd--shipping_address_tokenized").addClass("allrnd_keepSaved_userData");
     } else if ("tokenizer" === current.val()) {
       $(".alarnd--card-details-wrap").hide();
       $(".payment-info-display").hide();
-      $(".alrnd--shipping_address_tokenized").show();
+      // $(".alrnd--shipping_address_tokenized").show();
       $(".alarnd--single-payout-submit").show();
+      $(".alrnd--shipping_address_tokenized").removeClass("allrnd_keepSaved_userData");
     }
     return false;
   });
