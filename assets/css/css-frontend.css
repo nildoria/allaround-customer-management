@@ -682,7 +682,37 @@ h3#order_review_heading {
   padding-bottom: 5px !important;
   font-weight: 500;
 }
+span.view_details_not_available {
+    display: block;
+    height: 23.5px;
+}
 
+.no_color_text {
+    padding: 8px 0 12px;
+}
+.no_color_text span {
+    font-size: 14px;
+    font-weight: 400;
+    padding: 5px 27px 5px 10px;
+    background-color: rgba(38, 115, 231, 0.1);
+    border-radius: 7px;
+    color: #003380;
+    display: inline-block;
+    position: relative;
+}
+.no_color_text span::after {
+    content: "";
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    right: 6px;
+    top: 50%;
+    background-image: url(../images/info-icon.svg);
+    background-repeat: no-repeat;
+    background-size: contain;
+    transform: translateY(-50%);
+    background-position: center center;
+}
 .allaround--slick-carousel .slick-slide img {
   max-height: inherit !important;
 }

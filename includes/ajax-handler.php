@@ -132,7 +132,11 @@ class ML_Ajax {
                         <?php endforeach; ?>
                     </div>
                 </div>
-                <?php
+                <?php else :?>
+                    <div class="no_color_text">
+                        <span>זמין בצבע אחד</span>
+                    </div>
+                <?php 
                 endif;
 
                 // Price
@@ -143,6 +147,8 @@ class ML_Ajax {
                 echo '<div class="product-buttons">';
                 if( ! empty( $discount_steps ) || ! empty( $pricing_description ) ) {
                     echo '<a href="#alarnd__pricing_info-'. $product->get_id() .'" class="view-details-button alarnd_view_pricing_cb" data-product_id="'. $product->get_id() .'">כמות, מחיר ומבחר</a>';
+                } else {
+                    echo '<span class="view_details_not_available"></span>';
                 }
                 echo '<button class="quick-view-button ml_add_loading ml_trigger_details button" data-product-id="' . esc_attr($product->get_id()) . '">'.esc_html( $product->single_add_to_cart_text() ).'</button>';
                 echo '</div>';
