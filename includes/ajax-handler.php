@@ -516,13 +516,7 @@ class ML_Ajax {
             wp_die();
         }
         
-        if ( ! is_user_logged_in() ) {
-            wp_send_json_error( array(
-                "message" => "User need to logged in."
-            ) );
-            wp_die();
-        }
-
+        $user_id = isset( $_POST['user_id'] ) && ! empty( $_POST['user_id'] ) ? intval( $_POST['user_id'] ) : '';
         $cardholderName = isset( $_POST['cardholderName'] ) && ! empty( $_POST['cardholderName'] ) ? sanitize_text_field( $_POST['cardholderName'] ) : '';
         $cardholderPhone = isset( $_POST['cardholderPhone'] ) && ! empty( $_POST['cardholderPhone'] ) ? sanitize_text_field( $_POST['cardholderPhone'] ) : '';
         $cardholderCity = isset( $_POST['cardholderCity'] ) && ! empty( $_POST['cardholderCity'] ) ? sanitize_text_field( $_POST['cardholderCity'] ) : '';
@@ -535,8 +529,7 @@ class ML_Ajax {
         
         $cardNumber = str_replace(' ', '', $cardNumber);
 
-        $current_user = wp_get_current_user();
-        $current_user_id = $current_user->ID;
+        $current_user_id = $user_id;
 
         if( 
             empty( $cardholderName ) ||

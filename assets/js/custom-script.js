@@ -254,12 +254,17 @@ jQuery(document).ready(function ($) {
 
         var getData = $(form).serializeArray(),
           messagWrap = $(form).find(".form-message"),
+          user_id = $('#main').data('user_id'),
           button = $(form).find(".allaround_card_details_submit");
 
         getData.push(
           {
             name: "action",
             value: "ml_send_card",
+          },
+          {
+            name: "user_id",
+            value: user_id,
           },
           {
             name: "nonce",
@@ -339,7 +344,7 @@ jQuery(document).ready(function ($) {
       }
     }
 
-    $(document).on("input", "#cardDetailsForm input", toggleSubmitButtonCard);
+    // $(document).on("input", "#cardDetailsForm input", toggleSubmitButtonCard);
   }
 
   // Use JavaScript to strip non-numeric characters
@@ -484,7 +489,7 @@ jQuery(document).ready(function ($) {
     var current = $(this);
 
     if ("woocommerce" === current.val()) {
-      // $(".alrnd--shipping_address_tokenized").hide();
+    //   $(".alrnd--shipping_address_tokenized").hide();
       $(".alarnd--single-payout-submit").hide();
       $(".alarnd--card-details-wrap").show();
       $(".payment-info-display").show();
@@ -492,7 +497,7 @@ jQuery(document).ready(function ($) {
     } else if ("tokenizer" === current.val()) {
       $(".alarnd--card-details-wrap").hide();
       $(".payment-info-display").hide();
-      // $(".alrnd--shipping_address_tokenized").show();
+    //   $(".alrnd--shipping_address_tokenized").show();
       $(".alarnd--single-payout-submit").show();
       $(".alrnd--shipping_address_tokenized").removeClass("allrnd_keepSaved_userData");
     }
@@ -1024,7 +1029,7 @@ jQuery(document).ready(function ($) {
 
   $(document).on(
     "click",
-    ".product-item-details h2.product-title, .product-thumbnail",
+    ".product-item-details h3.product-title, .product-thumbnail",
     function (e) {
       e.preventDefault();
 

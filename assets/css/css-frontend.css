@@ -1727,7 +1727,7 @@ img.verified_tick {
   width: 30px;
 }
 
-/* Checkout Saved UserInfo fixes */
+/* Checkout Saved UserInfo CSS */
 .alrnd--shipping_address_tokenized.allrnd_keepSaved_userData, .alarnd--woocommerce-checkout-page .alrnd--shipping_address_tokenized {
     opacity: 1;
     position: absolute;
@@ -1757,6 +1757,7 @@ form.allaround--card-form .form-input.form-submit-container {
 .alarnd--woocommerce-checkout-page.alarnd--default-visible {
 	position: relative;
 }
+
 /*For pad/Tablet Layout*/
 @media (max-width: 991px) {
   .site-header .header-inner,

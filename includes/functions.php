@@ -1432,7 +1432,7 @@ function allaround_card_form($user_id = '') {
         <div class="form-row">
             <div class="form-label"></div>
             <div class="form-input form-submit-container">
-                <button type="submit" class="ml_add_loading button allaround_card_details_submit" disabled><?php esc_html_e("התקדם לנקודת הביקורת", "mini-store" ); ?></button>
+                <button type="submit" class="ml_add_loading button allaround_card_details_submit"><?php esc_html_e("התקדם לנקודת הביקורת", "mini-store" ); ?></button>
             </div>
         </div>
         <div class="form-message"></div>
