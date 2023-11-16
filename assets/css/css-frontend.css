@@ -1783,17 +1783,19 @@ section.cart_loader_section {
     z-index: 9;
     width: 100%;
     min-height: 365px;
+    /* display: none; */
 }
 .shipping_side {
     width: 300px;
     background: #fff;
     border-radius: 11px;
+    padding: 40px 30px 15px;
 }
 aside.cart_loader_aside {
     flex: 0 0 68%;
     display: flex;
     flex-direction: column;
-    max-width: 679px;
+    max-width: 680px;
     padding: 10px 25px;
     background: #fff;
     border-radius: 11px;
@@ -1859,6 +1861,29 @@ section.cart_loader_section .shinny::before{
   transform:skew(5deg);
   animation:shine infinite 1.5s ease-in-out;
 }
+section.cart_loader_section .cartLoader__total {
+    margin-top: 37px;
+    margin-bottom: 15px;
+    max-width: 180px;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+section.cart_loader_section .cartLoader__total .info__text_two {
+    width: 80%;
+    margin-top: 0;
+}
+section.cart_loader_section .cartLoader_button {}
+section.cart_loader_section .cartLoader_button .image {
+    height: 48px;
+    width: calc(100% + 20px);
+    border-radius: 11px;
+    margin-bottom: 0;
+    margin-right: -10px;
+}
 
 
 @keyframes shine {
@@ -1869,6 +1894,9 @@ section.cart_loader_section .shinny::before{
   to{
     transform:skew(45deg) translateX(200%);
   }
+}
+.woocommerce .blockUI.blockOverlay::before {
+  display: none;
 }
 
 /*For pad/Tablet Layout*/
