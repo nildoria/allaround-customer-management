@@ -1758,6 +1758,119 @@ form.allaround--card-form .form-input.form-submit-container {
 	position: relative;
 }
 
+/* Cart Section Loader CSS */
+div#cart_loader {
+  /* display: none; */
+  position: relative;
+}
+.alarnd--cart-wrapper-inner.loading div#cart_loader {
+  /* z-index: 9;
+    min-height: 365px;
+  position: absolute; */
+  display: block;
+  min-height: 365px;
+
+}
+section.cart_loader_section {
+    display: flex;
+    padding: 10px 0px;
+    max-width: 1000px;
+    margin: 0px auto;
+    justify-content: space-between;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 9;
+    width: 100%;
+    min-height: 365px;
+}
+.shipping_side {
+    width: 300px;
+    background: #fff;
+    border-radius: 11px;
+}
+aside.cart_loader_aside {
+    flex: 0 0 68%;
+    display: flex;
+    flex-direction: column;
+    max-width: 679px;
+    padding: 10px 25px;
+    background: #fff;
+    border-radius: 11px;
+}
+
+section.cart_loader_section .info__box {
+    background: #fff;
+    padding: 10px 20px;
+    margin: 5px 5px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.12),
+            0 2px 4px 0 rgba(0,0,0,0.08);
+    flex-direction: row-reverse;
+}
+
+
+section.cart_loader_section .info__text_one{
+  width:100%;
+  height:20px;
+  border-radius:4px;
+}
+
+section.cart_loader_section .info__text_two{
+  width:70%;
+  height:20px;
+  border-radius:4px;
+}
+
+section.cart_loader_section .info__text_three{
+  width:85%;
+  height:20px;
+  border-radius:4px;
+}
+
+section.cart_loader_section .left_box{
+  flex:0 0 70%;
+  margin-right:auto;
+}
+
+section.cart_loader_section .image {
+    height: 90px;
+    width: 125px;
+    border-radius: 25px;
+}
+
+section.cart_loader_section .shinny{
+  background:lightgray;
+  margin:10px 0px;
+  position:relative;
+  overflow:hidden;
+}
+
+section.cart_loader_section .shinny::before{
+  content:"";
+  position:absolute;
+  top:0;
+  left:0;
+  width:100%;
+  background:rgba(255,255,255,0.2);
+  height:100%;
+  transform:skew(5deg);
+  animation:shine infinite 1.5s ease-in-out;
+}
+
+
+@keyframes shine {
+  from {
+  transform:skew(45deg) translateX(0%);
+  }
+  
+  to{
+    transform:skew(45deg) translateX(200%);
+  }
+}
+
 /*For pad/Tablet Layout*/
 @media (max-width: 991px) {
   .site-header .header-inner,

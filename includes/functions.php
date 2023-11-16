@@ -190,7 +190,9 @@ function woocommerce_header_add_to_cart_fragment( $fragments ) {
 
     echo '<div class="alarnd--cart-wrapper-inner alarnd--full-width">';
         echo '<h2>העגלה שלך</h2>';
+        echo '<div id="cart_loader">';
          echo do_shortcode('[woocommerce_cart]');
+        echo '</div>';
     echo '</div>';
 
 	$fragments['div.alarnd--cart-wrapper-inner'] = ob_get_clean();

@@ -821,13 +821,19 @@ jQuery(document).ready(function ($) {
         // It's a cart update AJAX request
         $('.alarnd--cart-wrapper-inner').addClass('loading');
         console.log("started update");
+
+        // Append HTML code
+        var cartLoaderHTML = '<section class="cart_loader_section"><aside class="cart_loader_aside"><div class="info__box"><div class="left_box"><p class="shinny info__text_one"></p><p class="shinny info__text_two"></p><p class="shinny info__text_three"></p></div><div class="right_box"><div class="shinny image"></div></div></div><div class="info__box"><div class="left_box"><p class="shinny info__text_one"></p><p class="shinny info__text_two"></p><p class="shinny info__text_three"></p></div><div class="right_box"><div class="shinny image"></div></div></div></aside><div class="shipping_side"></div></section>';
+        $('#cart_loader').append(cartLoaderHTML);
     }
   });
 
   $(document.body).on('updated_wc_div', function(){
       // Add your class to the element you want to target
-      $('.alarnd--cart-wrapper-inner').removeClass('loading');
-      console.log("completed update");
+      setTimeout(function () {
+        $('.alarnd--cart-wrapper-inner').removeClass('loading');
+        console.log("completed update");
+      }, 1000);
   });
 
   // Listen for the WooCommerce AJAX complete event
