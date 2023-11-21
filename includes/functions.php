@@ -860,9 +860,9 @@ function isColorLightOrDark($hexColor) {
 
     // Compare the luminance to the threshold
     if ($luminance > $threshold) {
-        return 'light';
-    } else {
         return 'dark';
+    } else {
+        return 'light';
     }
 }
 

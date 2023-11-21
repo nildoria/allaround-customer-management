@@ -1212,6 +1212,27 @@ jQuery(document).ready(function ($) {
                 });
                 form_variation.trigger("check_variations");
                 form_variation.trigger("reset_image");
+
+                // Apply color adjustment to elements with class .alarnd--opt-color span
+                $(".alarnd--opt-color span").each(function () {
+                    var rgb = $(this).css("backgroundColor");
+                    var colors = rgb.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/);
+
+                    var r = colors[1];
+                    var g = colors[2];
+                    var b = colors[3];
+
+                    var o = Math.round(
+                        (parseInt(r) * 299 + parseInt(g) * 587 + parseInt(b) * 114) / 1000
+                    );
+
+                    if (o > 125) {
+                        $(this).css("color", "black");
+                    } else {
+                        $(this).css("color", "white");
+                    }
+                });
+
                 $(".alarnd_trigger_details_modal").removeClass("ml_loading");
               },
               close: function () {
@@ -1270,4 +1291,5 @@ jQuery(document).ready(function ($) {
       );
     }
   );
+
 });
