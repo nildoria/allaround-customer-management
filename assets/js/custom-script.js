@@ -927,6 +927,29 @@ jQuery(document).ready(function ($) {
     }
   );
 
+  $(document).on("click", ".alarnd_view_pricing_cb", function () {
+    // Check for the condition and add class accordingly
+    $(".alarnd--pricing-wrapper-new").each(function () {
+        var $pricingWrapper = $(this);
+        var $pricingColumns = $pricingWrapper.find(".alarn--pricing-column");
+
+        if ($pricingColumns.length === 2) {
+            $pricingWrapper.closest(".alarnd--info-modal").addClass("mini-no-gallery");
+        } else if ($pricingColumns.length === 1) {
+            $pricingWrapper.closest(".alarnd--info-modal").addClass("mini-one-pricing-column");
+            $pricingColumns.css({
+                'flex': '0 0 100%',
+            });
+            $pricingWrapper.closest(".alarnd--info-modal").css({
+                'max-width': '410px',
+                'min-width': 'auto'
+            });
+        }
+    });
+
+  });
+
+
   function initi_prive_view_modal() {
     var isApplicable = null;
 

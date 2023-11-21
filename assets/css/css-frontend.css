@@ -362,6 +362,9 @@ span.shipping-title {
 .woocommerce button.button[name="update_cart"]:hover, .woocommerce #respond input#submit:hover, .woocommerce a.button:hover, .woocommerce button.button:hover, .woocommerce input.button:hover {
   background-color: #74e49f !important;
 }
+table tbody > tr:nth-child(odd) > td, table tbody > tr:nth-child(odd) > th {
+    background-color: #fff;
+}
 td.product-quantity .quantity input[type="number"] {
   padding: 6px 5px;
 }
@@ -831,7 +834,19 @@ ol.mlCustomDots a {
   display: table;
   clear: both;
 }
-
+.alarnd--info-modal.mini-no-gallery {
+  max-width: 650px;
+}
+.alarnd--info-modal.mini-no-gallery .alarn--pricing-column.alarn--pricing-column-desc {
+  flex: 0 0 55%;
+}
+.alarnd--info-modal.mini-no-gallery .alarn--pricing-column.alarn--pricing-column-chart {
+  flex: 0 0 45%;
+}
+.alarnd--info-modal.mini-one-pricing-colum {
+  max-width: 410px;
+  min-width: auto;
+}
 /* Apply styles to .alarnd--pricing-wrapper-new */
 .alarnd--pricing-wrapper-new {
   display: flex; /* Use flexbox to create a flex container */
