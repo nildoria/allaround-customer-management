@@ -257,6 +257,7 @@ $current_user_id = $get_current_puser->ID;
 
                                     <?php echo ml_gallery_carousels($product->get_id(), $current_user_id); ?>
 
+                                    <div class="pricingDescSteps">
                                     <?php if( ! empty( $pricing_description ) ) : ?>
                                     <div class="alarn--pricing-column alarn--pricing-column-desc">
                                         <?php echo allround_get_meta( $pricing_description ); ?>
@@ -264,11 +265,9 @@ $current_user_id = $get_current_puser->ID;
                                     <?php endif; ?>
                                     <?php if( ! empty( $discount_steps ) ) : ?>
                                     <div class="alarn--pricing-column alarn--pricing-column-chart">
+                                        <h5>תמחור כמות</h5>
                                         <div class="alarn--price-chart">
                                             <div class="alarnd--price-chart-price">
-                                                <div class="alarnd--price-chart-item">
-                                                    <span>כַּמוּת</span>
-                                                </div>
                                                 <?php 
                                                 $index = 0;
                                                 foreach( $discount_steps as $step ) :
@@ -277,28 +276,30 @@ $current_user_id = $get_current_puser->ID;
 
                                                 ?>
                                                 <div class="alarnd--price-chart-item">
-                                                    <span><?php echo esc_html( $qty); ?></span>
+                                                    <span class="price_step_price"><?php echo $step['amount'] == 0 ? wc_price($product->get_regular_price(), array('decimals' => 0)) : wc_price($step['amount'], array('decimals' => 0)); ?></span>
+                                                    <span class="price_step_qty">כמות: <span><?php echo esc_html( $qty); ?></span></span>
                                                 </div>
                                                 <?php $index++; endforeach; ?>
                                             </div>
-                                            <div class="alarnd--price-chart-qty">
+                                            <!-- <div class="alarnd--price-chart-qty">
                                                 <div class="alarnd--price-chart-item">
                                                     <span>מחיר (כולל מע"מ)</span>
                                                 </div>
-                                                <?php foreach( $discount_steps as $step ) : ?>
+                                                <//?php foreach( $discount_steps as $step ) : ?>
                                                 <div class="alarnd--price-chart-item">
-                                                    <span><?php echo $step['amount'] == 0 ? wc_price($product->get_regular_price(), array('decimals' => 0)) : wc_price($step['amount'], array('decimals' => 0)); ?></span>
+                                                    <span><//?php echo $step['amount'] == 0 ? wc_price($product->get_regular_price(), array('decimals' => 0)) : wc_price($step['amount'], array('decimals' => 0)); ?></span>
                                                 </div>
-                                                <?php endforeach; ?>
-                                            </div>
+                                                <//?php endforeach; ?>
+                                            </div> -->
                                             
                                         </div>
                                     </div>
                                     <?php endif; ?>
-                                </div>
 
-                                <div class="modal-bottom-btn">
-                                    <button type="button" class="alarnd_trigger_details_modal ml_add_loading" data-product_id="<?php echo $product->get_id(); ?>"><?php esc_html_e( 'הוסף לעגלה שלך', 'hello-elementor' ); ?></button>
+                                    <div class="modal-bottom-btn">
+                                        <button type="button" class="alarnd_trigger_details_modal ml_add_loading" data-product_id="<?php echo $product->get_id(); ?>"><?php esc_html_e( 'הוסף לעגלה שלך', 'hello-elementor' ); ?></button>
+                                    </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>

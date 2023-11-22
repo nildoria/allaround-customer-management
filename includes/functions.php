@@ -260,6 +260,7 @@ function acf_select_products_choices_cb( $field ) {
 
 }
 add_filter( 'acf/load_field/name=selected_products', 'acf_select_products_choices_cb' );
+add_filter( 'acf/load_field/name=disable_product', 'acf_select_products_choices_cb' );
 add_filter( 'acf/load_field/name=default_products', 'acf_select_products_choices_cb' );
 
 add_action( 'alarnd__modal_cart', 'woocommerce_template_single_add_to_cart' );
@@ -435,12 +436,12 @@ function ml_gallery_carousels( $product_id, $user_id ) {
                 echo '<li><a href="#" data-slide="'.$key.'" style="background-color: '.$gallery['color'].'"></a></li>';
             }
             echo '</ol>';
-            echo '<div class="mlHiddenGallery">';
-            foreach ($galleries as $key => $gallery) {
-                $full_thumbnail = ml_get_gallery_thumbnail($key, $gallery['attachment_id'], $user_id, $product_id, true);
-                echo '<a class="mlGallerySingle" href="'.$full_thumbnail.'" data-title="'.$gallery['title'].'"></a>';
-            }
-            echo '</div>';
+            //echo '<div class="mlHiddenGallery">';
+            // foreach ($galleries as $key => $gallery) {
+            //     $full_thumbnail = ml_get_gallery_thumbnail($key, $gallery['attachment_id'], $user_id, $product_id, true);
+            //     echo '<a class="mlGallerySingle" href="'.$full_thumbnail.'" data-title="'.$gallery['title'].'"></a>';
+            // }
+            //echo '</div>';
         echo '</div>';
     }
 }
@@ -689,6 +690,7 @@ function ml_refactor_selects( $selections ) {
 function ml_get_user_products( $user_id ) {
     $default_products = get_field('default_products', 'option');
     $selected_product_ids = get_field('selected_products', "user_{$user_id}");
+    $disable_product = get_field('disable_product', "user_{$user_id}");
 
     if( empty( $default_products ) && empty( $selected_product_ids ) )
         return [];
@@ -720,6 +722,18 @@ function ml_get_user_products( $user_id ) {
                 $uniqueValues[$item['value']] = true;
             }
         }
+    }
+
+    if( ! empty( $disable_product ) ) {
+        // Extract values from the second array
+        $disable_product_values = array_column($disable_product, 'value');
+
+        // Filter the results array
+        $filtered_array = array_filter($results, function ($item) use ($disable_product_values) {
+            return !in_array($item['value'], $disable_product_values);
+        });
+
+        return $filtered_array;
     }
     
     return $results;
@@ -1141,9 +1155,13 @@ function alarnd_single_checkout($user_id = false) {
 
                             <div class="alarnd--user-address">
                                 <div class="alarnd--user-address-wrap">
-                                    <?php echo ! empty( $billing_address ) ? '<p>'. esc_html( $billing_address ) .'</p>' : ''; ?>
+                                    <?php echo ! empty( $display_name ) ? '<p>'. esc_html( $display_name ) .'</p>' : ''; ?>
                                     <?php echo ! empty( $phone ) ? '<p>'. esc_html( $phone ) .'</p>' : ''; ?>
-                                    <?php echo ! empty( $city ) ? '<p>'. esc_html( $city ) .'</p>' : ''; ?>
+                                    <?php echo ! empty( $user_email ) ? '<p>'. esc_html( $user_email ) .'</p>' : ''; ?>
+                                    <p>
+                                    <?php echo ! empty( $billing_address ) ? '<span>'. esc_html( $billing_address ) .', </span>' : ''; ?>
+                                    <?php echo ! empty( $city ) ? '<span>'. esc_html( $city ) .'</span>' : ''; ?>
+                                    </p>
                                 </div>
                                 <span class="alarnd--user_address_edit">שינוי</span>
                             </div>
@@ -1220,9 +1238,13 @@ function allaround_card_form($user_id = '') {
 
                 <div class="alarnd--user-address">
                     <div class="alarnd--user-address-wrap">
-                        <?php echo ! empty( $billing_address ) ? '<p>'. esc_html( $billing_address ) .'</p>' : ''; ?>
+                        <?php echo ! empty( $name ) ? '<p>'. esc_html( $name ) .'</p>' : ''; ?>
                         <?php echo ! empty( $phone ) ? '<p>'. esc_html( $phone ) .'</p>' : ''; ?>
-                        <?php echo ! empty( $city ) ? '<p>'. esc_html( $city ) .'</p>' : ''; ?>
+                        <?php echo ! empty( $email ) ? '<p>'. esc_html( $email ) .'</p>' : ''; ?>
+                        <p>
+                        <?php echo ! empty( $billing_address ) ? '<span>'. esc_html( $billing_address ) .', </span>' : ''; ?>
+                        <?php echo ! empty( $city ) ? '<span>'. esc_html( $city ) .'</span>' : ''; ?>
+                        </p>
                     </div>
                     <span class="alarnd--user_address_edit">שינוי</span>
                 </div>
@@ -1249,7 +1271,7 @@ function allaround_card_form($user_id = '') {
                     <div class="form-row">
                         <div class="form-label"><?php esc_html_e("Card Number", "mini-store" ); ?></div>
                         <div class="form-input">
-                            <input type="text" id="cardNumber" name="cardNumber" placeholder="<?php esc_attr_e("1111 1111 1111 1111", "mini-store" ); ?>" dir="ltr" required>
+                            <input type="text" id="cardNumber" name="cardNumber" maxlength="19" placeholder="<?php esc_attr_e("1111 1111 1111 1111", "mini-store" ); ?>" dir="ltr" required>
                             <svg id="ccicon" class="ccicon" width="750" height="471" viewBox="0 0 750 471" version="1.1" xmlns="http://www.w3.org/2000/svg"
                             xmlns:xlink="http://www.w3.org/1999/xlink">
 
@@ -1260,13 +1282,13 @@ function allaround_card_form($user_id = '') {
                         <div class="form-row">
                             <div class="form-label"><?php esc_html_e("Expiration Date", "mini-store" ); ?></div>
                             <div class="form-input">
-                                <input type="text" inputmode="numeric" id="expirationDate" name="expirationDate" placeholder="<?php esc_attr_e("MM/YY", "mini-store" ); ?>" required>
+                                <input type="text" inputmode="numeric" id="expirationDate" maxlength="5" name="expirationDate" placeholder="<?php esc_attr_e("MM/YY", "mini-store" ); ?>" required>
                             </div>
                         </div>
                         <div class="form-row">
                             <div class="form-label"><?php esc_html_e("CVC", "mini-store" ); ?></div>
                             <div class="form-input">
-                                <input type="number" id="cvvCode" name="cvvCode" placeholder="<?php esc_attr_e("CVC", "mini-store" ); ?>" required>
+                                <input type="number" id="cvvCode" maxlength="3" name="cvvCode" placeholder="<?php esc_attr_e("CVC", "mini-store" ); ?>" required>
                                 <div class="cvc-info tooltip-left" data-tooltip="3 סיטרכה בגב תורפס">
                                     <img src="<?php echo esc_url($cvc_info_path); ?>" alt="CVC Info" loading="lazy">
                                 </div>

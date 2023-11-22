@@ -68,7 +68,7 @@ class ALRN_Genrator {
             $max_dimension = 600; // Maximum dimension for the resized image
 
             $resize_data = array(
-                "width" => 400,
+                "width" => 600,
                 "original_height" => $original_height,
                 "original_width" => $original_width,
                 "original_image" => $original_image,
