@@ -179,6 +179,42 @@ h3.miniStore-promo-title {
     color: #2673E7;
     margin: 0 0 5px;
 }
+.iconLibraryTooltip {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+}
+
+.iconLibraryTooltip span.tooltipContainer {
+    display:none;
+}
+
+.iconLibraryTooltip:hover span.tooltipContainer {
+    display:block;
+    position:fixed;
+    overflow:hidden;
+}
+
+.iconLibraryTooltip .tooltipContainer {
+    visibility: hidden;
+    width: 400px;
+    text-align: left;
+    padding: 0px;
+
+    /* Position the tooltip */
+    position: absolute;
+    z-index: 1;
+    left: 0px;
+    top: 20px;
+}
+.iconLibraryTooltip .tooltipContainer img {
+    height: auto !important;
+    border: 1px solid #D9D9D9;
+    border-radius: 7px;
+}
+.iconLibraryTooltip:hover .tooltipContainer {
+    visibility: visible;
+}
 .aum_auth_page .product-item-details .product-buttons .button,
 .modal-cart button.alarnd_view_pricing.button.alt {
   display: inline-block;

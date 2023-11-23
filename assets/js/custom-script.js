@@ -568,6 +568,27 @@ jQuery(document).ready(function ($) {
       .addClass("allrnd_tokenized_wooCheckout_visible");
   }
 
+  // Add tooltip to Cart Thumbnail
+  function attachTooltipToProductThumbnails() {
+      var tooltips = document.querySelectorAll('.tooltip-span');
+
+      tooltips.forEach(function (tooltipSpan) {
+          var productThumbnailCells = document.querySelectorAll('td.product-thumbnail');
+
+          if (productThumbnailCells.length > 0) {
+              productThumbnailCells.forEach(function (cell) {
+                  cell.addEventListener('mousemove', function (e) {
+                      var x = e.clientX,
+                          y = e.clientY;
+                      var tooltipWidth = tooltipSpan.offsetWidth || tooltipSpan.getBoundingClientRect().width;
+                      tooltipSpan.style.left = (x - tooltipWidth - 20) + 'px';
+                      tooltipSpan.style.top = (y - 20) + 'px';
+                  });
+              });
+          }
+      });
+  }
+
   var isLoading = false;
 
   $(document).on("submit", ".modal-cart", function (e) {
@@ -647,7 +668,12 @@ jQuery(document).ready(function ($) {
 
         $('#ministore--custom-checkout-section').removeClass('ml_pay_hidden');
 
+        setTimeout(function () {
+          attachTooltipToProductThumbnails();
+        }, 1500);
+
         console.log(data);
+        console.log('Item added to cart');
       },
     }).then(function () {
       isLoading = false;
@@ -833,7 +859,10 @@ jQuery(document).ready(function ($) {
       setTimeout(function () {
         $('.alarnd--cart-wrapper-inner').removeClass('loading');
         console.log("completed update");
-      }, 1000);
+
+        // Call the function to attach the tooltip to product thumbnails
+        attachTooltipToProductThumbnails();
+      }, 1500);
   });
 
   // Listen for the WooCommerce AJAX complete event
@@ -1272,6 +1301,8 @@ jQuery(document).ready(function ($) {
   $(".xoo-ml-otp-input-cont-main input:first").focus();
   $(window).on("load", function () {
     $(".xoo-ml-otp-input-cont-main input:first").focus();
+
+    attachTooltipToProductThumbnails();
   });
 
   $("body").on("keyup change", "input.alarnd--otp-input", function () {
