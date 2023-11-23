@@ -929,13 +929,25 @@ span.price_step_qty {
   text-align: center !important;
   padding: 0;
 }
+.alarnd--info-modal.mini-no-gallery .pricingDescSteps, .alarnd--info-modal.mini-one-pricing-column .pricingDescSteps {
+  flex: 0 0 100%;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+}
+.alarnd--info-modal.mini-no-gallery .modal-bottom-btn {
+  float: none;
+  margin-left: auto;
+  margin-right: auto;
+}
 
-.mlHiddenGallery {
+/* .mlHiddenGallery {
   position: absolute;
   visibility: hidden;
   opacity: 0;
   left: -55555px;
-}
+} */
 
 button.mfp-arrow.mfp-prevent-close:hover,
 button.mfp-arrow.mfp-prevent-close:focus,
