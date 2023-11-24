@@ -211,6 +211,8 @@ class ALRN_Genrator {
             $thumbnails = $this->get_thumbnails( $user_id );
             $logo_positions = $this->logo_positions( $user_id );
 
+            $custom_logo = get_field('custom_logo', "user_{$user_id}");
+
             if( isset( $_GET['dev'] ) && 'true' === $_GET['dev'] ) {
                 echo '<pre>';
                 echo "<h2>$user_id</h2>";
@@ -226,6 +228,10 @@ class ALRN_Genrator {
                 'images' => $thumbnails,
                 'logo_positions' => $logo_positions
             );
+
+            if( ! empty( $custom_logo ) ) {
+                $user_data['custom_logo'] = $custom_logo;
+            }
 
             // Output the content
             $value = '<div class="alarnd--mockup-trigger-area">';
@@ -281,6 +287,8 @@ class ALRN_Genrator {
             $thumbnails = $this->get_thumbnails( $user_id );
             $logo_positions = $this->logo_positions( $user_id );
 
+            $custom_logo = get_field('custom_logo', "user_{$user_id}");
+
             // echo '<pre>';
             // echo "<h2>$user_id</h2>";
             // print_r( $logo_positions );
@@ -294,6 +302,10 @@ class ALRN_Genrator {
                 'images' => $thumbnails,
                 'logo_positions' => $logo_positions
             );
+
+            if( ! empty( $custom_logo ) ) {
+                $user_data['custom_logo'] = $custom_logo;
+            }
 
             // Output the content
             $value = '<div class="alarnd--mockup-trigger-wrap"><div class="alarnd--mockup-trigger-area">';
@@ -409,6 +421,8 @@ class ALRN_Genrator {
         return $filter_results;
     }
 
+
+    
 
     public function create_dir($name) {
 

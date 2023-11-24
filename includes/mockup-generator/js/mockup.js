@@ -150,7 +150,7 @@ function getFileExtensionFromUrl(url) {
 }
 
 // Function to generate an image with logos
-const generateImageWithLogos = async (backgroundUrl, user_id, product_id, logo, logo_second, logoData, logo_type, gallery = false) => {
+const generateImageWithLogos = async (backgroundUrl, user_id, product_id, logo, logo_second, custom_logo, logoData, logo_type, gallery = false) => {
 
     let itemResult = []
 
@@ -224,18 +224,20 @@ const generateImageWithLogos = async (backgroundUrl, user_id, product_id, logo, 
                 url: finalLogo,
                 product_id: product_id,
                 user_id: user_id,
+                custom_logo: custom_logo,
                 is_feature: is_feature_image
             };
             
             // Loop through the logo data and draw each logo on the canvas
             for (const logoInfo of finalItem) {
-                const logoImage = await loadLogoImage(imgData);
+                const { x, y, width, height, angle, custom } = logoInfo;
 
+                imgData['custom'] = custom;
+
+                const logoImage = await loadLogoImage(imgData);
                 // Use the original width and height of the logo
                 const originalWidth = logoImage.width;
                 const originalHeight = logoImage.height;
-
-                const { x, y, width, height, angle } = logoInfo;
 
                 const newHeight = aspect_height(originalWidth, originalHeight, width);
                 const newY =  aspectY(newHeight, height, y);
@@ -269,8 +271,13 @@ const generateImageWithLogos = async (backgroundUrl, user_id, product_id, logo, 
 
 // Function to load a logo image
 const loadLogoImage = async (imgData) => {
-    const { url, product_id, user_id, is_feature } = imgData;
-    const logoResponse = await fetch(url);
+    const { url, product_id, user_id, is_feature, custom, custom_logo } = imgData;
+
+    let fetchUrl = url;
+    if( undefined != custom && true === custom) {
+        fetchUrl = custom_logo;
+    }
+    const logoResponse = await fetch(fetchUrl);
     if (!logoResponse.ok) {
         throw new Error(`Failed to fetch logo image: ${logoResponse.status} ${logoResponse.statusText} is_feature:${is_feature} url:${url} id:${product_id} user:${user_id}`);
     }
@@ -280,7 +287,7 @@ const loadLogoImage = async (imgData) => {
 
 // Function to perform the image generation
 const generateImages = async (task) => {
-    const { backgrounds, logo, logo_second, user_id, logoData, logo_type } = task;
+    const { backgrounds, logo, logo_second, custom_logo, user_id, logoData, logo_type } = task;
     const promises = [];
     const totalImages = backgrounds.length;
 
@@ -289,7 +296,7 @@ const generateImages = async (task) => {
         const product_id = backgrounds[i]['id'];
         const galleries = backgrounds[i]['galleries'];
 
-        promises.push(generateImageWithLogos(backgroundUrl, user_id, product_id, logo, logo_second, logoData, logo_type));
+        promises.push(generateImageWithLogos(backgroundUrl, user_id, product_id, logo, logo_second, custom_logo, logoData, logo_type));
 
         if (galleries && galleries.length !== 0) {
             const galleriesConvert = convertGallery(galleries);
@@ -297,7 +304,7 @@ const generateImages = async (task) => {
             galleriesConvert.forEach((item, index) => {
                 const galleryUrl = item['url'];
                 const galleryItem = item;
-                promises.push(generateImageWithLogos(galleryUrl, user_id, product_id, logo, logo_second, logoData, logo_type, galleryItem));
+                promises.push(generateImageWithLogos(galleryUrl, user_id, product_id, logo, logo_second, custom_logo, logoData, logo_type, galleryItem));
             });
         }
     }
@@ -542,15 +549,21 @@ function getItemData(elm) {
     const logo = settings.logo;
     const user_id = settings.user_id;
     let logo_second = settings.logo_second;
+    let custom_logo = settings.custom_logo;
 
     if (logo_second && !isValidUrl(logo_second)) {
         console.log('logo_second is not a valid URL. Setting to undefined or default.');
         logo_second = undefined; // or set to a default value
     }
+    
+    if (custom_logo && !isValidUrl(custom_logo)) {
+        console.log('custom_logo is not a valid URL. Setting to undefined or default.');
+        custom_logo = undefined; // or set to a default value
+    }
 
     elm.addClass('ml_loading');
 
-    const task = { backgrounds, logo, logo_second, user_id, logoData, logo_type };
+    const task = { backgrounds, logo, logo_second, custom_logo, user_id, logoData, logo_type };
 
     console.log(task);
 

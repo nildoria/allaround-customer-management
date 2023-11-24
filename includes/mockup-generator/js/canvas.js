@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const mergedCanvas = document.getElementById('mergedCanvas');
     const logoNumberBtn = document.getElementById('logoNumber');
     const addLogoBtn = document.getElementById('addLogo');
+    const addSecondLogo = document.getElementById('addSecondLogo');
     const rotationInput = document.getElementById('rotationInput');
     const rotateLeftBtn = document.getElementById('rotateLeft');
     const rotateRightBtn = document.getElementById('rotateRight');
@@ -31,10 +32,12 @@ document.addEventListener('DOMContentLoaded', function () {
         console.log( settings );
 
     let saved_positions = settings.positions ? settings.positions : undefined;
+    let customers_list = settings.customers_list ? settings.customers_list : [];
     console.log( saved_positions );
         
     let logo_src = settings.logo[logoType];
     let original_logo_src = logo_src;
+    let custom_logo_src = original_logo_src;
     // Define a variable to store the original dimensions of the logo before resizing
     let originalLogoDimensions = null;
 
@@ -251,61 +254,89 @@ document.addEventListener('DOMContentLoaded', function () {
         return 'default';;
     }
 
-    function addLogoWithPositions(logoImage, userId = false) {
+    async function addLogoWithPositions(logoImage, userId = false) {
         const selectedLogoType = logoTypesSelect.value;
-
+        let selectedLogoPath = logoSelector.value;
+    
         // Use the original width and height of the logo
         const originalWidth = logoImage.width;
         const originalHeight = logoImage.height;
-
+    
         // Set the initial coordinates for the new logo
         const centerX = mergedCanvas.width / 2 - originalWidth / 2;
         const centerY = mergedCanvas.height / 2 - originalHeight / 2;
-
+    
         let is_saved_found = false;
-        const finalItem = get_position_values( userId, selectedLogoType );
+        const finalItem = get_position_values(userId, selectedLogoType);
+
         
+    
         if (finalItem !== undefined && finalItem !== false) {
-            // Loop through the logo data and draw each logo on the canvas
             for (const logoInfo of finalItem) {
-                const { x, y, width, height, angle } = logoInfo;
-
+                const { x, y, width, height, angle, custom } = logoInfo;
                 const newHeight = aspect_height(originalWidth, originalHeight, width);
-                const newY =  aspectY(newHeight, height, y);
+                const newY = aspectY(newHeight, height, y);
+    
+                const logoImageSrc = custom ? custom_logo_src : logoImage.src;
+                await loadImage(logoImageSrc); // Await the loading of the logo image
 
-                console.log( "logoInfo", logoInfo );
-                console.log( "newHeight", newHeight );
-                console.log( "newY", newY );
-
+                console.log('logoInfo', logoInfo);
+                console.log('originalWidth', originalWidth);
+                console.log('originalHeight', originalHeight);
+                console.log('width', width);
+                console.log('src', logoImage.src);
+    
                 const newLogo = {
                     x: x,
                     y: newY,
                     width: width,
-                    height: newHeight,
+                    height: height,
                     angle: angle,
-                    image: logoImage
+                    custom: custom,
+                    image: new Image(),
                 };
 
+                console.log('newLogo', newLogo);
+    
+                newLogo.image.src = logoImageSrc;
                 logos.push(newLogo);
             }
+    
             is_saved_found = true;
+            draw(); // Draw after all images are loaded
         }
-
+    
         if (is_saved_found !== true) {
-            console.log(logos);
-            const newLogo = {
-                x: centerX,
-                y: centerY,
-                width: originalWidth,
-                height: originalHeight,
-                angle: 0,
-                image: logoImage,
+            // Load the logo image and draw it
+            const newLogoImage = new Image();
+            const logoImageSrc = selectedLogoPath || original_logo_src; // Use the selected logo path or the original path
+            await loadImage(logoImageSrc); // Await the loading of the logo image
+    
+            newLogoImage.src = logoImageSrc;
+            newLogoImage.onload = () => {
+                const newLogo = {
+                    x: centerX,
+                    y: centerY,
+                    width: originalWidth,
+                    height: originalHeight,
+                    angle: 0,
+                    image: newLogoImage,
+                };
+                logos.push(newLogo);
+                draw(); // Draw after the image is loaded
             };
-
-            logos.push(newLogo);
         }
     }
-
+    
+    function loadImage(src) {
+        return new Promise((resolve, reject) => {
+            const image = new Image();
+            image.src = src;
+            image.onload = resolve;
+            image.onerror = reject;
+        });
+    }
+    
     logoSelector.addEventListener('change', (e) => {
         let selectedLogoPath = logoSelector.value;
         const selectedLogoType = logoTypesSelect.value;
@@ -322,6 +353,9 @@ document.addEventListener('DOMContentLoaded', function () {
             // logoNumberBtn.disabled = true;
         }
 
+        const customLogo = selectedOption.getAttribute('data-custom_logo');
+        console.log('customLogo', customLogo);
+
         let logoNumber = getLogoNumber(dataUserId);
         console.log("logoNumber", logoNumber);
         if( logoNumber && logoNumber !== false ) {
@@ -332,6 +366,16 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         } else {
             logoNumberBtn.value = 'default';
+        }
+
+        // Check if if customer exists in allow customers_list
+        // Check if user has custom logo
+        if( customers_list.includes(dataUserId) && customLogo && customLogo != undefined && customLogo != null ) {
+            addSecondLogo.disabled = false;
+            custom_logo_src = customLogo;
+        } else {
+            addSecondLogo.disabled = true;
+            custom_logo_src = selectedLogoPath;
         }
 
         if (selectedLogoPath) {
@@ -580,52 +624,43 @@ document.addEventListener('DOMContentLoaded', function () {
             const mouseX = e.offsetX;
             const mouseY = e.offsetY;
     
+            // Store the original dimensions before resizing
+            if (!originalLogoDimensions) {
+                originalLogoDimensions = {
+                    width: selectedLogo.width,
+                    height: selectedLogo.height,
+                };
+            }
+    
+            let newWidth, newHeight;
+    
             if (resizeHandle.includes('right')) {
-                // Store the original dimensions before resizing
-                if (!originalLogoDimensions) {
-                    originalLogoDimensions = {
-                        width: selectedLogo.width,
-                        height: selectedLogo.height,
-                    };
-                }
-
-                console.log("selectedLogo", selectedLogo);
-                console.log(originalLogoDimensions);
-                const newWidth = mouseX - selectedLogo.x;
+                newWidth = mouseX - selectedLogo.x;
     
                 // Calculate the new height to maintain the aspect ratio
-                const aspectRatio = originalLogoDimensions.width / originalLogoDimensions.height;
-                const newHeight = newWidth / aspectRatio;
-    
-                selectedLogo.width = newWidth;
-                selectedLogo.height = newHeight;
-
-                console.log("newWidth", newWidth);
-                console.log("newHeight", newHeight);
+                newHeight = newWidth * (originalLogoDimensions.height / originalLogoDimensions.width);
             }
-            if (resizeHandle.includes('bottom')) {
-                // Store the original dimensions before resizing
-                if (!originalLogoDimensions) {
-                    originalLogoDimensions = {
-                        width: selectedLogo.width,
-                        height: selectedLogo.height,
-                    };
-                }
     
-                const newHeight = mouseY - selectedLogo.y;
+            if (resizeHandle.includes('bottom')) {
+                newHeight = mouseY - selectedLogo.y;
     
                 // Calculate the new width to maintain the aspect ratio
-                const aspectRatio = originalLogoDimensions.width / originalLogoDimensions.height;
-                const newWidth = newHeight * aspectRatio;
-                
-    
-                selectedLogo.width = newWidth;
-                selectedLogo.height = newHeight;
+                newWidth = newHeight * (originalLogoDimensions.width / originalLogoDimensions.height);
             }
+    
+            // Limit minimum size to avoid issues
+            newWidth = Math.max(newWidth, 10);
+            newHeight = Math.max(newHeight, 10);
+    
+            selectedLogo.width = newWidth;
+            selectedLogo.height = newHeight;
     
             draw();
         }
     });
+    
+    
+    
     
 
     mergedCanvas.addEventListener('mouseup', () => {
@@ -711,6 +746,85 @@ document.addEventListener('DOMContentLoaded', function () {
                     width: initialWidth,
                     height: initialHeight,
                     angle: 0,
+                    image: logoImage,
+                };
+    
+                logos.push(newLogo);
+    
+                // Immediately draw the new logo
+                draw();
+    
+                // Select the newly added logo for further interaction
+                selectedLogo = newLogo;
+            }
+        };
+    });
+    
+    addSecondLogo.addEventListener('click', (e) => {
+        e.preventDefault();
+        
+        rotationInput.value = '0';
+        
+        const selectedLogoPath = custom_logo_src || logoSelector.value; // Use the selected logo path or the customlogo path
+        const logoImage = new Image();
+        logoImage.src = selectedLogoPath;
+    
+        logoImage.onload = () => {
+            // Check if a logo with the same image source already exists
+            const existingLogo = logos.find(logo => logo.image.src === logoImage.src);
+    
+            if (existingLogo) {
+                // Logo with the same image source exists
+                // You can access its width and height as follows:
+                const width = existingLogo.width;
+                const height = existingLogo.height;
+    
+                // Now you have the width and height of the existing logo
+                // You can apply these dimensions to the new logo if needed
+                // For example, you can set the initial width and height of the new logo:
+                const initialWidth = width;
+                const initialHeight = height;
+    
+                // Generate random coordinates for the new logo
+                const canvasWidth = mergedCanvas.width;
+                const canvasHeight = mergedCanvas.height;
+                const randomX = Math.random() * (canvasWidth - initialWidth); // Adjust as needed
+                const randomY = Math.random() * (canvasHeight - initialHeight); // Adjust as needed
+    
+                const newLogo = {
+                    x: randomX,
+                    y: randomY,
+                    width: initialWidth,
+                    height: initialHeight,
+                    angle: 0,
+                    custom: true,
+                    image: logoImage,
+                };
+    
+                logos.push(newLogo);
+    
+                // Immediately draw the new logo
+                draw();
+    
+                // Select the newly added logo for further interaction
+                selectedLogo = newLogo;
+            } else {
+                // Logo with the same image source doesn't exist
+                // Proceed to add the new logo as you did previously
+                const initialWidth = logoImage.width;
+                const initialHeight = logoImage.height;
+                const canvasWidth = mergedCanvas.width;
+                const canvasHeight = mergedCanvas.height;
+                const randomX = Math.random() * (canvasWidth - initialWidth); // Adjust as needed
+                const randomY = Math.random() * (canvasHeight - initialHeight); // Adjust as needed
+    
+                const newLogo = {
+                    x: randomX,
+                    y: randomY,
+                    width: initialWidth,
+                    height: initialHeight,
+                    angle: 0,
+                    custom: true,
                     image: logoImage,
                 };
     

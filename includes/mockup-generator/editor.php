@@ -207,9 +207,12 @@ class ALRN_Metabox {
 
         $filter_arr = get_positions_by_id( $post->ID );
 
+        $customers_list = get_field('customers_list', $post->ID);
+        $customers_list = ! empty( $customers_list ) ? $customers_list : [];
+
         if( isset( $_GET['dev'] ) && 'true' === $_GET['dev'] ) {
             echo '<pre>';
-            print_r( $filter_arr );
+            print_r( $customers_list );
             echo '</pre>';
         }
 
@@ -219,6 +222,7 @@ class ALRN_Metabox {
                 "horizontal" => plugin_dir_url(__FILE__) . 'images/horizontal.png'
             ),
             'positions' => $filter_arr,
+            'customers_list' => $customers_list,
             "background" => $featured_img_url
         );
 
@@ -251,6 +255,7 @@ class ALRN_Metabox {
                             $profile_logo = wp_get_attachment_image_url($customer_picture_id, 'full');
 
                             $profile_picture_id_second = get_field('profile_picture_id_second', "user_{$customer_id}");
+                            $custom_logo = get_field('custom_logo', "user_{$customer_id}");
 
                             if( empty( $profile_logo ) ) {
                                 continue;
@@ -258,7 +263,7 @@ class ALRN_Metabox {
                             $customer_has_logo[$customer_id] = $profile_logo;
                             $user_info = get_userdata($customer_id);
                             ?>
-                            <option value="<?php echo esc_url( $profile_logo ); ?>" data-second_logo="<?php echo esc_attr($profile_picture_id_second); ?>" data-user_id="<?php echo esc_attr( $customer_id ); ?>"><?php echo esc_html( $user_info->display_name ); ?> (<?php echo esc_html( $user_info->user_email ); ?>)</option>
+                            <option value="<?php echo esc_url( $profile_logo ); ?>" data-second_logo="<?php echo esc_attr($profile_picture_id_second); ?>" <?php echo ! empty( $customers_list ) && in_array($customer_id, $customers_list) && ! empty( $custom_logo ) ? 'data-custom_logo="'.esc_attr($custom_logo).'"' : ''; ?> data-user_id="<?php echo esc_attr( $customer_id ); ?>"><?php echo esc_html( $user_info->display_name ); ?> (<?php echo esc_html( $user_info->user_email ); ?>)</option>
                             <?php endforeach; ?>
                         </select>
                         <select id="logoNumber">
@@ -272,6 +277,7 @@ class ALRN_Metabox {
                     ?>
                     <!-- <button id="defaultSelect" class="button">Select As Default</button> -->
                     <button id="addLogo" class="button">Add Logo</button>
+                    <button id="addSecondLogo" class="button" disabled="disabled">Add Custom Logo</button>
                     <button id="removeLogo" class="button">Remove Logo</button>
                     <button id="deselectLogo" class="button">Deselect Logo</button>
                     <input type="hidden" id="ml_product_id" value="<?php echo esc_attr( $post->ID ); ?>">
