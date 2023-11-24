@@ -42,337 +42,571 @@ function getParameterByName(name) {
     return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
 }
 
-// Function to poll and update progress
-function pollProgress(user_id, current) {
 
-    checkProress(user_id, intervalId, current);
+/**
+ * Image Generation System
+ */
 
-    // Interval in milliseconds for polling (adjust as needed)
-    var pollingInterval = 5000; // Poll every 1 second
+let imageResultList = [];
+let isGeneratingImages = false; // Flag to track whether image generation is in progress
+const userQueue = []; // Queue to store users for processing
 
-    // Set up a recurring AJAX request
-    var intervalId = setInterval(function() {
-        checkProress(user_id, intervalId, current);
-    }, pollingInterval);
+// Define a variable to control logging
+let enableLogging = true;
+
+// Custom logging function
+const customLog = (...args) => {
+    if (enableLogging) {
+        console.log(...args);
+    }
+};
+    
+function convertBackgrounds(images) {
+    let backgrounds = [];
+
+    for (let key in images) {
+        if (images.hasOwnProperty(key)) {
+        backgrounds.push({
+            id: key,
+            url: images[key]['thumbnail'][0],
+            galleries: images[key]['galleries']
+        });
+        }
+    }
+
+    return backgrounds;
+}
+
+function convertLogos(logos) {
+    let backgrounds = [];
+
+    for (let key in logos) {
+        if (logos.hasOwnProperty(key)) {
+        // If the value is an array, iterate through its elements
+        if (Array.isArray(logos[key])) {
+            logos[key].forEach((item, index) => {
+            backgrounds.push({
+                product_id: parseInt(key),
+                meta_key: item['meta_key'],
+                meta_value: item['meta_value']
+            });
+            });
+        } else {
+            backgrounds.push({
+            id: key,
+            url: logos[key][0]
+            });
+        }
+        }
+    }
+
+    return backgrounds;
+}
+
+function convertGallery(images) {
+    let gallery = [];
+  
+    for (let key in images) {
+      if (images.hasOwnProperty(key)) {
+        gallery.push({
+          id: key,
+          attachment_id: images[key]['attachment_id'],
+          url: images[key]['thumbnail'],
+          type: images[key]['type']
+        });
+      }
+    }
+  
+    return gallery;
+}
+
+function aspect_height(originalWidth, originalHeight, newWidth) {
+    // Calculate the aspect ratio
+    const aspectRatio = originalWidth / originalHeight;
+
+    // Calculate the new height based on the aspect ratio
+    const newHeight = newWidth / aspectRatio;
+
+    return newHeight;
+}
+
+function aspectY(newHeight, height, y) {
+    const newY = height > newHeight ? y + (height - newHeight) : y - ((newHeight - height)/2);
+    return newY;
 }
 
 
+function getFileExtensionFromUrl(url) {
+    // Use a regular expression to extract the file extension
+    const regex = /(?:\.([^.]+))?$/; // Match the last dot and anything after it
+    const extension = regex.exec(url)[1]; // Extract the extension (group 1 in the regex)
 
-function checkProress(user_id, intervalId, current) {
-    $.ajax({
-        type: 'POST',
-        url: mockupGeneratorAjax.ajax_url,
-        data: {
-            action: 'mockup_generation_progress', // AJAX action to check progress
-            user_id: user_id,
-            nonce: mockupGeneratorAjax.nonce
-        },
-        dataType: 'json',
-        success: function(response) {
-            if (response.progress === 'completed') {
-                clearInterval(intervalId); // Stop polling when the task is completed
-                current.removeClass('ml_loading').prop('disabled', false);
-                current.closest('.alarnd--mockup-trigger-area').find('.ml_mockup_progress_bar').text('100');
-            } else if (response.progress === 'in-progress') {
-                current.prop('disabled', true);
-            } else {
-                var numericProgress = parseInt(response.progress);
-                numericProgress = numericProgress < 0 ? 0 : numericProgress;
-                console.log(numericProgress);
-                current.closest('.alarnd--mockup-trigger-area').find('.ml_mockup_progress_bar').text(numericProgress);
+    // Ensure the extension is in lowercase (optional)
+    if (extension) {
+        return extension.toLowerCase();
+    } else {
+        return null; // Return null if no extension is found
+    }
+}
+
+// Function to generate an image with logos
+const generateImageWithLogos = async (backgroundUrl, user_id, product_id, logo, logo_second, logoData, logo_type, gallery = false) => {
+
+    let itemResult = []
+
+    // Extract the filename from the background URL
+    const file_ext = getFileExtensionFromUrl(backgroundUrl);
+    let filename = product_id + '.' + file_ext;
+    let is_feature_image = false === gallery ? true : false;
+
+    //customLog("gallery", gallery);
+    if( gallery && gallery !== false && gallery.length !== 0 ) {
+        filename = product_id + '-' + gallery['id'] + '-' + gallery['attachment_id'] + '.' + file_ext;
+    }
+    //customLog("filename", filename);
+
+    // Load background image as Blob
+    const backgroundResponse = await fetch(backgroundUrl);
+    // //customLog( backgroundUrl, product_id );
+    // //customLog( backgroundResponse );
+    if (!backgroundResponse.ok) {
+        throw new Error(`Failed to fetch background image: ${backgroundResponse.status} ${backgroundResponse.statusText}`);
+    }
+    const backgroundBlob = await backgroundResponse.blob();
+    const backgroundImage = await createImageBitmap(backgroundBlob);
+
+    // Create a canvas element to work with
+    const staticCanvas = new OffscreenCanvas(backgroundImage.width, backgroundImage.height);
+    const ctx = staticCanvas.getContext('2d');
+
+    // Draw the background image
+    ctx.drawImage(backgroundImage, 0, 0);
+
+    customLog('logoData', logoData);
+
+    // Use Array.filter() to get items with the matching product_id
+    const itemsWithMatchingProductID = logoData.filter(item => item.product_id == product_id);
+
+    // //customLog( 'itemsWithMatchingProductID', itemsWithMatchingProductID );
+
+    // Find an item with the matching meta_key "ml_logos_positions_{user_id}"
+    const matchingItem = itemsWithMatchingProductID.find(item => item.meta_key === `ml_logos_positions_${user_id}`);
+
+    // //customLog( 'matchingItem', matchingItem );
+
+    // If found, use it; otherwise, fall back to "ml_logos_positions"
+    const resultItem = matchingItem || itemsWithMatchingProductID.find(item => item.meta_key === "ml_logos_positions");
+
+    // //customLog( 'resultItem', resultItem );
+
+    if (resultItem != undefined) {
+        let finalItem = resultItem.meta_value[logo_type];
+        let logoNumber = resultItem.meta_value['logoNumber'];
+            logoNumber = logoNumber !== undefined ? logoNumber : 'default';
+
+        // check if select second logo or not
+        // check if second logo value exists or not
+        let finalLogo = logoNumber === 'second' && (logo_second && logo_second != null && logo_second != undefined) ? logo_second : logo;
+
+        if( gallery && gallery !== false && gallery.length !== 0 ) {
+            
+            if( gallery['type'] == 'light' ) {
+                finalLogo = logo;
             }
-        },
+            if( gallery['type'] == 'dark' && (logo_second && logo_second != null && logo_second != undefined) ) {
+                finalLogo = logo_second;
+            }
+        }
+
+        if (finalItem !== undefined && finalItem !== false) {
+
+            let imgData = {
+                url: finalLogo,
+                product_id: product_id,
+                user_id: user_id,
+                is_feature: is_feature_image
+            };
+            
+            // Loop through the logo data and draw each logo on the canvas
+            for (const logoInfo of finalItem) {
+                const logoImage = await loadLogoImage(imgData);
+
+                // Use the original width and height of the logo
+                const originalWidth = logoImage.width;
+                const originalHeight = logoImage.height;
+
+                const { x, y, width, height, angle } = logoInfo;
+
+                const newHeight = aspect_height(originalWidth, originalHeight, width);
+                const newY =  aspectY(newHeight, height, y);
+
+                ctx.save();
+                ctx.translate(x + width / 2, newY + newHeight / 2);
+                ctx.rotate(angle);
+                ctx.drawImage(logoImage, -width / 2, -newHeight / 2, width, newHeight);
+                ctx.restore();
+            }
+
+            // Get the image data from the OffscreenCanvas
+            const imageData = ctx.getImageData(0, 0, staticCanvas.width, staticCanvas.height);
+
+            // Convert ImageData to data URL
+            const dataURL = await canvasToDataUrl(imageData);
+
+            // Call the function and wait for the result
+            const result = await saveImageToServer(dataURL, filename, user_id, is_feature_image);
+
+            // Now you can check the result
+            if ( ! result ) {
+                console.error(`Image save operation failedm, filename: ${$filename}`);
+                return false;
+            }
+
+            return filename;
+        }
+    }
+};
+
+// Function to load a logo image
+const loadLogoImage = async (imgData) => {
+    const { url, product_id, user_id, is_feature } = imgData;
+    const logoResponse = await fetch(url);
+    if (!logoResponse.ok) {
+        throw new Error(`Failed to fetch logo image: ${logoResponse.status} ${logoResponse.statusText} is_feature:${is_feature} url:${url} id:${product_id} user:${user_id}`);
+    }
+    const logoBlob = await logoResponse.blob();
+    return await createImageBitmap(logoBlob);
+};
+
+// Function to perform the image generation
+const generateImages = async (task) => {
+    const { backgrounds, logo, logo_second, user_id, logoData, logo_type } = task;
+    const promises = [];
+    const totalImages = backgrounds.length;
+
+    for (let i = 0; i < totalImages; i++) {
+        const backgroundUrl = backgrounds[i]['url'];
+        const product_id = backgrounds[i]['id'];
+        const galleries = backgrounds[i]['galleries'];
+
+        promises.push(generateImageWithLogos(backgroundUrl, user_id, product_id, logo, logo_second, logoData, logo_type));
+
+        if (galleries && galleries.length !== 0) {
+            const galleriesConvert = convertGallery(galleries);
+
+            galleriesConvert.forEach((item, index) => {
+                const galleryUrl = item['url'];
+                const galleryItem = item;
+                promises.push(generateImageWithLogos(galleryUrl, user_id, product_id, logo, logo_second, logoData, logo_type, galleryItem));
+            });
+        }
+    }
+
+    // Wait for all promises to resolve and capture the results
+    imageResultList = await Promise.all(promises);
+
+    // Filter out the false values (failed image generation)
+    imageResultList = imageResultList.filter(result => result !== false);
+
+    return imageResultList; // Return the result list if needed elsewhere
+};
+
+
+// Function to convert ImageData to data URL
+async function canvasToDataUrl(imageData) {
+    const tempCanvas = document.createElement('canvas');
+    const tempContext = tempCanvas.getContext('2d');
+
+    // Set the canvas size to match the ImageData
+    tempCanvas.width = imageData.width;
+    tempCanvas.height = imageData.height;
+
+    // Put the ImageData onto the canvas
+    tempContext.putImageData(imageData, 0, 0);
+
+    // Convert the canvas content to data URL
+    const dataUrl = tempCanvas.toDataURL('image/png');
+
+    return dataUrl;
+}
+
+// Function to send the dataURL to the server
+async function saveImageToServer(dataURL, filename, user_id, is_feature_image) {
+    try {
+        const response = await fetch(mockupGeneratorAjax.image_save_endpoint, {
+            method: 'POST',
+            body: JSON.stringify({ imageData: dataURL, filename, user_id, is_feature_image }),
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (response.ok) {
+            // Image was successfully saved on the server
+            customLog('Image saved on the server');
+            return true; // or you can return some other value indicating success
+        } else {
+            // Handle the error if the save operation fails
+            console.error('Failed to save image on the server');
+            return false; // or you can return some other value indicating failure
+        }
+    } catch (error) {
+        console.error('Error sending data to the server:', error);
+        return false; // or you can return some other value indicating failure
+    }
+}
+
+const processUserQueue = async () => {
+    while (userQueue.length > 0) {
+        const user = userQueue.shift(); // Dequeue the first user from the queue
+        const { backgrounds, logo, logo_second, user_id, logoData, logo_type } = user;
+
+        try {
+            isGeneratingImages = true; // Set the flag to indicate image generation is in progress
+            const result = await generateImages({ backgrounds, logo, logo_second, user_id, logoData, logo_type });
+
+            // Do something with the result if needed
+            if(result) {
+                let btnItem = $('#ml_mockup_gen-'+user_id);
+                let checkboxItem = $('input.customer[value="'+user_id+'"]');
+                if( btnItem.length !== 0 ) {
+                    btnItem.removeClass('ml_loading').prop("disabled", false);
+                }
+                if( checkboxItem.length !== 0 ) {
+                    checkboxItem.prop("checked", false);
+                }
+            }
+
+            // Call the function to print the result after all images are generated
+            printImageResultList();
+        } catch (error) {
+            console.error('Error generating images for user:', user, error);
+        } finally {
+            isGeneratingImages = false; // Reset the flag once image generation is complete
+        }
+    }
+
+    // Print a message if the queue is empty after processing
+    if (userQueue.length === 0) {
+        customLog('All users in the queue have been processed.');
+        alert("Generation Done!");
+    }
+};
+
+// Helper function to get selected user IDs from checkboxes
+const getSelectedUserIds = () => {
+    const checkboxElements = document.querySelectorAll('input[name="users[]"]:checked');
+    const selectedUserIds = [];
+
+    checkboxElements.forEach((checkbox) => {
+        // Check if the parent contains an element with class "ml_mockup_gen_trigger"
+        const parent = checkbox.closest('tr');
+        if (parent && parent.querySelector('.ml_mockup_gen_trigger')) {
+            // Include the user ID in the array of selected user IDs
+            selectedUserIds.push(checkbox.value);
+        } else {
+            checkbox.checked = false;
+        }
     });
+
+    return selectedUserIds;
+};
+
+
+// Assuming you have a function to get user data based on user ID
+const getUserDataById = (userId) => {
+
+    let btnItem = $('#ml_mockup_gen-'+userId);
+    if( btnItem.length !== 0 ) {
+        const task = getItemData(btnItem);
+        return task;
+    }
+
+    return false;
+};
+
+
+// Assuming you have a function to handle the bulk action apply button click
+const handleBulkActionApply = async (event) => {
+
+    // Check if the bulk action selector value is "alaround_mockup_gen"
+    const bulkActionSelector = document.getElementById("bulk-action-selector-top");
+    const bulkActionSelectorValue = bulkActionSelector.value;
+
+    if (bulkActionSelectorValue !== "alaround_mockup_gen") {
+        customLog('Bulk action does not match "alaround_mockup_gen". Ignoring.');
+        return;
+    }
+
+    const doActionButton = document.getElementById("doaction");
+
+    event.preventDefault();
+
+    if (isGeneratingImages) {
+        customLog('Image generation is already in progress. Please wait.');
+        return;
+    }
+
+    const selectedUserIds = getSelectedUserIds();
+
+    if (selectedUserIds.length === 0) {
+        customLog('No users selected.');
+        return;
+    }
+
+     // Set the flag to indicate image generation is in progress
+     isGeneratingImages = true;
+
+    // Disable the bulk action selector and do action button
+    bulkActionSelector.disabled = true;
+    doActionButton.disabled = true;
+
+    // Filter out users without .ml_mockup_gen_trigger
+    const selectedUsersWithLogo = selectedUserIds
+        .map(userId => getUserDataById(userId))
+        .filter(userData => userData !== false);
+
+    // Enqueue the selected users
+    userQueue.push(...selectedUsersWithLogo);
+
+    try {
+        await processUserQueue();
+    } catch (error) {
+        console.error('Error during bulk image generation:', error);
+    } finally {
+         // Reset the flag once image generation is complete
+         isGeneratingImages = false;
+
+        // Re-enable the bulk action selector and do action button
+        bulkActionSelector.disabled = false;
+        doActionButton.disabled = false;
+    }
+};
+
+// Show a warning message when the user tries to leave or close the tab
+window.addEventListener('beforeunload', (event) => {
+    if (isGeneratingImages) {
+        const message = 'Leaving this page while the bulk action is in progress may result in data loss.';
+        (event || window.event).returnValue = message; // Standard method
+        return message; // For some older browsers
+    }
+});
+
+// event listener for the bulk action apply button
+const doActionButton = document.getElementById('doaction');
+if (doActionButton) {
+    doActionButton.addEventListener('click', handleBulkActionApply);
+}
+
+function isValidUrl(url) {
+    try {
+        new URL(url);
+        return true;
+    } catch (error) {
+        return false;
+    }
+}
+
+function getItemData(elm) {
+    if (elm.length === 0)
+        return false;
+
+    let settings = elm.data('settings');
+
+    if (settings.length === 0)
+        return false;
+
+    if (
+        !settings.images ||
+        settings.images.length === 0 ||
+        !settings.logo ||
+        !settings.user_id
+    ) {
+        customLog("required variables are undefined");
+        return false;
+    }
+
+    const backgrounds = convertBackgrounds(settings.images);
+    if(!backgrounds) {
+        return false;
+    }
+
+
+    let logoData = '';
+    if (settings.logo_positions && settings.logo_positions.length !== 0) {
+        logoData = convertLogos(settings.logo_positions);
+    }
+
+    let logo_type = settings.logo_type;
+
+    const logo = settings.logo;
+    const user_id = settings.user_id;
+    let logo_second = settings.logo_second;
+
+    if (logo_second && !isValidUrl(logo_second)) {
+        console.log('logo_second is not a valid URL. Setting to undefined or default.');
+        logo_second = undefined; // or set to a default value
+    }
+
+    elm.addClass('ml_loading');
+
+    const task = { backgrounds, logo, logo_second, user_id, logoData, logo_type };
+
+    console.log(task);
+
+    return task;
+}
+
+$(document).on('click', ".ml_mockup_gen_trigger", async function () {
+    var item = $(this);
+
+    // Check if image generation is already in progress
+    if (isGeneratingImages) {
+        customLog('Image generation is already in progress. Please wait.');
+        return;
+    }
+
+    const task = getItemData(item);
+
+    try {
+        // Set the flag to indicate image generation is in progress
+        isGeneratingImages = true;
+
+        // Add the "ml_loading" class to the clicked item
+        item.addClass('ml_loading');
+
+        // Perform image generation
+        imageResultList = await generateImages(task);
+    } catch (error) {
+        console.error('Error:', error);
+    } finally {
+        // Reset the flag once image generation is complete
+        isGeneratingImages = false;
+
+        // Remove the "ml_loading" class from the clicked item
+        item.removeClass('ml_loading');
+
+        // Call the function to print the result after all images are generated
+        printImageResultList();
+    }
+
+    return false;
+});
+
+
+// Print the result after all images are generated
+function printImageResultList() {
+    customLog('imageResultList', imageResultList);
 }
 
 
-// $( document ).on('click', '.ml_mockup_gen_trigger', function() {
-
-//     var current = $(this),
-//         user_id = current.data('user_id');
-
-//     current.closest('.alarnd--mockup-trigger-area').find('.ml_mockup_progress_bar').text('0');
-//     current.addClass('ml_loading').prop("disabled", true);
-
-//     $.ajax({
-//         url: mockupGeneratorAjax.ajax_url,
-//         type: 'POST',
-//         dataType: 'html',
-//         data: {
-//             action: 'generate_mockup',
-//             "user_id": user_id,
-//             nonce: mockupGeneratorAjax.nonce
-//         },
-//         success: function(response) {
-//             // Handle the AJAX response (e.g., start polling for progress)
-//             if (response === 'Background process scheduled.') {
-//                 pollProgress(user_id, current); // Replace with the actual user ID
-//             } else {
-//                 current.removeClass('ml_loading');
-//             }
-//         }
-//     });
-// });
-
-
-
-
-
+// T̶O̶D̶O̶:̶ U̶n̶c̶h̶e̶c̶k̶ i̶f̶ u̶s̶e̶r̶ d̶o̶n̶t̶ h̶a̶v̶e̶ l̶o̶g̶o̶.̶ .̶m̶l̶_̶m̶o̶c̶k̶u̶p̶_̶g̶e̶n̶_̶t̶r̶i̶g̶g̶e̶r̶ c̶a̶n̶ b̶e̶ u̶s̶e̶ f̶o̶r̶ t̶h̶i̶s̶ c̶a̶s̶e̶.̶
+// TODO: When one user running make button disable
+// T̶O̶D̶O̶:̶ I̶f̶ b̶u̶l̶k̶ r̶u̶n̶n̶i̶n̶g̶ t̶h̶e̶n̶ s̶e̶l̶e̶c̶t̶ a̶n̶d̶ d̶o̶a̶c̶t̶i̶o̶n̶ m̶a̶k̶e̶ d̶i̶s̶a̶b̶l̶e̶
+// T̶O̶D̶O̶:̶ U̶n̶c̶h̶e̶c̶k̶ w̶h̶e̶n̶ o̶n̶e̶ u̶s̶e̶r̶ d̶o̶n̶e̶ a̶n̶d̶ a̶l̶s̶o̶ r̶e̶m̶o̶v̶e̶ l̶o̶a̶d̶i̶n̶g̶ f̶r̶o̶m̶ b̶u̶t̶t̶o̶n̶
+// T̶O̶D̶O̶:̶ S̶h̶o̶w̶ a̶l̶e̶r̶t̶ w̶h̶e̶n̶ b̶u̶l̶k̶ a̶l̶l̶ q̶u̶e̶u̶e̶ d̶o̶n̶e̶.̶
 
 
 
 
 })(jQuery);
-
-// Initialize the task queue from local storage on page load
-let taskQueue = [];
-
-// Check if local storage has saved tasks and load them
-if (localStorage.getItem('taskQueue')) {
-  taskQueue = JSON.parse(localStorage.getItem('taskQueue'));
-}
-
-// Create a variable to store the Web Worker instance.
-let worker = new Worker(mockupGeneratorAjax.generate_file); // Path to the Web Worker script
-let isWorkerBusy = false;
-
-// Function to add a task to the queue.
-function addToQueue(type, backgrounds, logo, logo_second, user_id, logoData, logo_type) {
-  const task = { type, backgrounds, logo, logo_second, user_id, logoData, logo_type };
-
-  taskQueue.push(task);
-
-  // Save the task queue to local storage
-  localStorage.setItem('taskQueue', JSON.stringify(taskQueue));
-
-  // If the worker is not busy, start processing tasks.
-  if (!isWorkerBusy) {
-    processQueue();
-  }
-}
-
-// Function to process tasks from the queue.
-function processQueue() {
-  if (taskQueue.length > 0) {
-    isWorkerBusy = true;
-    const task = taskQueue[0]; // Get the first task from the queue
-
-    // Send the task to the Web Worker.
-    worker.postMessage(task);
-
-    // Listen for the worker's response.
-    worker.addEventListener('message', function (e) {
-      if (e.data.type === 'progress') {
-        // Handle progress updates here
-        const progress = e.data.progress;
-        const user_id = e.data.user_id;
-        updateProgressBar(progress, user_id);
-      } else if (e.data.type === 'imageGenerated') {
-        // Get the imageData from the message
-        const imageData = e.data.imageData;
-        const filename = e.data.filename;
-        const is_feature_image = e.data.is_feature_image;
-        const user_id = e.data.user_id;
-
-        // Create a new Canvas element
-        const canvas = document.createElement('canvas');
-        canvas.width = imageData.width;
-        canvas.height = imageData.height;
-        const ctx = canvas.getContext('2d');
-
-        // Draw the image data onto the canvas
-        ctx.putImageData(imageData, 0, 0);
-
-        // Convert the canvas to a data URL (e.g., PNG format)
-        const dataURL = canvas.toDataURL('image/png'); // You can change the format to 'image/jpeg' or others if needed
-
-        console.log("user_id", user_id);
-        console.log("is_feature_image from mockupjs", is_feature_image);
-
-        // Send the dataURL to your server to save the image
-        saveImageToServer(dataURL, filename, user_id, is_feature_image);
-      }
-
-      // Remove the completed task from the queue
-      taskQueue.shift();
-
-      // Save the updated task queue to local storage
-      localStorage.setItem('taskQueue', JSON.stringify(taskQueue));
-
-      // Continue processing the queue.
-      isWorkerBusy = false;
-      processQueue();
-    });
-  }
-}
-
-// Function to send the dataURL to the server
-function saveImageToServer(dataURL, filename, user_id, is_feature_image) {
-  // You can use AJAX or Fetch to send the dataURL to your server
-  // Here's an example using Fetch:
-
-  // Create a new Headers object and set the custom header
-
-  fetch(mockupGeneratorAjax.image_save_endpoint, {
-    method: 'POST',
-    body: JSON.stringify({ imageData: dataURL, filename, user_id, is_feature_image }),
-    headers: {
-      'Content-Type': 'application/json'
-    }
-  })
-    .then(response => {
-      if (response.ok) {
-        // Image was successfully saved on the server
-        console.log('Image saved on the server');
-      } else {
-        // Handle the error if the save operation fails
-        console.error('Failed to save image on the server');
-      }
-    })
-    .catch(error => {
-      console.error('Error sending data to the server:', error);
-    });
-}
-
-function convertBackgrounds(images) {
-  let backgrounds = [];
-
-  for (let key in images) {
-    if (images.hasOwnProperty(key)) {
-      backgrounds.push({
-        id: key,
-        url: images[key]['thumbnail'][0],
-        galleries: images[key]['galleries']
-      });
-    }
-  }
-
-  return backgrounds;
-}
-
-function convertLogos(logos) {
-  let backgrounds = [];
-
-  for (let key in logos) {
-    if (logos.hasOwnProperty(key)) {
-      // If the value is an array, iterate through its elements
-      if (Array.isArray(logos[key])) {
-        logos[key].forEach((item, index) => {
-          backgrounds.push({
-            product_id: parseInt(key),
-            meta_key: item['meta_key'],
-            meta_value: item['meta_value']
-          });
-        });
-      } else {
-        backgrounds.push({
-          id: key,
-          url: logos[key][0]
-        });
-      }
-    }
-  }
-
-  return backgrounds;
-}
-
-// Function to update the progress bar
-function updateProgressBar(progress, user_id) {
-  const progressBar = document.getElementById('ml_mockup_progress_bar-'+user_id);
-  const triggerBtn = document.getElementById('ml_mockup_gen-'+user_id);
-  // progressBar.style.width = progress + '%';
-  progressBar.textContent = progress;
-
-  // You can also add additional logic to hide or reset the progress bar when the progress is 100%
-  if (progress === 100) {
-    triggerBtn.classList.remove("ml_loading");
-  }
-}
-
-function trigger_generate(event) {
-  // Get the attributes from the clicked button
-  let settings = event.target.getAttribute('data-settings');
-
-  if (settings.length === 0)
-    return false;
-
-  settings = JSON.parse(settings);
-
-  if (
-    !settings.images ||
-    settings.images.length === 0 ||
-    !settings.logo ||
-    !settings.user_id
-  ) {
-    console.log("required variables are undefined");
-    return false;
-  }
-
-  console.log("settings", settings);
-
-  const backgrounds = convertBackgrounds(settings.images);
-  console.log("settings-backgrounds", backgrounds);
-  let logoData = '';
-  if (settings.logo_positions && settings.logo_positions.length !== 0) {
-    logoData = convertLogos(settings.logo_positions);
-  }
-
-  let logo_type = settings.logo_type;
-
-  const logo = settings.logo;
-  const logo_second = settings.logo_second;
-  const user_id = settings.user_id;
-  const type = 'generateImages';
-
-  event.target.classList.add('ml_loading');
-
-  // Pass the attributes to the sendTaskToWorker function
-  addToQueue(type, backgrounds, logo, logo_second, user_id, logoData, logo_type);
-}
-
-
-document.addEventListener('DOMContentLoaded', function () {
-
-  // Clear the task queue and local storage on page load
-  taskQueue = [];
-  localStorage.removeItem('taskQueue');
-
-  document.addEventListener('click', function (event) {
-    if (event.target && event.target.classList.contains('ml_mockup_gen_trigger')) {
-      trigger_generate(event);
-    }
-});
-
-const doactionBtn = document.getElementById('doaction');
-if( doactionBtn ) {
-  doactionBtn.addEventListener("click", function (e) {
-
-    const action = document.getElementById("bulk-action-selector-top").value;
-    if (action === 'alaround_mockup_gen') {
-      e.preventDefault();
-      const checkboxes = document.querySelectorAll('input[name="users[]"]:checked');
-      checkboxes.forEach(function (checkbox) {
-        if ("customer" === checkbox.classList.value) {
-
-          const user_row = document.querySelector('tr#user-' + checkbox.value);
-          if (user_row) {
-            // Find a the trigger button from user row
-            var triggerBtn = user_row.querySelector('.ml_mockup_gen_trigger');
-
-            if (triggerBtn) {
-              triggerBtn.click();
-            } else {
-              checkbox.checked = false;
-            }
-          } else {
-            checkbox.checked = false;
-          }
-        } else {
-          checkbox.checked = false;
-        }
-      });
-    }
-  });
-}
-
-});

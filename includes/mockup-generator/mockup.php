@@ -164,7 +164,6 @@ class ALRN_Genrator {
             $upload_dir = wp_upload_dir();
             // Pass AJAX URL to the script
 
-            $is_edit_user = false;
             wp_localize_script('mockup-generator', 'mockupGeneratorAjax', array(
                 'ajax_url' => admin_url('admin-ajax.php'),
                 'nonce' => wp_create_nonce( "mockup_gen_nonce" ),
@@ -194,8 +193,11 @@ class ALRN_Genrator {
             $profile_picture_url = wp_get_attachment_image_url($profile_picture_id, 'full');
 
             $profile_second_logo = get_field('profile_picture_id_second', "user_{$user_id}");
+            if (! filter_var($profile_second_logo, FILTER_VALIDATE_URL)) {
+                $profile_second_logo = '';
+            }
 
-            if( empty( $profile_picture_id ) || empty( $profile_picture_url ) )
+            if( empty( $profile_picture_id ) || empty( $profile_picture_url ) || ! @getimagesize($profile_picture_url) )
                 return $value;
 
             // user meta.
@@ -228,7 +230,6 @@ class ALRN_Genrator {
             // Output the content
             $value = '<div class="alarnd--mockup-trigger-area">';
             $value .= '<button id="ml_mockup_gen-'.$user_id.'" type="button" class="button button-primary ml_mockup_gen_trigger ml_add_loading" data-settings=\'' . wp_json_encode($user_data) . '\' data-user_id="'.$user_id.'">'.$button_text.'</button>';
-            $value .= '<div class="alarnd--mockup-progress"><span id="ml_mockup_progress_bar-'.$user_id.'" class="ml_mockup_progress_bar ml_mockup_progress_bar-'.$user_id.'">0</span>%</div>';
             $value .= '</div>';
         }
         return $value;
@@ -262,8 +263,11 @@ class ALRN_Genrator {
             $profile_picture_url = wp_get_attachment_image_url($profile_picture_id, 'full');
 
             $profile_second_logo = get_field('profile_picture_id_second', "user_{$user_id}");
+            if (! filter_var($profile_second_logo, FILTER_VALIDATE_URL)) {
+                $profile_second_logo = '';
+            }
 
-            if( empty( $profile_picture_id ) || empty( $profile_picture_url ) )
+            if( empty( $profile_picture_id ) || empty( $profile_picture_url ) || ! @getimagesize($profile_picture_url) )
                 wp_die();
 
             // user meta.
@@ -294,7 +298,6 @@ class ALRN_Genrator {
             // Output the content
             $value = '<div class="alarnd--mockup-trigger-wrap"><div class="alarnd--mockup-trigger-area">';
             $value .= '<button id="ml_mockup_gen-'.$user_id.'" type="button" class="button button-primary ml_mockup_gen_trigger ml_add_loading" data-settings=\'' . wp_json_encode($user_data) . '\' data-user_id="'.$user_id.'">'.$button_text.'</button>';
-            $value .= '<div class="alarnd--mockup-progress"><span id="ml_mockup_progress_bar-'.$user_id.'" class="ml_mockup_progress_bar ml_mockup_progress_bar-'.$user_id.'">0</span>%</div>';
             $value .= '</div></div>';
 
             echo $value;
@@ -406,8 +409,6 @@ class ALRN_Genrator {
         return $filter_results;
     }
 
-
-    
 
     public function create_dir($name) {
 
