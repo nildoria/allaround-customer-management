@@ -267,7 +267,7 @@ $current_user_id = $get_current_puser->ID;
                                     <div class="alarn--pricing-column alarn--pricing-column-chart">
                                         <h5>תמחור כמות</h5>
                                         <div class="alarn--price-chart">
-                                            <div class="alarnd--price-chart-price">
+                                            <div class="alarnd--price-chart-price <?php echo count($discount_steps) > 4 ? 'alarnd--plus4item-box' : ''; ?>">
                                                 <?php 
                                                 $index = 0;
                                                 foreach( $discount_steps as $step ) :
@@ -281,16 +281,6 @@ $current_user_id = $get_current_puser->ID;
                                                 </div>
                                                 <?php $index++; endforeach; ?>
                                             </div>
-                                            <!-- <div class="alarnd--price-chart-qty">
-                                                <div class="alarnd--price-chart-item">
-                                                    <span>מחיר (כולל מע"מ)</span>
-                                                </div>
-                                                <//?php foreach( $discount_steps as $step ) : ?>
-                                                <div class="alarnd--price-chart-item">
-                                                    <span><//?php echo $step['amount'] == 0 ? wc_price($product->get_regular_price(), array('decimals' => 0)) : wc_price($step['amount'], array('decimals' => 0)); ?></span>
-                                                </div>
-                                                <//?php endforeach; ?>
-                                            </div> -->
                                             
                                         </div>
                                     </div>

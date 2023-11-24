@@ -418,9 +418,14 @@ function ml_get_gallery_thumbnail($key, $attachment_id, $user_id, $product_id, $
 function ml_gallery_carousels( $product_id, $user_id ) {
     // error_log( $product_id );
     $galleries = get_gallery_thumbs( $product_id );
-    // echo '<pre>';
-    // print_r( $galleries );
-    // echo '</pre>';
+
+    $product = wc_get_product( $product_id );
+
+    $thumbnail = wp_get_attachment_image_src($product->get_image_id(), 'alarnd_main_thumbnail');
+    if( ! empty( $thumbnail ) ) {
+        $thumbnail = ml_get_thumbnail($thumbnail, $user_id, $product_id );
+    }
+
     if( ! empty( $galleries ) ) {
         echo ' <div class="woocommerce-product-gallery alarn--pricing-column">';
             echo '<div class="allaround--slick-carousel">';
@@ -436,12 +441,11 @@ function ml_gallery_carousels( $product_id, $user_id ) {
                 echo '<li><a href="#" data-slide="'.$key.'" style="background-color: '.$gallery['color'].'"></a></li>';
             }
             echo '</ol>';
-            //echo '<div class="mlHiddenGallery">';
-            // foreach ($galleries as $key => $gallery) {
-            //     $full_thumbnail = ml_get_gallery_thumbnail($key, $gallery['attachment_id'], $user_id, $product_id, true);
-            //     echo '<a class="mlGallerySingle" href="'.$full_thumbnail.'" data-title="'.$gallery['title'].'"></a>';
-            // }
-            //echo '</div>';
+        echo '</div>';
+    } elseif( ! empty( $thumbnail ) ) {
+        // Product Thumbnail
+        echo '<div class="product-thumbnail alarn--pricing-column">';
+        echo '<img src="'.$thumbnail.'" loading="lazy" />';
         echo '</div>';
     }
 }
@@ -1229,7 +1233,7 @@ function allaround_card_form($user_id = '') {
 
     ?>
     <?php if( !is_user_logged_in() ) : ?>
-    <div class="alrnd--shipping_address_tokenized">
+    <div class="alrnd--shipping_address_tokenized mini_non_loggedIn">
         <?php if( $is_disabled === false ) : ?>
         <div id="alarnd__details_preview">
             <div class="alarnd--payout-col alarnd--details-previewer">
@@ -1250,8 +1254,8 @@ function allaround_card_form($user_id = '') {
                 </div>
             </div>
         </div>
-        <?php endif; ?>
         <?php echo allaround_customer_form($is_disabled); ?>
+        <?php endif; ?>
     </div>
     <?php endif; ?>
 
