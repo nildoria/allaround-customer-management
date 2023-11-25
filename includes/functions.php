@@ -1933,6 +1933,37 @@ function ml_get_current_list($url) {
     }
 }
 
+function ml_customers_arr() {
+    $customer_query = new WP_User_Query(
+        array(
+            'fields' => 'all',
+            'role' => 'customer',
+            'number' => 5000
+        )
+    );
+    return $customer_query->get_results();
+}
+
+function acf_customers_list_choices_cb( $field ) {
+
+    // reset choices
+    $field['choices'] = array();
+
+    $customers = ml_customers_arr();
+
+    // Loop through the array and add to field 'choices'
+    if( is_array($customers) && ! empty($customers) ) {
+        foreach( $customers as $customer ) {
+            $field['choices'][ $customer->ID ] = $customer->display_name;
+        }
+    }
+
+    // return the field
+    return $field;
+
+}
+add_filter( 'acf/load_field/name=customers_list', 'acf_customers_list_choices_cb' );
+
 function ml_products_per_page() {
     $products_per_page = get_field('products_per_page', 'option');
     if( empty( $products_per_page ) ) {
