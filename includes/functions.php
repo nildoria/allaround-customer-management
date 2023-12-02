@@ -262,6 +262,7 @@ function acf_select_products_choices_cb( $field ) {
 add_filter( 'acf/load_field/name=selected_products', 'acf_select_products_choices_cb' );
 add_filter( 'acf/load_field/name=disable_product', 'acf_select_products_choices_cb' );
 add_filter( 'acf/load_field/name=default_products', 'acf_select_products_choices_cb' );
+add_filter( 'acf/load_field/name=custom_logo_products', 'acf_select_products_choices_cb' );
 
 add_action( 'alarnd__modal_cart', 'woocommerce_template_single_add_to_cart' );
 
@@ -1963,6 +1964,7 @@ function acf_customers_list_choices_cb( $field ) {
 
 }
 add_filter( 'acf/load_field/name=customers_list', 'acf_customers_list_choices_cb' );
+
 
 function ml_products_per_page() {
     $products_per_page = get_field('products_per_page', 'option');

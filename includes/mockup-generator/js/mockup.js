@@ -206,15 +206,23 @@ const generateImageWithLogos = async (backgroundUrl, user_id, product_id, logo, 
 
         // check if select second logo or not
         // check if second logo value exists or not
-        let finalLogo = logoNumber === 'second' && (logo_second && logo_second != null && logo_second != undefined) ? logo_second : logo;
+        let finalLogo = logo;
+        let finalLogoNumber = 'lighter';
+
+        if(logoNumber === 'second' && (logo_second && logo_second != null && logo_second != undefined)) {
+            finalLogo = logo_second;
+            finalLogoNumber = 'darker';
+        }
 
         if( gallery && gallery !== false && gallery.length !== 0 ) {
             
             if( gallery['type'] == 'light' ) {
                 finalLogo = logo;
+                finalLogoNumber = 'lighter';
             }
             if( gallery['type'] == 'dark' && (logo_second && logo_second != null && logo_second != undefined) ) {
                 finalLogo = logo_second;
+                finalLogoNumber = 'darker';
             }
         }
 
@@ -225,6 +233,8 @@ const generateImageWithLogos = async (backgroundUrl, user_id, product_id, logo, 
                 product_id: product_id,
                 user_id: user_id,
                 custom_logo: custom_logo,
+                finalLogoNumber: finalLogoNumber,
+                logoNumber: logoNumber,
                 is_feature: is_feature_image
             };
             
@@ -271,12 +281,25 @@ const generateImageWithLogos = async (backgroundUrl, user_id, product_id, logo, 
 
 // Function to load a logo image
 const loadLogoImage = async (imgData) => {
-    const { url, product_id, user_id, is_feature, custom, custom_logo } = imgData;
+    const { url, product_id, user_id, is_feature, custom, custom_logo, finalLogoNumber, logoNumber } = imgData;
 
     let fetchUrl = url;
-    if( undefined != custom && true === custom) {
-        fetchUrl = custom_logo;
+    if( undefined != custom && true === custom && custom_logo != null) {
+        if (
+            custom_logo.hasOwnProperty("allow_products") && 
+            Array.isArray(custom_logo.allow_products) && 
+            custom_logo.allow_products.includes(product_id)
+        ) {
+            if (
+                custom_logo.hasOwnProperty(finalLogoNumber) && 
+                custom_logo[finalLogoNumber] && 
+                custom_logo.finalLogoNumber !== ""
+            ) {
+                fetchUrl = custom_logo[finalLogoNumber];
+            }
+        }
     }
+    console.log('fetchUrl', fetchUrl);
     const logoResponse = await fetch(fetchUrl);
     if (!logoResponse.ok) {
         throw new Error(`Failed to fetch logo image: ${logoResponse.status} ${logoResponse.statusText} is_feature:${is_feature} url:${url} id:${product_id} user:${user_id}`);
@@ -549,16 +572,12 @@ function getItemData(elm) {
     const logo = settings.logo;
     const user_id = settings.user_id;
     let logo_second = settings.logo_second;
-    let custom_logo = settings.custom_logo;
+    let custom_logo = settings.custom_logo_data;
+    // let custom_logo = undefined;
 
     if (logo_second && !isValidUrl(logo_second)) {
         console.log('logo_second is not a valid URL. Setting to undefined or default.');
         logo_second = undefined; // or set to a default value
-    }
-    
-    if (custom_logo && !isValidUrl(custom_logo)) {
-        console.log('custom_logo is not a valid URL. Setting to undefined or default.');
-        custom_logo = undefined; // or set to a default value
     }
 
     elm.addClass('ml_loading');

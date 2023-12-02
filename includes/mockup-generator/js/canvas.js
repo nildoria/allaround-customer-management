@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const mergedCanvas = document.getElementById('mergedCanvas');
     const logoNumberBtn = document.getElementById('logoNumber');
     const addLogoBtn = document.getElementById('addLogo');
-    const addSecondLogo = document.getElementById('addSecondLogo');
+    const addBackLogo = document.getElementById('addBackLogo');
     const rotationInput = document.getElementById('rotationInput');
     const rotateLeftBtn = document.getElementById('rotateLeft');
     const rotateRightBtn = document.getElementById('rotateRight');
@@ -277,7 +277,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 const newHeight = aspect_height(originalWidth, originalHeight, width);
                 const newY = aspectY(newHeight, height, y);
     
-                const logoImageSrc = custom ? custom_logo_src : logoImage.src;
+                // const logoImageSrc = custom ? custom_logo_src : logoImage.src;
+                const logoImageSrc = logoImage.src;
                 await loadImage(logoImageSrc); // Await the loading of the logo image
 
                 console.log('logoInfo', logoInfo);
@@ -370,13 +371,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // Check if if customer exists in allow customers_list
         // Check if user has custom logo
-        if( customers_list.includes(dataUserId) && customLogo && customLogo != undefined && customLogo != null ) {
-            addSecondLogo.disabled = false;
-            custom_logo_src = customLogo;
-        } else {
-            addSecondLogo.disabled = true;
-            custom_logo_src = selectedLogoPath;
-        }
+        // if( customers_list.includes(dataUserId) && customLogo && customLogo != undefined && customLogo != null ) {
+        //     addBackLogo.disabled = false;
+        //     custom_logo_src = customLogo;
+        // } else {
+        //     addBackLogo.disabled = true;
+        //     custom_logo_src = selectedLogoPath;
+        // }
 
         if (selectedLogoPath) {
             const logoImage = new Image();
@@ -624,45 +625,53 @@ document.addEventListener('DOMContentLoaded', function () {
             const mouseX = e.offsetX;
             const mouseY = e.offsetY;
     
-            // Store the original dimensions before resizing
-            if (!originalLogoDimensions) {
-                originalLogoDimensions = {
-                    width: selectedLogo.width,
-                    height: selectedLogo.height,
-                };
-            }
-    
-            let newWidth, newHeight;
-    
             if (resizeHandle.includes('right')) {
-                newWidth = mouseX - selectedLogo.x;
+                // Store the original dimensions before resizing
+                if (!originalLogoDimensions) {
+                    originalLogoDimensions = {
+                        width: selectedLogo.width,
+                        height: selectedLogo.height,
+                    };
+                }
+
+                console.log("selectedLogo", selectedLogo);
+                console.log(originalLogoDimensions);
+                const newWidth = mouseX - selectedLogo.x;
     
                 // Calculate the new height to maintain the aspect ratio
-                newHeight = newWidth * (originalLogoDimensions.height / originalLogoDimensions.width);
-            }
+                const aspectRatio = originalLogoDimensions.width / originalLogoDimensions.height;
+                const newHeight = newWidth / aspectRatio;
     
+                selectedLogo.width = newWidth;
+                selectedLogo.height = newHeight;
+
+                console.log("newWidth", newWidth);
+                console.log("newHeight", newHeight);
+            }
             if (resizeHandle.includes('bottom')) {
-                newHeight = mouseY - selectedLogo.y;
+                // Store the original dimensions before resizing
+                if (!originalLogoDimensions) {
+                    originalLogoDimensions = {
+                        width: selectedLogo.width,
+                        height: selectedLogo.height,
+                    };
+                }
+    
+                const newHeight = mouseY - selectedLogo.y;
     
                 // Calculate the new width to maintain the aspect ratio
-                newWidth = newHeight * (originalLogoDimensions.width / originalLogoDimensions.height);
+                const aspectRatio = originalLogoDimensions.width / originalLogoDimensions.height;
+                const newWidth = newHeight * aspectRatio;
+                
+    
+                selectedLogo.width = newWidth;
+                selectedLogo.height = newHeight;
             }
-    
-            // Limit minimum size to avoid issues
-            newWidth = Math.max(newWidth, 10);
-            newHeight = Math.max(newHeight, 10);
-    
-            selectedLogo.width = newWidth;
-            selectedLogo.height = newHeight;
     
             draw();
         }
     });
     
-    
-    
-    
-
     mergedCanvas.addEventListener('mouseup', () => {
         isDragging = false;
         isResizing = false;
@@ -760,12 +769,12 @@ document.addEventListener('DOMContentLoaded', function () {
         };
     });
     
-    addSecondLogo.addEventListener('click', (e) => {
+    addBackLogo.addEventListener('click', (e) => {
         e.preventDefault();
         
         rotationInput.value = '0';
         
-        const selectedLogoPath = custom_logo_src || logoSelector.value; // Use the selected logo path or the customlogo path
+        const selectedLogoPath = logoSelector.value || original_logo_src; // Use the selected logo path or the customlogo path
         const logoImage = new Image();
         logoImage.src = selectedLogoPath;
     

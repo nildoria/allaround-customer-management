@@ -211,7 +211,15 @@ class ALRN_Genrator {
             $thumbnails = $this->get_thumbnails( $user_id );
             $logo_positions = $this->logo_positions( $user_id );
 
-            $custom_logo = get_field('custom_logo', "user_{$user_id}");
+            $custom_logo_lighter = get_field('custom_logo_lighter', "user_{$user_id}");
+            $custom_logo_darker = get_field('custom_logo_darker', "user_{$user_id}");
+            $custom_logo_products = get_field('custom_logo_products', "user_{$user_id}");
+
+            $custom_logo_data = array(
+                "lighter" => $custom_logo_lighter,
+                "darker" => $custom_logo_darker,
+                "allow_products" => $custom_logo_products
+            );
 
             if( isset( $_GET['dev'] ) && 'true' === $_GET['dev'] ) {
                 echo '<pre>';
@@ -229,8 +237,8 @@ class ALRN_Genrator {
                 'logo_positions' => $logo_positions
             );
 
-            if( ! empty( $custom_logo ) ) {
-                $user_data['custom_logo'] = $custom_logo;
+            if( ! empty( $custom_logo_data ) ) {
+                $user_data['custom_logo_data'] = $custom_logo_data;
             }
 
             // Output the content
@@ -287,7 +295,15 @@ class ALRN_Genrator {
             $thumbnails = $this->get_thumbnails( $user_id );
             $logo_positions = $this->logo_positions( $user_id );
 
-            $custom_logo = get_field('custom_logo', "user_{$user_id}");
+            $custom_logo_lighter = get_field('custom_logo_lighter', "user_{$user_id}");
+            $custom_logo_darker = get_field('custom_logo_darker', "user_{$user_id}");
+            $custom_logo_products = get_field('custom_logo_products', "user_{$user_id}");
+
+            $custom_logo_data = array(
+                "lighter" => $custom_logo_lighter,
+                "darker" => $custom_logo_darker,
+                "allow_products" => $custom_logo_products
+            );
 
             // echo '<pre>';
             // echo "<h2>$user_id</h2>";
@@ -303,8 +319,8 @@ class ALRN_Genrator {
                 'logo_positions' => $logo_positions
             );
 
-            if( ! empty( $custom_logo ) ) {
-                $user_data['custom_logo'] = $custom_logo;
+            if( ! empty( $custom_logo_data ) ) {
+                $user_data['custom_logo_data'] = $custom_logo_data;
             }
 
             // Output the content
