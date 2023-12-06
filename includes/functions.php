@@ -123,6 +123,24 @@ function get_positions_by_id( $post_id ) {
     return $filter_arr;
 }
 
+function delete_positions_by_id($post_id) {
+    // Get all post meta for the specified post ID
+    $all_meta = get_post_meta($post_id);
+
+    if( empty( $all_meta ) )
+        return false;
+
+    // Loop through all post meta
+    foreach ($all_meta as $meta_key => $meta_values) {
+        // Check if the meta key starts with "ml_logos_positions"
+        if (strpos($meta_key, 'ml_logos_positions') === 0) {
+            // Delete the post meta with the matching key
+            delete_post_meta($post_id, $meta_key);
+        }
+    }
+    return true;
+}
+
 
 
 
@@ -1156,7 +1174,9 @@ function alarnd_single_checkout($user_id = false) {
                     <div id="alarnd__details_preview">
                         <div class="alarnd--payout-col alarnd--details-previewer">
                             <h3>כתובת למשלוח</h3>
-                            <div class="tokenized_inv_name_cont"><?php esc_html_e( 'חשבונית על שם', 'hello-elementor' ); ?>:<p class="tokenized_user_name"><?php echo $invoice ?></p></div>
+                            <div class="tokenized_inv_name_cont"><?php esc_html_e( 'חשבונית על שם', 'hello-elementor' ); ?>:
+                            <?php echo ! empty( $invoice ) ? '<p class="tokenized_user_name">'. esc_html( $invoice ) .'</p>' : ''; ?>
+                            </div>
 
                             <div class="alarnd--user-address">
                                 <div class="alarnd--user-address-wrap">
@@ -1239,7 +1259,7 @@ function allaround_card_form($user_id = '') {
         <div id="alarnd__details_preview">
             <div class="alarnd--payout-col alarnd--details-previewer">
                 <h3>כתובת למשלוח</h3>
-                <div class="tokenized_inv_name_cont"><?php esc_html_e( 'חשבונית על שם', 'hello-elementor' ); ?>:<p class="tokenized_user_name"><?php echo $invoice ?></p></div>
+                <div class="tokenized_inv_name_cont"><?php esc_html_e( 'חשבונית על שם', 'hello-elementor' ); ?>:<?php echo ! empty( $invoice ) ? '<p class="tokenized_user_name">'. esc_html( $invoice ) .'</p>' : ''; ?></div>
 
                 <div class="alarnd--user-address">
                     <div class="alarnd--user-address-wrap">
@@ -1972,4 +1992,31 @@ function ml_products_per_page() {
         return 3;
     }
     return (int) $products_per_page;
+}
+
+
+/**
+ * Get the orientation of an attachment (square or horizontal).
+ *
+ * @param int $attachment_id The ID of the attachment.
+ * @return string The orientation of the attachment ('horizontal', or 'square').
+ */
+function ml_get_orientation($attachment_id) {
+    // Get attachment metadata
+    $attachment_metadata = wp_get_attachment_metadata($attachment_id);
+
+    if ($attachment_metadata) {
+
+        // Check if the difference between width and height is within 10px (square)
+        $threshold = 10;
+        $difference = abs($attachment_metadata['width'] - $attachment_metadata['height']);
+
+        // Check if width and height are equal (square)
+        if ($difference <= $threshold) {
+            return 'square';
+        } else {
+            return 'horizontal';
+        }
+    }
+    return 'square';
 }

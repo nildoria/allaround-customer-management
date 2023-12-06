@@ -13,6 +13,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const logoSelector = document.getElementById('logoSelector');
     const undoResizeBtn = document.getElementById('undoResizeBtn');
     const removeUserDataBtn = document.getElementById('removeUserDataBtn');
+    const removeAllDataBtn = document.getElementById('removeAllDataBtn');
+    const removeDefaultDataBtn = document.getElementById('removeDefaultDataBtn');
     const productId = document.getElementById('ml_product_id');
     const mainWrap = document.getElementById('alarnd--main-canvas-editor-wrap');
     const alarndSaveCanvasBtn = document.getElementById('alarndSaveCanvas');
@@ -100,6 +102,22 @@ document.addEventListener('DOMContentLoaded', function () {
                         logos.push(newLogo);
                     }
                     is_saved_found = true;
+
+                    
+
+                    if( 
+                        saved_positions.ml_logos_positions && 
+                        saved_positions.ml_logos_positions.length !== 0
+                    ) {
+                        removeDefaultDataBtn.disabled = false;
+                    }
+                }
+
+                if( 
+                    saved_positions && 
+                    saved_positions.length !== 0
+                ) {
+                    removeAllDataBtn.disabled = false;
                 }
 
                 if (is_saved_found !== true) {
@@ -379,6 +397,10 @@ document.addEventListener('DOMContentLoaded', function () {
         //     custom_logo_src = selectedLogoPath;
         // }
 
+        if( "trigger_types" === e.source ) {
+            return false;
+        }
+
         if (selectedLogoPath) {
             const logoImage = new Image();
             logoImage.src = selectedLogoPath;
@@ -398,9 +420,13 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    function change_trigger(elm, value = '') {
+    function change_trigger(elm, value = '', source = '') {
         elm.value = value;
         const changeEvent = new Event("change", { bubbles: true });
+        
+        // Attach the source information to the event
+        changeEvent.source = source;
+        
         elm.dispatchEvent(changeEvent);
     }
 
@@ -427,7 +453,7 @@ document.addEventListener('DOMContentLoaded', function () {
         logoImage.src = original_logo_src;
         logo_src = original_logo_src;
 
-        change_trigger(logoSelector);
+        change_trigger(logoSelector, '', 'trigger_types');
         rotationInput.value = '0';
         logos = [];
     
@@ -498,12 +524,19 @@ document.addEventListener('DOMContentLoaded', function () {
     function removeDisabled() {
         // Get all child buttons and input elements within the parent element
         const childButtonsAndInputs = mainWrap.querySelectorAll("button, input, select");
-
-        // Disable all child buttons and input elements
-        childButtonsAndInputs.forEach(function (element) {
-            element.disabled = false;
+    
+        // List of IDs to skip
+        const idsToSkip = ["removeUserDataBtn", "removeAllDataBtn", "removeDefaultDataBtn"]; // Add your specific IDs to skip
+    
+        // Disable all child buttons and input elements, except for those in the skip list
+        childButtonsAndInputs.forEach(function (element) {    
+            // Check if the element's ID is in the skip list
+            if (!idsToSkip.includes(element.id)) {
+                element.disabled = false;
+            }
         });
     }
+    
     
     removeUserDataBtn.addEventListener('click', (e) => {
         e.preventDefault();
@@ -541,6 +574,138 @@ document.addEventListener('DOMContentLoaded', function () {
                             const updatedSettings = JSON.parse(responseData);
                             settings = updatedSettings;
                             saved_positions = settings.positions ? settings.positions : saved_positions;
+
+                            resetRemoveBtnDisability(saved_positions);
+
+                            logoSelector.value = '';
+                            const changeEvent = new Event("change", { bubbles: true });
+                            logoSelector.dispatchEvent(changeEvent);
+
+                            console.log('Updated Settings:', settings);
+                            console.log('saved_positions:', saved_positions);
+                        } catch (error) {
+                            console.error('Error parsing updated settings:', error);
+                        }
+                    } else {
+                        console.log( 'Error: Unable to send data' );
+                    }
+                    alarndSaveCanvasBtn.classList.remove('ml_loading');
+                    removeDisabled();
+                }
+            };
+
+            xhr.send(data);
+        }
+    });
+
+    function resetRemoveBtnDisability(data) {
+        if( 
+            data && 
+            data.length !== 0
+        ) {
+            removeAllDataBtn.disabled = false;
+        }
+
+        if( 
+            data.ml_logos_positions && 
+            data.ml_logos_positions.length !== 0
+        ) {
+            removeDefaultDataBtn.disabled = false;
+        }
+    }
+    
+    removeAllDataBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        
+        if (logos) {
+
+            const product_id = productId.value;
+            logoType = logoTypesSelect.value;
+
+            const xhr = new XMLHttpRequest();
+            const url = canvasObj.ajax_url;
+
+            // Create data object with the selected value
+            const data = new FormData();
+            data.append('action', 'remove_all_data');
+            data.append('nonce', canvasObj.nonce);
+            data.append('product_id', product_id);
+
+            xhr.onloadstart = function () {
+                alarndSaveCanvasBtn.classList.add('ml_loading');
+                addDisabled();
+            };
+            xhr.open('POST', url, true);
+
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4) {
+                    if (xhr.status === 200) {
+                        const responseData = xhr.responseText;
+                        console.log(`Response: ${responseData}`);
+                        // Assuming responseData is a JSON string containing updated settings
+                        try {
+                            const updatedSettings = JSON.parse(responseData);
+                            settings = updatedSettings;
+                            saved_positions = settings.positions ? settings.positions : saved_positions;
+
+                            resetRemoveBtnDisability(saved_positions);
+
+                            logoSelector.value = '';
+                            const changeEvent = new Event("change", { bubbles: true });
+                            logoSelector.dispatchEvent(changeEvent);
+
+                            console.log('Updated Settings:', settings);
+                            console.log('saved_positions:', saved_positions);
+                        } catch (error) {
+                            console.error('Error parsing updated settings:', error);
+                        }
+                    } else {
+                        console.log( 'Error: Unable to send data' );
+                    }
+                    alarndSaveCanvasBtn.classList.remove('ml_loading');
+                    removeDisabled();
+                }
+            };
+
+            xhr.send(data);
+        }
+    });
+    
+    removeDefaultDataBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        
+        if (logos) {
+
+            const product_id = productId.value;
+            logoType = logoTypesSelect.value;
+
+            const xhr = new XMLHttpRequest();
+            const url = canvasObj.ajax_url;
+
+            // Create data object with the selected value
+            const data = new FormData();
+            data.append('action', 'remove_default_data');
+            data.append('nonce', canvasObj.nonce);
+            data.append('product_id', product_id);
+
+            xhr.onloadstart = function () {
+                alarndSaveCanvasBtn.classList.add('ml_loading');
+                addDisabled();
+            };
+            xhr.open('POST', url, true);
+
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4) {
+                    if (xhr.status === 200) {
+                        const responseData = xhr.responseText;
+                        console.log(`Response: ${responseData}`);
+                        // Assuming responseData is a JSON string containing updated settings
+                        try {
+                            const updatedSettings = JSON.parse(responseData);
+                            settings = updatedSettings;
+                            saved_positions = settings.positions ? settings.positions : saved_positions;
+
+                            resetRemoveBtnDisability(saved_positions);
 
                             logoSelector.value = '';
                             const changeEvent = new Event("change", { bubbles: true });
@@ -967,6 +1132,13 @@ document.addEventListener('DOMContentLoaded', function () {
                             const updatedSettings = JSON.parse(responseData);
                             settings = updatedSettings;
                             saved_positions = settings.positions ? settings.positions : saved_positions;
+
+                            resetRemoveBtnDisability(saved_positions);
+
+                            if( logoSelector.value != '' ) {
+                                removeUserDataBtn.disabled = false;
+                            }
+
                             console.log('Updated Settings:', settings);
                             console.log('saved_positions:', saved_positions);
                         } catch (error) {

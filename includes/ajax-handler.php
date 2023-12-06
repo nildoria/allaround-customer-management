@@ -93,6 +93,9 @@ class ML_Ajax {
             $discount_steps = get_field( 'discount_steps', $product->get_id() );
             $discount_steps = ml_filter_disount_steps($discount_steps);
 
+            $customQuantity_steps = get_field( 'quantity_steps', $product->get_id() );
+            $customQuantity_steps = ml_filter_disount_steps($customQuantity_steps);
+
             $thumbnail = wp_get_attachment_image_src($product->get_image_id(), 'alarnd_main_thumbnail');
             if( ! $thumbnail )
                 continue;
@@ -145,7 +148,7 @@ class ML_Ajax {
                 
                 // Buttons
                 echo '<div class="product-buttons">';
-                if( ! empty( $discount_steps ) || ! empty( $pricing_description ) ) {
+                if( ! empty( $discount_steps ) || ! empty( $pricing_description ) || ! empty( $customQuantity_steps ) ) {
                     echo '<a href="#alarnd__pricing_info-'. $product->get_id() .'" class="view-details-button alarnd_view_pricing_cb" data-product_id="'. $product->get_id() .'">כמות, מחיר ומבחר</a>';
                 } else {
                     echo '<span class="view_details_not_available"></span>';
@@ -154,7 +157,7 @@ class ML_Ajax {
                 echo '</div>';
                 echo '</div>';
 
-                if( ! empty( $discount_steps ) || ! empty( $pricing_description ) ) : ?>
+                if( ! empty( $discount_steps ) || ! empty( $pricing_description ) || ! empty( $customQuantity_steps ) ) : ?>
                     <div id="alarnd__pricing_info-<?php echo $product->get_id(); ?>" data-product_id="<?php echo $product->get_id(); ?>" class="mfp-hide white-popup-block alarnd--info-modal">
                         <div class="alarnd--modal-inner alarnd--modal-chart-info">
                             <h2><?php echo get_the_title( $product->get_id() ); ?></h2>
@@ -169,7 +172,7 @@ class ML_Ajax {
                                     <?php echo allround_get_meta( $pricing_description ); ?>
                                 </div>
                                 <?php endif; ?>
-                                <?php if( ! empty( $discount_steps ) ) : ?>
+                                <?php if( ! empty( $discount_steps ) && ! empty( $group_enable ) ) : ?>
                                 <div class="alarn--pricing-column alarn--pricing-column-chart">
                                     <h5>תמחור כמות</h5>
                                     <div class="alarn--price-chart">
@@ -184,6 +187,29 @@ class ML_Ajax {
                                             <div class="alarnd--price-chart-item">
                                                 <span class="price_step_price"><?php echo $step['amount'] == 0 ? wc_price($product->get_regular_price(), array('decimals' => 0)) : wc_price($step['amount'], array('decimals' => 0)); ?></span>
                                                 <span class="price_step_qty">כמות: <?php echo esc_html( $qty); ?></span>
+                                            </div>
+                                            <?php $index++; endforeach; ?>
+                                        </div>
+                                        
+                                    </div>
+                                </div>
+                                <?php endif; ?>
+                                    
+                                <?php if( ! empty( $customQuantity_steps ) && ! empty( $custom_quanity ) ) : ?>
+                                <div class="alarn--pricing-column alarn--pricing-column-chart">
+                                    <h5>תמחור כמות</h5>
+                                    <div class="alarn--price-chart">
+                                        <div class="alarnd--price-chart-price <?php echo count($customQuantity_steps) > 4 ? 'alarnd--plus4item-box' : ''; ?>">
+                                            <?php 
+                                            $index = 0;
+                                            foreach( $customQuantity_steps as $step ) :
+                                            $prev = ($index == 0) ? false : $customQuantity_steps[$index-1];                            
+                                            $qty = ml_get_price_range($step['quantity'], $step['amount'], $prev);
+
+                                            ?>
+                                            <div class="alarnd--price-chart-item">
+                                                <span class="price_step_price"><?php echo $step['amount'] == 0 ? wc_price($product->get_regular_price(), array('decimals' => 0)) : wc_price($step['amount'], array('decimals' => 0)); ?></span>
+                                                <span class="price_step_qty">כמות: <span><?php echo esc_html( $qty); ?></span></span>
                                             </div>
                                             <?php $index++; endforeach; ?>
                                         </div>
@@ -1239,6 +1265,7 @@ class ML_Ajax {
                             </div>
                         </div>
                         <?php if( ! empty( $steps ) ) :
+                        $total_steps = count($steps);
                         foreach( $steps as $key => $step ) :
                         $item_price = ! empty( $step['amount'] ) ? $step['amount'] : $product->get_regular_price();
                         $price = (int) $step['quantity'] * floatval( $item_price );
@@ -1248,7 +1275,12 @@ class ML_Ajax {
                             <div class="alarnd--single-variable">
                                 <span class="alarnd--single-var-info">
                                     <input type="radio" id="cutom_quantity-<?php echo $key; ?>" name="cutom_quantity" value="<?php echo $key; ?>" <?php echo 0 === $key ? 'checked="checked"' : ''; ?>>
-                                    <label for="cutom_quantity-<?php echo $key; ?>"><?php echo esc_html( $step['quantity'] ); ?></label>
+                                    <label for="cutom_quantity-<?php echo $key; ?>">
+                                        <?php echo esc_html( $step['quantity'] ); ?>
+                                        <?php if ($key === $total_steps - 1) : ?>
+                                            <span>+</span>
+                                        <?php endif; ?>
+                                    </label>
                                 </span>
                                 <?php echo wc_price( (int) $price, array('decimals' => 0)); ?>
                                 <span class="alarnd--single-saving"><?php echo esc_html( $item_price ); ?> <?php echo esc_html( $saving_info ); ?></span>

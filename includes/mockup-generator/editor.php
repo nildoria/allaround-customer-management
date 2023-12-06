@@ -10,8 +10,74 @@ class ALRN_Metabox {
 
         add_action('wp_ajax_save_canvas', array( $this, 'save_canvas' ));
         add_action('wp_ajax_remove_data', array( $this, 'remove_data' ));
+        add_action('wp_ajax_remove_all_data', array( $this, 'remove_all_data' ));
+        add_action('wp_ajax_remove_default_data', array( $this, 'remove_default_data' ));
     }
 
+    public function remove_default_data() {
+        check_ajax_referer( 'canvas_ajx_nonce', 'nonce' );
+
+        // Get the user ID from the AJAX request
+		$product_id = isset($_POST['product_id']) ? intval($_POST['product_id']) : '';
+
+        if( empty( $product_id ) ) {
+            wp_send_json_error();
+            wp_die();
+        }
+
+        $result = delete_post_meta($product_id, "ml_logos_positions");
+
+        if ($result === true) {
+            $featured_img_url = get_the_post_thumbnail_url( $product_id,'alarnd_main_thumbnail');
+            $filter_arr = get_positions_by_id( $product_id );
+    
+            $data = array(
+                "logo" => array(
+                    "square" => plugin_dir_url(__FILE__) . 'images/square.png',
+                    "horizontal" => plugin_dir_url(__FILE__) . 'images/horizontal.png'
+                ),
+                'positions' => $filter_arr,
+                "background" => $featured_img_url
+            );
+    
+            echo wp_json_encode($data);
+        }
+
+        wp_die();
+    }
+    
+    public function remove_all_data() {
+        check_ajax_referer( 'canvas_ajx_nonce', 'nonce' );
+
+        // Get the user ID from the AJAX request
+		$product_id = isset($_POST['product_id']) ? intval($_POST['product_id']) : '';
+
+        if( empty( $product_id ) ) {
+            wp_send_json_error();
+            wp_die();
+        }
+
+        $result = delete_positions_by_id($product_id);
+
+        if ($result === true) {
+            $featured_img_url = get_the_post_thumbnail_url( $product_id,'alarnd_main_thumbnail');
+            $filter_arr = get_positions_by_id( $product_id );
+    
+            $data = array(
+                "logo" => array(
+                    "square" => plugin_dir_url(__FILE__) . 'images/square.png',
+                    "horizontal" => plugin_dir_url(__FILE__) . 'images/horizontal.png'
+                ),
+                'positions' => $filter_arr,
+                "background" => $featured_img_url
+            );
+    
+            echo wp_json_encode($data);
+        }
+
+        wp_die();
+    }
+    
     public function remove_data() {
         check_ajax_referer( 'canvas_ajx_nonce', 'nonce' );
 
@@ -207,24 +273,20 @@ class ALRN_Metabox {
 
         $filter_arr = get_positions_by_id( $post->ID );
 
-        $customers_list = get_field('customers_list', $post->ID);
-        $customers_list = ! empty( $customers_list ) ? $customers_list : [];
-
-        if( isset( $_GET['dev'] ) && 'true' === $_GET['dev'] ) {
-            echo '<pre>';
-            print_r( $customers_list );
-            echo '</pre>';
-        }
-
         $data = array(
             "logo" => array(
                 "square" => plugin_dir_url(__FILE__) . 'images/square.png',
                 "horizontal" => plugin_dir_url(__FILE__) . 'images/horizontal.png'
             ),
             'positions' => $filter_arr,
-            'customers_list' => $customers_list,
             "background" => $featured_img_url
         );
+
+        if( isset( $_GET['dev'] ) && 'true' === $_GET['dev'] ) {
+            echo '<pre>';
+            print_r( $data );
+            echo '</pre>';
+        }
 
         ?>
         <div class="alarnd--canvas-wrapper">
@@ -282,6 +344,8 @@ class ALRN_Metabox {
                     <input type="hidden" id="ml_product_id" value="<?php echo esc_attr( $post->ID ); ?>">
                     <button id="undoResizeBtn" class="button">Undo Resize</button>
                     <button id="removeUserDataBtn" class="button" disabled="disabled">Remove User Data</button>
+                    <button id="removeAllDataBtn" class="button" disabled="disabled">Remove All Data</button>
+                    <button id="removeDefaultDataBtn" class="button" disabled="disabled">Remove Default Data</button>
                     <div class="rotate-controls">
                         <label for="rotationInput">Rotate:</label>
                         <input type="number" id="rotationInput" class="small-text" step="1" min="-360" max="360" value="0">

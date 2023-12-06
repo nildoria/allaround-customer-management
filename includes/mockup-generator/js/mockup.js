@@ -239,12 +239,25 @@ const generateImageWithLogos = async (backgroundUrl, user_id, product_id, logo, 
             };
             
             // Loop through the logo data and draw each logo on the canvas
-            for (const logoInfo of finalItem) {
-                const { x, y, width, height, angle, custom } = logoInfo;
+            for (const [index, logoInfo] of finalItem.entries()) {
+                let { x, y, width, height, angle, custom } = logoInfo;
 
                 imgData['custom'] = custom;
 
                 const logoImage = await loadLogoImage(imgData);
+
+                // if custom then check logo_type by image size
+                // then get that type value from resultItem
+                // and re-initialize x, y, width, height, angle again with new values.
+                if( custom === true ) {
+                    const get_type = get_orientation(logoImage);
+                    let get_type_values = resultItem.meta_value[get_type];
+                    if( get_type_values[index] && get_type_values[index] != null && get_type_values[index] != undefined ) {
+                        console.log("variable re-initializing....", get_type_values[index]);
+                        ({ x, y, width, height, angle } = get_type_values[index]);
+                    }
+                }
+
                 // Use the original width and height of the logo
                 const originalWidth = logoImage.width;
                 const originalHeight = logoImage.height;
@@ -279,6 +292,27 @@ const generateImageWithLogos = async (backgroundUrl, user_id, product_id, logo, 
     }
 };
 
+
+function get_orientation(attachment_metadata) {
+    // Get attachment metadata
+
+    if (attachment_metadata) {
+
+        // Check if the difference between width and height is within 10px (square)
+        const threshold = 10;
+        const difference = Math.abs(attachment_metadata.width - attachment_metadata.height);
+
+        // Check if width and height are equal (square)
+        if (difference <= threshold) {
+            return 'square';
+        } else {
+            return 'horizontal';
+        }
+    }
+    return 'square';
+}
+
+
 // Function to load a logo image
 const loadLogoImage = async (imgData) => {
     const { url, product_id, user_id, is_feature, custom, custom_logo, finalLogoNumber, logoNumber } = imgData;
@@ -301,6 +335,7 @@ const loadLogoImage = async (imgData) => {
     }
     console.log('fetchUrl', fetchUrl);
     const logoResponse = await fetch(fetchUrl);
+    console.log("image response", logoResponse);
     if (!logoResponse.ok) {
         throw new Error(`Failed to fetch logo image: ${logoResponse.status} ${logoResponse.statusText} is_feature:${is_feature} url:${url} id:${product_id} user:${user_id}`);
     }

@@ -912,7 +912,6 @@ ol.mlCustomDots a {
 }
 .alarnd--price-chart-price {
     display: flex;
-    direction: ltr;
     flex-wrap: wrap;
     justify-content: flex-end;
     max-width: 256px;
