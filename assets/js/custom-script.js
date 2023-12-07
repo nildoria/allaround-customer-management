@@ -139,6 +139,16 @@ jQuery(document).ready(function ($) {
 
     return false;
   });
+  
+  $(document).on(
+    "input",
+    "#customerDetails input",
+    filterWhenInput
+  );
+
+  function filterWhenInput() {
+    $('#customerDetails').find('.ml_error_label').remove();
+  }
 
   function initilize_validate() {
     $("#customerDetails").validate({
@@ -158,12 +168,17 @@ jQuery(document).ready(function ($) {
 
         var getData = $(form).serializeArray(),
           messagWrap = $(form).find(".form-message"),
+          user_id = $('#main').data('user_id'),
           button = $(form).find(".ml_save_customer_info");
 
         getData.push(
           {
             name: "action",
             value: "ml_customer_details",
+          },
+          {
+            name: "user_id",
+            value: user_id,
           },
           {
             name: "nonce",
@@ -174,30 +189,14 @@ jQuery(document).ready(function ($) {
         button.addClass("ml_loading");
         messagWrap.html("").slideUp();
 
-        // Form is valid, send data via AJAX
-        // $.ajax({
-        //   type: "POST",
-        //   dataType: "json",
-        //   url: ajax_object.ajax_url,
-        //   data: getData,
-        //   success: function (response) {
-        //     button.removeClass("ml_loading");
-
-        //     if (response.success === false) {
-        //       messagWrap
-        //         .html("<p>" + response.data.message + "</p>")
-        //         .slideDown();
-        //     }
-        //   },
-        //   error: function (xhr, status, error) {
-        //     button.removeClass("ml_loading");
-        //   },
-        // });
-
         $.ajax({
           type: "POST",
           url: ajax_object.ajax_url,
           data: getData,
+          beforeSend: function(){
+            $(form).find('.error').remove();
+            $(form).find('.ml_error_label').remove();
+          },
           success: function (response, status, xhr) {
             button.removeClass("ml_loading");
 
@@ -206,15 +205,25 @@ jQuery(document).ready(function ($) {
 
             // Check the content type to determine the dataType
             if (contentType && contentType.indexOf("application/json") !== -1) {
-              if (response.success === false) {
-                messagWrap
-                  .html("<p>" + response.data.message + "</p>")
-                  .slideDown();
+              if (response.success === false && response.data) {
+                var responseData = response.data;
+                if (typeof responseData === 'object' && responseData !== null) {
+                    for (var key in responseData) {
+                        if (responseData.hasOwnProperty(key)) {
+                            var value = responseData[key];
+                            if( $('#'+key).length !== 0 ) {
+                              $('#'+key).addClass('error').after('<label class="ml_error_label">'+value+'</label>');
+                            }
+                            console.log('Key:', key, 'Value:', value);
+                        }
+                    }
+                }
               }
             } else {
+              var cleanedResponse = response.replace(/\\/g, '');
               // Response is HTML or another format, set dataType to 'html'
               $("#customerDetails").slideUp();
-              $("#alarnd__details_preview").html(response).slideDown();
+              $("#alarnd__details_preview").html(cleanedResponse).slideDown();
               $(".alarnd--single-payout-submit").slideDown();
             }
           },
@@ -863,6 +872,29 @@ jQuery(document).ready(function ($) {
         // Call the function to attach the tooltip to product thumbnails
         attachTooltipToProductThumbnails();
       }, 1500);
+  });
+
+  // Assuming you have jQuery loaded on your page
+  $(document).ajaxComplete(function(event, xhr, settings) {
+      var response = xhr.responseText;
+      // Check if the response contains the custom error message
+      if (response.includes('<div class="custom-error-message woocommerce-info">')) {
+          console.log(response);
+
+          // Append the error message to the span with class 'coupon_varification_message'
+          setTimeout(function() {
+            var $message = $(response);
+
+            $('.coupon_varification_message').append($message.hide().fadeIn());
+
+            // Remove the error message after 4 seconds
+            setTimeout(function() {
+              $message.fadeOut(function() {
+                  $(this).remove();
+              });
+            }, 4000);
+          }, 2000);
+      }
   });
 
   // Listen for the WooCommerce AJAX complete event

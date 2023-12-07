@@ -1298,10 +1298,9 @@ function allaround_card_form($user_id = '') {
                         <div class="form-input">
                             <input type="text" id="cardNumber" name="cardNumber" maxlength="19" placeholder="<?php esc_attr_e("1111 1111 1111 1111", "mini-store" ); ?>" dir="ltr" required>
                             <svg id="ccicon" class="ccicon" width="750" height="471" viewBox="0 0 750 471" version="1.1" xmlns="http://www.w3.org/2000/svg"
-                            xmlns:xlink="http://www.w3.org/1999/xlink">
-
-                        </svg>
+                            xmlns:xlink="http://www.w3.org/1999/xlink"></svg>
                         </div>
+                        <div class="form-message"></div>
                     </div>
                     <div class="form-row flex-row exp-cvc-con">
                         <div class="form-row">
@@ -1484,7 +1483,6 @@ function allaround_card_form($user_id = '') {
                 <button type="submit" class="ml_add_loading button allaround_card_details_submit"><?php esc_html_e("התקדם לנקודת הביקורת", "mini-store" ); ?></button>
             </div>
         </div>
-        <div class="form-message"></div>
     </form>
     <?php
 }
@@ -2020,3 +2018,23 @@ function ml_get_orientation($attachment_id) {
     }
     return 'square';
 }
+
+// Custom Function for getting coupon code responses
+function customize_coupon_error_message( $err, $err_code, $coupon )
+{
+  $messages = array(
+    'coupon_apply_error' => __('This coupon cannot be applied.'),
+    'coupon_minimum_error' => __('You need to spend more to use this coupon.'),
+    // Add more custom error messages here
+  );
+
+  $message = isset( $messages[$err_code] ) ? $messages[$err_code] : $err;
+
+  // Display the customized error message
+  echo '<div class="custom-error-message woocommerce-info">' . $message . '</div>';
+
+  // Return an empty string to exclude the default error message
+  return '';
+}
+
+add_filter( 'woocommerce_coupon_error', 'customize_coupon_error_message', 10, 3 );

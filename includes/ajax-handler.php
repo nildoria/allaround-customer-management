@@ -547,6 +547,7 @@ class ML_Ajax {
         $cardNumber = str_replace(' ', '', $cardNumber);
 
         $current_user_id = $user_id;
+        $current_user = get_userdata( $current_user_id );
 
         if( 
             empty( $cardholderName ) ||
@@ -731,9 +732,7 @@ class ML_Ajax {
     public function ml_customer_details() {
         check_ajax_referer( 'aum_ajax_nonce', 'nonce' );
 
-        $current_user = wp_get_current_user();
-        $current_user_id = $current_user->ID;
-
+        $user_id = isset( $_POST['user_id'] ) && ! empty( $_POST['user_id'] ) ? absint( $_POST['user_id'] ) : '';
         $userName = isset( $_POST['userName'] ) && ! empty( $_POST['userName'] ) ? sanitize_text_field( $_POST['userName'] ) : '';
         $userPhone = isset( $_POST['userPhone'] ) && ! empty( $_POST['userPhone'] ) ? sanitize_text_field( $_POST['userPhone'] ) : '';
         $userAdress = isset( $_POST['userAdress'] ) && ! empty( $_POST['userAdress'] ) ? sanitize_text_field( $_POST['userAdress'] ) : '';
@@ -741,60 +740,76 @@ class ML_Ajax {
         $userCity = isset( $_POST['userCity'] ) && ! empty( $_POST['userCity'] ) ? sanitize_text_field( $_POST['userCity'] ) : '';
         $userInvoiceName = isset( $_POST['userInvoiceName'] ) && ! empty( $_POST['userInvoiceName'] ) ? sanitize_text_field( $_POST['userInvoiceName'] ) : '';
 
-        if( 
-            empty( $userName ) ||
-            empty( $userPhone ) ||
-            empty( $userAdress ) ||
-            empty( $userCity ) ||
-            empty( $userInvoiceName ) ||
-            empty( $userEmail ) 
-        ) {
-            wp_send_json_error( array(
-                "message" => esc_html__("Required field are empty. Please fill all the field.", "allaroundminilng")
-            ) );
-            wp_die();
-        }
-
+        $current_user_id = $user_id;
         $current_email = get_userdata($current_user_id)->user_email;
 
-        if(
-            ! is_email( $userEmail )
-        ) {
-            wp_send_json_error( array(
-                "message" => esc_html__("Please enter a valid email address.", "allaroundminilng")
-            ) );
-            wp_die();
+        $gonna_update = false;
+
+        // if user then only allow update
+        if( is_user_logged_in() ) {
+           $gonna_update = true;
         }
         
+        $invalid_inputs = [];
+
+        if( empty( $userName ) ) {
+            $invalid_inputs['userName'] = esc_html__("Please enter your full name.", "allaroundminilng");
+        }
+        if( empty( $userPhone ) ) {
+            $invalid_inputs['userPhone'] = esc_html__("Please enter a valid phone number.", "allaroundminilng");
+        }
+        if( empty( $userAdress ) ) {
+            $invalid_inputs['userAdress'] = esc_html__("Please provide your complete address.", "allaroundminilng");
+        }
+        if( empty( $userCity ) ) {
+            $invalid_inputs['userCity'] = esc_html__("Please provide your city.", "allaroundminilng");
+        }
+        if( empty( $userInvoiceName ) ) {
+            $invalid_inputs['userInvoiceName'] = esc_html__("Please enter the invoice number.", "allaroundminilng");
+        }
         if( 
+            empty( $userEmail ) ||
+            ! is_email( $userEmail )
+        ) {
+            $invalid_inputs['userEmail'] = esc_html__("Please provide a valid email address.", "allaroundminilng");
+        } 
+        
+        if( 
+            $gonna_update === true &&
             $current_email != $userEmail &&
             email_exists( $userEmail )
         ) {
-            wp_send_json_error( array(
-                "message" => esc_html__("This email address is registered with another account.", "allaroundminilng")
-            ) );
+            $invalid_inputs['userEmail'] = esc_html__("This email address is already in use.", "allaroundminilng");
+        }
+        
+        if( 
+            ! empty( $invalid_inputs )
+        ) {
+            wp_send_json_error( $invalid_inputs );
             wp_die();
         }
 
-        $phoneNumber = ml_get_phone_no( $userPhone );
-        $countryCode = ml_get_country_code();
+        if( $gonna_update === true ) {
+            $phoneNumber = ml_get_phone_no( $userPhone );
+            $countryCode = ml_get_country_code();
 
-        // update phone
-        update_user_meta_if_different($current_user_id, 'xoo_ml_phone_code', $countryCode);
-        update_user_meta_if_different($current_user_id, 'xoo_ml_phone_no', $phoneNumber);
+            // update phone
+            update_user_meta_if_different($current_user_id, 'xoo_ml_phone_code', $countryCode);
+            update_user_meta_if_different($current_user_id, 'xoo_ml_phone_no', $phoneNumber);
 
-        update_acf_usermeta($current_user_id, 'invoice', $userInvoiceName);
+            update_acf_usermeta($current_user_id, 'invoice', $userInvoiceName);
 
-        // WcooCommerce user field update
-        update_user_meta_if_different($current_user_id, 'billing_address_1', $userAdress);
-        update_user_meta_if_different($current_user_id, 'billing_phone', $userPhone);
-        update_user_meta_if_different($current_user_id, 'billing_city', $userCity);
+            // WcooCommerce user field update
+            update_user_meta_if_different($current_user_id, 'billing_address_1', $userAdress);
+            update_user_meta_if_different($current_user_id, 'billing_phone', $userPhone);
+            update_user_meta_if_different($current_user_id, 'billing_city', $userCity);
 
-        // Email address
-        update_user_email_if_different($current_user_id, $userEmail);
-        
-        // Display Name
-        update_user_name_if_different($current_user_id, $userName);
+            // Email address
+            update_user_email_if_different($current_user_id, $userEmail);
+            
+            // Display Name
+            update_user_name_if_different($current_user_id, $userName);
+        }
         ?>
         <div class="alarnd--payout-col alarnd--details-previewer">
             <h3>כתובת למשלוח</h3>
@@ -802,6 +817,7 @@ class ML_Ajax {
 
             <div class="alarnd--user-address">
                 <div class="alarnd--user-address-wrap">
+                    <?php echo ! empty( $userName ) ? '<p>'. esc_html( $userName ) .'</p>' : ''; ?>
                     <?php echo ! empty( $userAdress ) ? '<p>'. esc_html( $userAdress ) .'</p>' : ''; ?>
                     <?php echo ! empty( $userPhone ) ? '<p>'. esc_html( $userPhone ) .'</p>' : ''; ?>
                     <?php echo ! empty( $userCity ) ? '<p>'. esc_html( $userCity ) .'</p>' : ''; ?>
@@ -928,6 +944,8 @@ class ML_Ajax {
             $quantity = isset( $_POST['quantity'] ) && ! empty( $_POST['quantity'] ) ? intval( $_POST['quantity'] ) : '';
 
             $passed_validation = apply_filters( 'woocommerce_add_to_cart_validation', true, $product_id, $quantity );
+            
+            error_log( print_r($_POST, true) );
 
 
             if ( $passed_validation && WC()->cart->add_to_cart( $product_id, $quantity, '', '', $cart_item_data ) ) {

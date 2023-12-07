@@ -405,6 +405,11 @@ table tbody > tr:nth-child(odd) > td, table tbody > tr:nth-child(odd) > th {
 td.product-quantity .quantity input[type="number"] {
   padding: 6px 5px;
 }
+.custom-error-message.woocommerce-info {
+    margin-top: 10px;
+    margin-bottom: 0;
+    text-align: right;
+}
 form#customerDetails label.error,
 form#cardDetailsForm label.error {
   display: none !important;
@@ -1223,6 +1228,9 @@ form.allaround--card-form .form-input {
   color: red;
   line-height: 1.5;
   padding-top: 15px;
+}
+.form-cardDetail-fields .form-message {
+  padding-top: 0px;
 }
 .alarnd--woocommerce-checkout-page h2 {
   text-align: center;
