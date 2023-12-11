@@ -1283,7 +1283,6 @@ class ML_Ajax {
                             </div>
                         </div>
                         <?php if( ! empty( $steps ) ) :
-                        $total_steps = count($steps);
                         foreach( $steps as $key => $step ) :
                         $item_price = ! empty( $step['amount'] ) ? $step['amount'] : $product->get_regular_price();
                         $price = (int) $step['quantity'] * floatval( $item_price );
@@ -1295,9 +1294,6 @@ class ML_Ajax {
                                     <input type="radio" id="cutom_quantity-<?php echo $key; ?>" name="cutom_quantity" value="<?php echo $key; ?>" <?php echo 0 === $key ? 'checked="checked"' : ''; ?>>
                                     <label for="cutom_quantity-<?php echo $key; ?>">
                                         <?php echo esc_html( $step['quantity'] ); ?>
-                                        <?php if ($key === $total_steps - 1) : ?>
-                                            <span>+</span>
-                                        <?php endif; ?>
                                     </label>
                                 </span>
                                 <?php echo wc_price( (int) $price, array('decimals' => 0)); ?>
