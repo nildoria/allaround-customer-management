@@ -33,6 +33,7 @@ jQuery(document).ready(function ($) {
     var $grid = $("#allaround_products_list").isotope({
       itemSelector: ".product-item",
       layoutMode: "fitRows",
+      originLeft: false,
     });
 
     $(document).on("click", ".product-filter .filter-button", function () {
