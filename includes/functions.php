@@ -2038,3 +2038,64 @@ function customize_coupon_error_message( $err, $err_code, $coupon )
 }
 
 add_filter( 'woocommerce_coupon_error', 'customize_coupon_error_message', 10, 3 );
+
+
+/**
+ * Send Customer Leeds form Submission
+ *
+ * @return void
+ */
+function customer_leads_form_shortcode() {
+    ob_start(); ?>
+
+    <form id="customerLeadsForm">
+        <div class="alarnd--footer-form uses-form">
+            <div class="alarnd--form-row">
+                <div class="alarnd--single-form-item allarnd--name-field">
+                    <span class="alarnd__label">שם החברה</span>
+                    <input type="text" id="companyName" placeholder="הקלד את שם החברה" name="companyName" required>
+                </div>
+                <div class="alarnd--single-form-item allarnd--name-field">
+                    <span class="alarnd__label">שם מלא</span>
+                    <input type="text" id="fullName" placeholder="הקלד שם מלא" name="fullName" required>
+                </div>
+            </div>
+
+            <div class="alarnd--form-row">
+                <div class="alarnd--single-form-item allarnd--tel-field">
+                    <span class="alarnd__label">טלפון</span>
+                    <input type="tel" id="phone" placeholder="570-00-0000" name="phone" required>
+                </div>
+                <div class="alarnd--single-form-item clear">
+                    <span class="alarnd__label">אימייל</span>
+                    <input type="email" id="emailId" placeholder="name@co.li" name="emailId" required>
+                </div>
+            </div>
+
+            <div class="alarnd--form-row">
+                <div class="alarnd--single-form-item allarnd--name-field fileUpload-trick">
+                    <span class="alarnd__label">סֵמֶל</span>
+                    <input type="file" id="fileuploadfield" name="fileuploadfield">
+                    <div class="upload-button-kit">
+                        <input type="text" id="uploadtextfield" name="uploadtextfield">
+                        <input type="button" id="uploadbrowsebutton" value="...ץבוק רחב">
+                    </div>
+                </div>
+                <div class="alarnd--single-form-item allarnd--name-field">
+                    <span class="alarnd__label">אתר אינטרנט</span>
+                    <input type="url" id="website" name="website" placeholder="www.site.com">
+                </div>
+            </div>
+            <div class="alarnd--form-submit">
+                <button type="submit" class="alarnd--regular-button ml_add_loading button">שלח</button>
+            </div>
+        </form>
+
+        <div id="formResponse"></div>
+    </div>
+
+    <?php
+    return ob_get_clean();
+}
+
+add_shortcode('customer_leads_form', 'customer_leads_form_shortcode');
