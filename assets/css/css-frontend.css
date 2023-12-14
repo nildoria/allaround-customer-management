@@ -884,15 +884,16 @@ ol.mlCustomDots a {
   background-color: #f00; /* Active dot color */
 }
 
-.allaround--slick-carousel .slick-next {
-  right: 10px;
-  background-image: url(../images/right.png);
-  background-size: contain;
+.woocommerce-product-gallery .allaround--slick-carousel .slick-next {
+    right: -10px !important;
+    background-image: url(../images/right.png) !important;
+    background-size: contain !important;
 }
-.allaround--slick-carousel .slick-prev {
-  right: 10px;
-  background-image: url(../images/left.png);
-  background-size: contain;
+.woocommerce-product-gallery .allaround--slick-carousel .slick-prev {
+    right: auto !important;
+    background-image: url(../images/left.png) !important;
+    background-size: contain !important;
+    left: -10px !important;
 }
 
 /* Clear the float after the columns to prevent layout issues */
@@ -2055,6 +2056,9 @@ section.cart_loader_section .cartLoader_button .image {
   .alarnd--container {
     max-width: 750px;
   }
+  .alrnd--shipping_address_tokenized.mini_non_loggedIn .alarnd--details-previewer > h3 {
+    margin-bottom: 25px;
+  }
 }
 
 /*For Wide Mobile Layout*/
@@ -2066,15 +2070,37 @@ section.cart_loader_section .cartLoader_button .image {
     gap: 10px;
     line-height: 30px;
   }
-}
-/*For 320-384px up Mobile Layout*/
-@media (max-width: 479px) {
+  .alarnd--custom-checkout-section {
+    padding: 45px 0;
+  }
+  .alrnd--shipping_address_tokenized.mini_non_loggedIn .alarnd--details-previewer {
+    padding-top: 0px;
+  }
+  .alrnd--shipping_address_tokenized.mini_non_loggedIn .alarnd--details-previewer > h3 {
+    margin-bottom: 15px;
+  }
+  .mini-store-product-list .product-item img {
+    height: 100%;
+    width: 100%;
+    object-position: center;
+    object-fit: contain;
+  }
   .aum_auth_page .author-header {
-    flex-direction: column;
-    align-items: flex-start;
+    flex-direction: column-reverse;
     padding-top: 30px;
     padding-bottom: 30px;
   }
+  .welcome-column {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .welcome-column p {
+    text-align: center;
+  }
+}
+/*For 320-384px up Mobile Layout*/
+@media (max-width: 479px) {
   .allaround--card-form {
     max-width: 100%;
     overflow: hidden;

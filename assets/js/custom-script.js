@@ -893,8 +893,8 @@ jQuery(document).ready(function ($) {
               $message.fadeOut(function() {
                   $(this).remove();
               });
-            }, 4000);
-          }, 2000);
+            }, 5000);
+          }, 2500);
       }
   });
 
@@ -1246,6 +1246,62 @@ jQuery(document).ready(function ($) {
       });
   }
 
+  /*
+  Get the count of child elements inside .alarnd--select-opt-header 
+  and set width to #alarnd__select_options_info
+  */
+  function apearelsModalSize(productId) {
+    // const product_id = $(this).data("product_id");
+    var childCount = $("#ml--product_id-" + productId + " .alarnd--select-opt-header").children().length;
+    var colorChildCount = $("#ml--product_id-" + productId + " .alarnd--select-qty-body").children().length;
+    var parentWidth = childCount * 66 + 120;
+    var minimumWidth = 600;
+    var finalWidth = Math.max(parentWidth, minimumWidth);
+    $("#ml--product_id-" + productId)
+      .css("width", finalWidth + "px")
+      .addClass("size-count-" + childCount);
+
+    if (childCount >= 13) {
+      $("#ml--product_id-" + productId).css("width", finalWidth + "px");
+    }
+
+    // Check window width on page load
+    if ($(window).width() > 991) {
+      if (childCount <= 10) {
+        $(".alarnd--select-options").css("max-width", "100%");
+      }
+    }
+
+    // Check window width when it's resized
+    $(window).resize(function () {
+      if ($(window).width() > 991) {
+        if (childCount <= 10) {
+          $(".alarnd--select-options").css("max-width", "100%");
+        }
+      }
+    });
+
+    if (colorChildCount < 7) {
+      $(".alarnd--select-options").css("overflow-y", "auto");
+    }
+
+    var chconminimumWidth = 300;
+    var chconWidth = childCount * 75 + 14;
+    var chconfinalWidth = Math.max(chconWidth, chconminimumWidth);
+    $(".alarnd--select-options").css("width", chconfinalWidth + "px");
+
+    // Target the Disabled Quantity Field T-Shirt Product
+    const parentDivs = $(".tshirt-qty-input-field");
+
+    parentDivs.each(function () {
+      const inputField = $(this).find("input");
+      if (inputField.prop("disabled")) {
+        $(this).addClass("disabled_field");
+      }
+    });
+
+  }
+
 
   $(document).on("click", ".ml_trigger_details", function () {
     var $self = $(this),
@@ -1269,6 +1325,8 @@ jQuery(document).ready(function ($) {
 
             // Apply color adjustment to elements with class .alarnd--opt-color span
             adjustTextColor(".alarnd--opt-color span");
+
+            apearelsModalSize(productId);
           },
         },
       });
@@ -1306,6 +1364,8 @@ jQuery(document).ready(function ($) {
                 adjustTextColor(".alarnd--opt-color span");
 
                 $(".alarnd_trigger_details_modal").removeClass("ml_loading");
+
+                apearelsModalSize(productId);
               },
               close: function () {
                 $("body").append(response);
