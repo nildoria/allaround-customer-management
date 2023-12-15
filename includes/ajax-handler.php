@@ -1353,7 +1353,7 @@ class ML_Ajax {
                                         } ?>
                                         <?php if (!ml_is_omit($size, $selected_omit_sizes)) : ?>
                                         <div class="tshirt-qty-input-field">
-                                            <input style="box-shadow: 0px 0px 0px 1px <?php echo $color['color_hex_code']; ?>;" type="text" class="three-digit-input" placeholder="" pattern="^[0-9]*$" autocomplete="off" name="alarnd__color_qty[<?php echo $key; ?>][<?php echo $size; ?>]" <?php echo $disabled; ?>>
+                                            <input style="box-shadow: 0px 0px 0px 1px <?php echo $color['color_hex_code']; ?>;" type="text" class="three-digit-input" placeholder="" pattern="^[0-9]*$" inputmode="numeric" autocomplete="off" name="alarnd__color_qty[<?php echo $key; ?>][<?php echo $size; ?>]" <?php echo $disabled; ?>>
                                             <span class="alarnd--limit-tooltip">Can't order more than 999</span>
                                         </div>
                                         <?php endif; ?>

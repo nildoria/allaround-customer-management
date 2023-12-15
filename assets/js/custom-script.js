@@ -1049,6 +1049,8 @@ jQuery(document).ready(function ($) {
             isApplicable = true;
             currentInstance.close();
           });
+
+          $("html").css("overflow", "hidden");
         },
         afterClose: function () {
           const product_id = this.st.el.data("product_id");
@@ -1062,6 +1064,8 @@ jQuery(document).ready(function ($) {
             //   .find(".mlGallerySingle")
             //   .magnificPopup("open");
           }
+
+          $("html").css("overflow", "");
         },
       },
     });
@@ -1281,9 +1285,9 @@ jQuery(document).ready(function ($) {
       }
     });
 
-    if (colorChildCount < 7) {
-      $(".alarnd--select-options").css("overflow-y", "auto");
-    }
+    // if (colorChildCount < 7) {
+    //   $(".alarnd--select-options").css("overflow-y", "auto");
+    // }
 
     var chconminimumWidth = 300;
     var chconWidth = childCount * 75 + 14;
@@ -1327,6 +1331,11 @@ jQuery(document).ready(function ($) {
             adjustTextColor(".alarnd--opt-color span");
 
             apearelsModalSize(productId);
+
+            $("html").css("overflow", "hidden");
+          },
+          close: function () {
+            $("html").css("overflow", "");
           },
         },
       });
@@ -1366,10 +1375,13 @@ jQuery(document).ready(function ($) {
                 $(".alarnd_trigger_details_modal").removeClass("ml_loading");
 
                 apearelsModalSize(productId);
+
+                $("html").css("overflow", "hidden");
               },
               close: function () {
                 $("body").append(response);
                 $("#ml--product_id-" + productId).addClass("mfp-hide");
+                $("html").css("overflow", "");
               },
             },
           });

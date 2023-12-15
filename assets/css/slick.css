@@ -200,10 +200,11 @@
 
 .slick-prev:before,
 .slick-next:before {
-  /*font: normal normal normal 14px/1 FontAwesome;*/
+  font-family: "Font Awesome 5 Free" !important;
   font-size: 20px;
   line-height: 0;
-
+  display: inline-block !important;
+  font-weight: bold;
   opacity: 0.9;
   color: #000;
 
@@ -227,8 +228,17 @@
   content: "\f053" !important;
   font-weight: bold;
 }
+.slick-prev:before {
+  content: "\f053" !important;
+}
+.slick-next::before {
+    content: "\f054" !important;
+}
 [dir="rtl"] .slick-prev:before {
-  content: "";
+  content: "\f053" !important;
+}
+[dir="rtl"] .slick-next::before {
+    content: "\f054" !important;
 }
 
 .slick-next {
@@ -246,7 +256,7 @@
   font-weight: bold;
 }
 [dir="rtl"] .slick-next:before {
-  content: "";
+  content: "\f054" !important;
 }
 
 /* Dots */

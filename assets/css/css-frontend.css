@@ -885,15 +885,15 @@ ol.mlCustomDots a {
 }
 
 .woocommerce-product-gallery .allaround--slick-carousel .slick-next {
-    right: -10px !important;
-    background-image: url(../images/right.png) !important;
+    right: -25px !important;
+    /* background-image: url(../images/right.png) !important; */
     background-size: contain !important;
 }
 .woocommerce-product-gallery .allaround--slick-carousel .slick-prev {
     right: auto !important;
-    background-image: url(../images/left.png) !important;
+    /* background-image: url(../images/left.png) !important; */
     background-size: contain !important;
-    left: -10px !important;
+    left: -25px !important;
 }
 
 /* Clear the float after the columns to prevent layout issues */
