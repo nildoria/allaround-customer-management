@@ -266,8 +266,8 @@ $current_user_id = $get_current_puser->ID;
                                     <?php endif; ?>
                                     <?php if( ! empty( $discount_steps ) && ! empty( $group_enable ) ) : ?>
                                     <div class="alarn--pricing-column alarn--pricing-column-chart">
-                                        <h5>תמחור כמות</h5>
                                         <div class="alarn--price-chart">
+                                            <h5>תמחור כמות</h5>
                                             <div class="alarnd--price-chart-price <?php echo count($discount_steps) > 4 ? 'alarnd--plus4item-box' : ''; ?>">
                                                 <?php 
                                                 $index = 0;
@@ -289,8 +289,8 @@ $current_user_id = $get_current_puser->ID;
                                     
                                     <?php if( ! empty( $customQuantity_steps ) && ! empty( $custom_quanity ) ) : ?>
                                     <div class="alarn--pricing-column alarn--pricing-column-chart">
-                                        <h5>תמחור כמות</h5>
                                         <div class="alarn--price-chart">
+                                            <h5>תמחור כמות</h5>
                                             <div class="alarnd--price-chart-price <?php echo count($customQuantity_steps) > 4 ? 'alarnd--plus4item-box' : ''; ?>">
                                                 <?php 
                                                 $index = 0;
@@ -311,7 +311,7 @@ $current_user_id = $get_current_puser->ID;
                                     <?php endif; ?>
 
                                     <div class="modal-bottom-btn">
-                                        <button type="button" class="alarnd_trigger_details_modal ml_add_loading" data-product_id="<?php echo $product->get_id(); ?>"><?php esc_html_e( 'הוסף לעגלה שלך', 'hello-elementor' ); ?></button>
+                                        <button type="button" class="alarnd_trigger_details_modal ml_add_loading" data-product_id="<?php echo $product->get_id(); ?>"><?php esc_html_e( 'הוסיפו לעגלה', 'hello-elementor' ); ?></button>
                                     </div>
                                     </div>
                                 </div>
@@ -340,7 +340,7 @@ $current_user_id = $get_current_puser->ID;
             </div>
         </div>
 
-        <div class="alarnd--custom-checkout-section<?php echo WC()->cart->is_empty() ? ' ml_pay_hidden' : ''; ?>" id="ministore--custom-checkout-section">
+        <div class="alarnd--custom-checkout-section<?php echo WC()->cart->is_empty() ? ' ml_pay_hidden-not' : ''; ?>" id="ministore--custom-checkout-section">
 
             <?php if( is_user_logged_in() ) : ?>
                 <?php

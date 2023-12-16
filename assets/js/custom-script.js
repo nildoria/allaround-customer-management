@@ -676,7 +676,7 @@ jQuery(document).ready(function ($) {
           }, 3000);
         }
 
-        $('#ministore--custom-checkout-section').removeClass('ml_pay_hidden');
+        $("button.allaround_card_details_submit").prop("disabled", false);
 
         setTimeout(function () {
           attachTooltipToProductThumbnails();
@@ -839,14 +839,12 @@ jQuery(document).ready(function ($) {
               nonce: ajax_object.nonce,
           },
           success: function(response) {
-              // Show or hide the element based on the response
-              if (response && response.data.cart_has_items) {
-                  // Cart has items, show the element
-                  $('#ministore--custom-checkout-section').removeClass('ml_pay_hidden');
-              } else {
-                  // Cart is empty, hide the element
-                  $('#ministore--custom-checkout-section').addClass('ml_pay_hidden');
-              }
+            // Show or hide the element based on the response
+            if (response && response.data.cart_has_items) {
+              $("button.allaround_card_details_submit").prop("disabled", false);
+            } else {
+              $("button.allaround_card_details_submit").prop("disabled", true);
+            }
           },
       });
   }
@@ -1212,8 +1210,19 @@ jQuery(document).ready(function ($) {
     return false;
   });
 
-  $(document).on("click", ".gallery-item", function () {
-    // console.log("gallery item clicked - document on click");
+  // Smooth scroll to the target section when clicking a link with class 'alarnd__cart_menu_item'
+  $('.alarnd__cart_menu_item').on('click', function (e) {
+    e.preventDefault();
+    console.log("Cart icon clicked");
+    var targetSection = $("#woocommerce_cart");
+    if (targetSection.length) {
+      $("html, body").animate(
+        {
+          scrollTop: $("#woocommerce_cart").offset().top,
+        },
+        1000
+      );
+    }
   });
 
   $(document).on("click", ".alarnd_trigger_details_modal", function (e) {
@@ -1230,6 +1239,9 @@ jQuery(document).ready(function ($) {
       $('.ml_trigger_details[data-product-id="' + product_id + '"]').trigger(
         "click"
       );
+      setTimeout(() => {
+        adjustTextColor(".alarnd--opt-color span");
+      }, 1000);
     }
 
     return false;
@@ -1317,6 +1329,10 @@ jQuery(document).ready(function ($) {
   $(document).on("click", ".ml_trigger_details", function () {
     var $self = $(this),
       productId = $self.data("product-id");
+      
+    if ($(window).width() < 768) {
+      $("html").css("overflow", "hidden");
+    }
 
     if ($("#ml--product_id-" + productId).length !== 0) {
       $.magnificPopup.open({

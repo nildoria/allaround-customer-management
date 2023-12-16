@@ -154,16 +154,18 @@ h3.miniStore-promo-title {
   padding: 10px 10px 25px 10px;
 }
 .mini-store-product-list .product-item .product-thumbnail {
-  height: 210px;
+  height: 200px;
   cursor: pointer;
   display: flex;
   align-items: center;
   background-color: #fff;
 }
 .mini-store-product-list .product-item img {
-  margin-bottom: 0 !important;
-  height: auto;
-  width: 100%;
+    margin-bottom: 0 !important;
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
+    object-position: center;
 }
 .woocommerce
   table.shop_table
@@ -423,6 +425,9 @@ td.product-quantity .quantity input[type="number"] {
   margin-bottom: 0;
   text-align: right;
 }
+span.coupon_varification_message .woocommerce-message {
+    display: none;
+}
 form#customerDetails label.error,
 form#cardDetailsForm label.error {
   display: none !important;
@@ -623,7 +628,6 @@ span.alarnd--user_address_edit.ml_normal_loading {
   width: calc(100% - 60px);
   text-align: left;
   color: #bf1363;
-  padding-left: 64px;
   display: none;
 }
 
@@ -637,7 +641,10 @@ span.alarnd--user_address_edit.ml_normal_loading {
   bottom: 5px;
   font-size: 14px;
 }
-
+.alarnd--slect-opt-modal .alanrd--product-added-message {
+    left: 50px;
+    font-size: 14px;
+}
 span.alarnd__return_token_payout {
   position: absolute;
   top: -54px;
@@ -2079,11 +2086,8 @@ section.cart_loader_section .cartLoader_button .image {
   .alrnd--shipping_address_tokenized.mini_non_loggedIn .alarnd--details-previewer > h3 {
     margin-bottom: 15px;
   }
-  .mini-store-product-list .product-item img {
-    height: 100%;
-    width: 100%;
-    object-position: center;
-    object-fit: contain;
+  .mini-store-product-list .product-item .product-thumbnail {
+    height: 230px;
   }
   .aum_auth_page .author-header {
     flex-direction: column-reverse;
@@ -2187,6 +2191,44 @@ section.cart_loader_section .cartLoader_button .image {
   span.alarnd--user_address_edit {
     line-height: 30px;
   }
+  .pricingDescSteps {
+    display: flex;
+    flex-wrap: wrap;
+  }
+  .alarn--pricing-column.alarn--pricing-column-desc {
+    flex: 0 0 100%;
+    float: right;
+  }
+  .alarn--pricing-column.alarn--pricing-column-chart {
+    flex: 0 0 70%;
+}
+.alarnd--price-chart-item {
+    height: 60px;
+    padding: 6px 10px;
+    min-width: 110px;
+    max-width: 110px;
+}
+.pricingDescSteps .modal-bottom-btn {
+    display: flex;
+    text-align: center;
+    margin-top: 35px;
+    flex: 0 0 30%;
+    align-items: center;
+    justify-content: center;
+}
+.pricingDescSteps .modal-bottom-btn button.alarnd_trigger_details_modal {
+    padding: 10px 10px;
+    min-width: 100%;
+    max-width: 100%;
+    white-space: pre-wrap;
+}
+.pricingDescSteps .alarn--price-chart {
+    flex-direction: column;
+    align-items: center;
+}
+.white-popup-block.alarnd--info-modal {
+    padding: 20px;
+}
   .alarn--pricing-column, .pricingDescSteps {
     flex: 0 0 100%;
   }
@@ -2197,7 +2239,7 @@ section.cart_loader_section .cartLoader_button .image {
     margin-bottom: 15px;
   }
   .alarnd--price-chart-price {
-    justify-content: center;
+    justify-content: flex-start;
   }
   .white-popup-block.alarnd--info-modal.alarnd--quantity-modal, .white-popup-block.alarnd--info-modal.alarnd--variable-modal {
     width: 100%;

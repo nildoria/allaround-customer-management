@@ -352,8 +352,8 @@ class ML_Ajax {
                                 <?php endif; ?>
                                 <?php if( ! empty( $discount_steps ) && ! empty( $group_enable ) ) : ?>
                                 <div class="alarn--pricing-column alarn--pricing-column-chart">
-                                    <h5>תמחור כמות</h5>
                                     <div class="alarn--price-chart">
+                                        <h5>תמחור כמות</h5>
                                         <div class="alarnd--price-chart-price <?php echo count($discount_steps) > 4 ? 'alarnd--plus4item-box' : ''; ?>">
                                             <?php 
                                             $index = 0;
@@ -375,8 +375,8 @@ class ML_Ajax {
                                     
                                 <?php if( ! empty( $customQuantity_steps ) && ! empty( $custom_quanity ) ) : ?>
                                 <div class="alarn--pricing-column alarn--pricing-column-chart">
-                                    <h5>תמחור כמות</h5>
                                     <div class="alarn--price-chart">
+                                        <h5>תמחור כמות</h5>
                                         <div class="alarnd--price-chart-price <?php echo count($customQuantity_steps) > 4 ? 'alarnd--plus4item-box' : ''; ?>">
                                             <?php 
                                             $index = 0;
@@ -396,9 +396,9 @@ class ML_Ajax {
                                 </div>
                                 <?php endif; ?>
 
-                                <div class="modal-bottom-btn">
-                                    <button type="button" class="alarnd_trigger_details_modal ml_add_loading" data-product_id="<?php echo $product->get_id(); ?>"><?php esc_html_e( 'הוסף לעגלה שלך', 'hello-elementor' ); ?></button>
-                                </div>
+                                    <div class="modal-bottom-btn">
+                                        <button type="button" class="alarnd_trigger_details_modal ml_add_loading" data-product_id="<?php echo $product->get_id(); ?>"><?php esc_html_e( 'הוסיפו לעגלה', 'hello-elementor' ); ?></button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
