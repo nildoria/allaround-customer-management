@@ -18,8 +18,6 @@ $current_user_id = $get_current_puser->ID;
 
         <?php
 
-        
-
         $token = get_field('token', "user_{$current_user_id}");
         $phone = ml_get_user_phone($current_user_id);
         $is_tokenpayout_show = false;

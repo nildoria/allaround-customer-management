@@ -620,7 +620,7 @@ span.alarnd--user_address_edit.ml_normal_loading {
 .alanrd--product-added-message {
   position: absolute;
   bottom: 15px;
-  width: 100%;
+  width: calc(100% - 60px);
   text-align: left;
   color: #bf1363;
   padding-left: 64px;
@@ -2097,6 +2097,17 @@ section.cart_loader_section .cartLoader_button .image {
   }
   .welcome-column p {
     text-align: center;
+  }
+  .wc-empty-cart-message {
+    max-width: 100%;
+    margin-left: 0;
+    margin-top: 15px;
+  }
+  .cart-empty.woocommerce-info {
+    min-height: 250px;
+  }
+  .iconLibraryTooltip:hover span.tooltipContainer {
+    display: none;
   }
 }
 /*For 320-384px up Mobile Layout*/

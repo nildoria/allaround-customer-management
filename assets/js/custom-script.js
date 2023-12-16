@@ -46,17 +46,17 @@ jQuery(document).ready(function ($) {
   $(window).resize(isotope_initalize);
 
   // overwrite woocommerce scroll to notices
-  $.scroll_to_notices = function (scrollElement) {
-    var offset = 300;
-    if (scrollElement.length) {
-      $("html, body").animate(
-        {
-          scrollTop: scrollElement.offset().top - offset,
-        },
-        1000
-      );
-    }
-  };
+  // $.scroll_to_notices = function (scrollElement) {
+  //   var offset = 300;
+  //   if (scrollElement.length) {
+  //     $("html, body").animate(
+  //       {
+  //         scrollTop: scrollElement.offset().top - offset,
+  //       },
+  //       1000
+  //     );
+  //   }
+  // };
 
   /* Storage Handling */
   var $supports_html5_storage = true,
@@ -865,15 +865,22 @@ jQuery(document).ready(function ($) {
   });
 
   $(document.body).on('updated_wc_div', function(){
-      // Add your class to the element you want to target
-      setTimeout(function () {
-        $('.alarnd--cart-wrapper-inner').removeClass('loading');
-        console.log("completed update");
+    // Add your class to the element you want to target
+    setTimeout(function () {
+      $('.alarnd--cart-wrapper-inner').removeClass('loading');
+      console.log("completed update");
 
-        // Call the function to attach the tooltip to product thumbnails
-        attachTooltipToProductThumbnails();
-      }, 1500);
+      // Call the function to attach the tooltip to product thumbnails
+      attachTooltipToProductThumbnails();
+    }, 1500);
   });
+
+  $(document).on('removed_from_cart', function (event) {
+    event.preventDefault();
+
+    return false;
+  });
+
 
   // Assuming you have jQuery loaded on your page
   $(document).ajaxComplete(function(event, xhr, settings) {
@@ -944,12 +951,12 @@ jQuery(document).ready(function ($) {
         setTimeout(function () {
           $(".white-popup-block button.mfp-close").click();
           // Smooth scroll to #woocommerce_cart
-          $("html, body").animate(
-            {
-              scrollTop: $("#woocommerce_cart").offset().top,
-            },
-            1000
-          );
+          // $("html, body").animate(
+          //   {
+          //     scrollTop: $("#woocommerce_cart").offset().top,
+          //   },
+          //   1000
+          // );
         }, 500);
       }
     }

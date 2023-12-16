@@ -295,18 +295,18 @@ const generateImageWithLogos = async (backgroundUrl, user_id, product_id, logo, 
 
 function get_orientation(attachment_metadata) {
     // Get attachment metadata
-
     if (attachment_metadata) {
 
-        // Check if the difference between width and height is within 10px (square)
-        const threshold = 10;
-        const difference = Math.abs(attachment_metadata.width - attachment_metadata.height);
+        // Calculate the threshold for height to be less than 60% of width
+        const heightThreshold = 0.6 * attachment_metadata.width;
 
         // Check if width and height are equal (square)
-        if (difference <= threshold) {
+        if (attachment_metadata.width === attachment_metadata.height) {
             return 'square';
-        } else {
+        } else if (attachment_metadata.height < heightThreshold) {
             return 'horizontal';
+        } else {
+            return 'square';
         }
     }
     return 'square';
