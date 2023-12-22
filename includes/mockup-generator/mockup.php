@@ -9,7 +9,7 @@ class ALRN_Genrator {
         add_action('manage_users_custom_column', array( $this, 'column_content' ), 10, 3);
 
         add_action('admin_enqueue_scripts', array( $this, 'generator_scripts' ));
-        add_action('wp_ajax_get_generate_button', array( $this, 'get_generate_button' ));
+        // add_action('wp_ajax_get_generate_button', array( $this, 'get_generate_button' ));
 
         add_action( 'rest_api_init', array($this, 'generate_endpoint') );
         add_filter('bulk_actions-users', array( $this, 'bulk_action' ));
@@ -214,9 +214,21 @@ class ALRN_Genrator {
             $custom_logo_lighter = get_field('custom_logo_lighter', "user_{$user_id}");
             $custom_logo_darker = get_field('custom_logo_darker', "user_{$user_id}");
             $custom_logo_products = get_field('custom_logo_products', "user_{$user_id}");
+            $override_shape = get_field('override_shape', 'user_' . $user_id);
+            $default_logo_shape = get_field('default_logo_shape', 'user_' . $user_id);
+            $custom_logo_shape = get_field('custom_logo_shape', 'user_' . $user_id);
 
             $type = ml_get_orientation( $profile_picture_id );
+            $custom_type = '';
 
+            if ($override_shape && in_array($default_logo_shape, array('square', 'horizontal'))) {
+                $type = $default_logo_shape;
+            }
+
+            if ($override_shape && in_array($custom_logo_shape, array('square', 'horizontal'))) {
+                $custom_type = $custom_logo_shape;
+            }
+            
             $custom_logo_data = array(
                 "lighter" => $custom_logo_lighter,
                 "darker" => $custom_logo_darker,
@@ -228,6 +240,7 @@ class ALRN_Genrator {
                 'logo' => $profile_picture_url,
                 'logo_second' => $profile_second_logo,
                 'logo_type' => $type,
+                'custom_logo_type' => $custom_type,
                 'images' => $thumbnails,
                 'logo_positions' => $logo_positions
             );
@@ -306,8 +319,15 @@ class ALRN_Genrator {
             $custom_logo_lighter = get_field('custom_logo_lighter', "user_{$user_id}");
             $custom_logo_darker = get_field('custom_logo_darker', "user_{$user_id}");
             $custom_logo_products = get_field('custom_logo_products', "user_{$user_id}");
+            $override_shape = get_field('override_shape', 'user_' . $user_id);
+            $default_logo_shape = get_field('default_logo_shape', 'user_' . $user_id);
+            $custom_logo_shape = get_field('custom_logo_shape', 'user_' . $user_id);
 
             $type = ml_get_orientation( $profile_picture_id );
+
+            if ($override_shape && in_array($default_logo_shape, array('square', 'horizontal'))) {
+                $type = $default_logo_shape;
+            }
 
             $custom_logo_data = array(
                 "lighter" => $custom_logo_lighter,

@@ -839,6 +839,14 @@ class ML_Ajax {
         $state = get_user_meta( $current_user_id, 'billing_state', true );
         $country = get_user_meta( $current_user_id, 'billing_country', true );
         $country = empty( $country ) ? "IL" : $country;
+        // Get the user's ACF lock_profile field value
+        $lock_profile = get_field('lock_profile', 'user_' . $current_user_id);
+
+        $update_order = true; // Default value
+
+        if ($lock_profile === true) {
+            $update_order = false;
+        }
 
         $customerInfo = array(
             'first_name' => $first_name,
@@ -860,7 +868,7 @@ class ML_Ajax {
             "cardNumber" => $cardNumber,
             "response" => $response_obj,
             "extraMeta" => $extraMeta,
-            "update" => true
+            "update" => $update_order,
         );
 
         if ( ! is_wp_error( $request ) && wp_remote_retrieve_response_code( $request ) == 200 && $message !== "Accepted" ) {	
