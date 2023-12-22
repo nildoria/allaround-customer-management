@@ -252,7 +252,6 @@ class ALRN_Genrator {
             if( isset( $_GET['dev'] ) && 'true' === $_GET['dev'] ) {
                 echo '<pre>';
                 echo "<h2>$user_id</h2>";
-                print_r( $logo_positions );
                 echo '</pre>';
                 echo '<pre>';
                 print_r( $user_data );

@@ -526,17 +526,9 @@ class ML_Ajax {
             empty( $userPhone ) ||
             empty( $userAdress ) ||
             empty( $cardholderCity ) ||
-            empty( $cardholderInvoiceName ) ||
             empty( $userEmail ) 
         ) {
             wp_send_json_error( array(
-                "details" => $customerDetails,
-                "userName" => $userName,
-                "userPhone" => $userPhone,
-                "userAdress" => $userAdress,
-                "userEmail" => $userEmail,
-                "cardholderCity" => $cardholderCity,
-                "cardholderInvoiceName" => $cardholderInvoiceName,
                 "message" => esc_html__("Required field are empty. Please fill all the field.", "allaroundminilng")
             ) );
             wp_die();
@@ -735,7 +727,6 @@ class ML_Ajax {
             empty( $cardNumber ) ||
             empty( $expirationDate ) ||
             empty( $cardholderCity ) ||
-            empty( $cardholderInvoiceName ) ||
             empty( $cvvCode )
         ) {
             wp_send_json_error( array(
@@ -951,9 +942,9 @@ class ML_Ajax {
         if( empty( $userCity ) ) {
             $invalid_inputs['userCity'] = esc_html__("Please provide your city.", "allaroundminilng");
         }
-        if( empty( $userInvoiceName ) ) {
-            $invalid_inputs['userInvoiceName'] = esc_html__("Please enter the invoice number.", "allaroundminilng");
-        }
+        // if( empty( $userInvoiceName ) ) {
+        //     $invalid_inputs['userInvoiceName'] = esc_html__("Please enter the invoice number.", "allaroundminilng");
+        // }
         if( 
             empty( $userEmail ) ||
             ! is_email( $userEmail )
@@ -997,6 +988,14 @@ class ML_Ajax {
             // Display Name
             update_user_name_if_different($current_user_id, $userName);
         }
+
+        if( empty( $userInvoiceName ) ) {
+            $current_value = get_field('invoice', "user_{$current_user_id}");
+            if ( ! empty($current_value) ) {
+                $userInvoiceName = $current_value;
+            }
+        }
+
         ?>
         <div class="alarnd--payout-col alarnd--details-previewer">
             <h3>כתובת למשלוח</h3>

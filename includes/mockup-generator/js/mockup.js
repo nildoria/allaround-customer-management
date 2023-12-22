@@ -29,10 +29,10 @@ function addGenerateButton() {
     }
     
 
-   
+    
 }
 
-addGenerateButton();
+// addGenerateButton();
 
 // Function to get a query parameter from the URL
 function getParameterByName(name) {
@@ -105,18 +105,18 @@ function convertLogos(logos) {
 
 function convertGallery(images) {
     let gallery = [];
-  
+    
     for (let key in images) {
-      if (images.hasOwnProperty(key)) {
+        if (images.hasOwnProperty(key)) {
         gallery.push({
-          id: key,
-          attachment_id: images[key]['attachment_id'],
-          url: images[key]['thumbnail'],
-          type: images[key]['type']
+            id: key,
+            attachment_id: images[key]['attachment_id'],
+            url: images[key]['thumbnail'],
+            type: images[key]['type']
         });
-      }
+        }
     }
-  
+    
     return gallery;
 }
 
@@ -150,7 +150,7 @@ function getFileExtensionFromUrl(url) {
 }
 
 // Function to generate an image with logos
-const generateImageWithLogos = async (backgroundUrl, user_id, product_id, logo, logo_second, custom_logo, logoData, logo_type, gallery = false) => {
+const generateImageWithLogos = async (backgroundUrl, user_id, product_id, logo, logo_second, custom_logo, logoData, logo_type, custom_logo_type, gallery = false) => {
 
     let itemResult = []
 
@@ -182,8 +182,6 @@ const generateImageWithLogos = async (backgroundUrl, user_id, product_id, logo, 
     // Draw the background image
     ctx.drawImage(backgroundImage, 0, 0);
 
-    customLog('logoData', logoData);
-
     // Use Array.filter() to get items with the matching product_id
     const itemsWithMatchingProductID = logoData.filter(item => item.product_id == product_id);
 
@@ -198,6 +196,8 @@ const generateImageWithLogos = async (backgroundUrl, user_id, product_id, logo, 
     const resultItem = matchingItem || itemsWithMatchingProductID.find(item => item.meta_key === "ml_logos_positions");
 
     // //customLog( 'resultItem', resultItem );
+
+    console.log(`====> is_feature:${is_feature_image} id:${product_id} user:${user_id} logo_type:${logo_type} custom_logo_type:${custom_logo_type}`, resultItem);
 
     if (resultItem != undefined) {
         let finalItem = resultItem.meta_value[logo_type];
@@ -228,6 +228,8 @@ const generateImageWithLogos = async (backgroundUrl, user_id, product_id, logo, 
 
         if (finalItem !== undefined && finalItem !== false) {
 
+            console.log(`finalItem:${finalItem} id:${product_id} user:${user_id} finalLogoNumber:${finalLogoNumber}`, resultItem);
+
             let imgData = {
                 url: finalLogo,
                 product_id: product_id,
@@ -246,14 +248,23 @@ const generateImageWithLogos = async (backgroundUrl, user_id, product_id, logo, 
 
                 const logoImage = await loadLogoImage(imgData);
 
+                console.log(`--- is_feature:${is_feature_image} custom:${custom} id:${product_id} user:${user_id}`);
+
                 // if custom then check logo_type by image size
                 // then get that type value from resultItem
                 // and re-initialize x, y, width, height, angle again with new values.
                 if( custom === true ) {
-                    const get_type = get_orientation(logoImage);
+                    let get_type = get_orientation(logoImage);
+                    if (custom_logo_type && (custom_logo_type === "horizontal" || custom_logo_type === "square")) {
+                        console.log(`ProductID:${product_id} Type:${custom_logo_type}`);
+                        get_type = custom_logo_type;
+                    }
+
                     let get_type_values = resultItem.meta_value[get_type];
                     if( get_type_values[index] && get_type_values[index] != null && get_type_values[index] != undefined ) {
-                        console.log("variable re-initializing....", get_type_values[index]);
+
+                        console.log(`--- get_type:${get_type} is_feature:${is_feature_image} id:${product_id} user:${user_id} index:${index}`, get_type_values);
+
                         ({ x, y, width, height, angle } = get_type_values[index]);
                     }
                 }
@@ -333,9 +344,8 @@ const loadLogoImage = async (imgData) => {
             }
         }
     }
-    console.log('fetchUrl', fetchUrl);
     const logoResponse = await fetch(fetchUrl);
-    console.log("image response", logoResponse);
+    console.log(`is_feature:${is_feature} custom:${custom} url:${fetchUrl} id:${product_id} user:${user_id}`, logoResponse);
     if (!logoResponse.ok) {
         throw new Error(`Failed to fetch logo image: ${logoResponse.status} ${logoResponse.statusText} is_feature:${is_feature} url:${url} id:${product_id} user:${user_id}`);
     }
@@ -345,7 +355,7 @@ const loadLogoImage = async (imgData) => {
 
 // Function to perform the image generation
 const generateImages = async (task) => {
-    const { backgrounds, logo, logo_second, custom_logo, user_id, logoData, logo_type } = task;
+    const { backgrounds, logo, logo_second, custom_logo, user_id, logoData, logo_type, custom_logo_type } = task;
     const promises = [];
     const totalImages = backgrounds.length;
 
@@ -354,7 +364,7 @@ const generateImages = async (task) => {
         const product_id = backgrounds[i]['id'];
         const galleries = backgrounds[i]['galleries'];
 
-        promises.push(generateImageWithLogos(backgroundUrl, user_id, product_id, logo, logo_second, custom_logo, logoData, logo_type));
+        promises.push(generateImageWithLogos(backgroundUrl, user_id, product_id, logo, logo_second, custom_logo, logoData, logo_type, custom_logo_type));
 
         if (galleries && galleries.length !== 0) {
             const galleriesConvert = convertGallery(galleries);
@@ -362,7 +372,7 @@ const generateImages = async (task) => {
             galleriesConvert.forEach((item, index) => {
                 const galleryUrl = item['url'];
                 const galleryItem = item;
-                promises.push(generateImageWithLogos(galleryUrl, user_id, product_id, logo, logo_second, custom_logo, logoData, logo_type, galleryItem));
+                promises.push(generateImageWithLogos(galleryUrl, user_id, product_id, logo, logo_second, custom_logo, logoData, logo_type, custom_logo_type, galleryItem));
             });
         }
     }
@@ -424,11 +434,11 @@ async function saveImageToServer(dataURL, filename, user_id, is_feature_image) {
 const processUserQueue = async () => {
     while (userQueue.length > 0) {
         const user = userQueue.shift(); // Dequeue the first user from the queue
-        const { backgrounds, logo, logo_second, user_id, logoData, logo_type } = user;
+        const { backgrounds, logo, logo_second, user_id, logoData, logo_type, custom_logo_type } = user;
 
         try {
             isGeneratingImages = true; // Set the flag to indicate image generation is in progress
-            const result = await generateImages({ backgrounds, logo, logo_second, user_id, logoData, logo_type });
+            const result = await generateImages({ backgrounds, logo, logo_second, user_id, logoData, logo_type, custom_logo_type });
 
             // Do something with the result if needed
             if(result) {
@@ -519,8 +529,8 @@ const handleBulkActionApply = async (event) => {
         return;
     }
 
-     // Set the flag to indicate image generation is in progress
-     isGeneratingImages = true;
+        // Set the flag to indicate image generation is in progress
+        isGeneratingImages = true;
 
     // Disable the bulk action selector and do action button
     bulkActionSelector.disabled = true;
@@ -539,8 +549,8 @@ const handleBulkActionApply = async (event) => {
     } catch (error) {
         console.error('Error during bulk image generation:', error);
     } finally {
-         // Reset the flag once image generation is complete
-         isGeneratingImages = false;
+            // Reset the flag once image generation is complete
+            isGeneratingImages = false;
 
         // Re-enable the bulk action selector and do action button
         bulkActionSelector.disabled = false;
@@ -608,6 +618,7 @@ function getItemData(elm) {
     const user_id = settings.user_id;
     let logo_second = settings.logo_second;
     let custom_logo = settings.custom_logo_data;
+    let custom_logo_type = settings.custom_logo_type;
     // let custom_logo = undefined;
 
     if (logo_second && !isValidUrl(logo_second)) {
@@ -617,7 +628,7 @@ function getItemData(elm) {
 
     elm.addClass('ml_loading');
 
-    const task = { backgrounds, logo, logo_second, custom_logo, user_id, logoData, logo_type };
+    const task = { backgrounds, logo, logo_second, custom_logo, user_id, logoData, logo_type, custom_logo_type };
 
     console.log(task);
 

@@ -963,7 +963,8 @@ function ml_get_user_phone( $user_id, $code_or_phone = '' ){
 	}
 
     if( ! empty( $code ) ) {
-        $number = $code . $number;
+        // $number = $code . $number;
+        $number = $number;
     }
 
     return $number;
@@ -1441,7 +1442,7 @@ function allaround_card_form($user_id = '') {
                     <div class="form-row">
                         <div class="form-label"><?php esc_html_e("Invoice Name", "mini-store" ); ?></div>
                         <div class="form-input">
-                            <input type="text" id="cardholderInvoiceName" maxlength="20" name="cardholderInvoiceName" placeholder="<?php esc_attr_e("required", "mini-store" ); ?>" value="<?php echo esc_attr( $invoice ); ?>" required>
+                            <input type="text" id="cardholderInvoiceName" maxlength="20" name="cardholderInvoiceName" placeholder="<?php esc_attr_e("required", "mini-store" ); ?>" value="<?php echo esc_attr( $invoice ); ?>">
                         </div>
                     </div>
                 </div>
@@ -1510,7 +1511,7 @@ function allaround_customer_form($is_disabled = false) {
             <div class="form-row">
                 <div class="form-label"><?php esc_html_e("Invoice Name", "mini-store" ); ?></div>
                 <div class="form-input">
-                    <input type="text" id="userInvoiceName" name="userInvoiceName" placeholder="<?php esc_attr_e("required", "mini-store" ); ?>" value="<?php echo esc_attr( $invoice ); ?>" required>
+                    <input type="text" id="userInvoiceName" name="userInvoiceName" placeholder="<?php esc_attr_e("required", "mini-store" ); ?>" value="<?php echo esc_attr( $invoice ); ?>">
                 </div>
             </div>
         </div>
