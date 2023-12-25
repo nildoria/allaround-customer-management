@@ -975,7 +975,7 @@ class ML_Ajax {
             update_user_meta_if_different($current_user_id, 'xoo_ml_phone_code', $countryCode);
             update_user_meta_if_different($current_user_id, 'xoo_ml_phone_no', $phoneNumber);
 
-            update_acf_usermeta($current_user_id, 'invoice', $userInvoiceName);
+            update_acf_anyway($current_user_id, 'invoice', $userInvoiceName);
 
             // WcooCommerce user field update
             update_user_meta_if_different($current_user_id, 'billing_address_1', $userAdress);
@@ -990,10 +990,11 @@ class ML_Ajax {
         }
 
         if( empty( $userInvoiceName ) ) {
-            $current_value = get_field('invoice', "user_{$current_user_id}");
-            if ( ! empty($current_value) ) {
-                $userInvoiceName = $current_value;
-            }
+            // $current_value = get_field('invoice', "user_{$current_user_id}");
+            // if ( ! empty($current_value) ) {
+            //     $userInvoiceName = $current_value;
+            // }
+             $userInvoiceName = $userName;
         }
 
         ?>

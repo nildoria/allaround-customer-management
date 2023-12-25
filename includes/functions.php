@@ -1031,7 +1031,6 @@ function alarnd_single_checkout($user_id = false) {
         empty( $phone ) ||
         empty( $billing_address ) ||
         empty( $city ) ||
-        empty( $invoice ) ||
         empty( $display_name ) ||
         empty( $user_email )
     ) {
@@ -1176,7 +1175,7 @@ function alarnd_single_checkout($user_id = false) {
                         <div class="alarnd--payout-col alarnd--details-previewer">
                             <h3>כתובת למשלוח</h3>
                             <div class="tokenized_inv_name_cont"><?php esc_html_e( 'חשבונית על שם', 'hello-elementor' ); ?>:
-                            <?php echo ! empty( $invoice ) ? '<p class="tokenized_user_name">'. esc_html( $invoice ) .'</p>' : ''; ?>
+                            <?php echo ! empty( $invoice ) ? '<p class="tokenized_user_name">'. esc_html( $invoice ) .'</p>' : '<p class="tokenized_user_name">'. esc_html( $display_name ) .'</p>'; ?>
                             </div>
 
                             <div class="alarnd--user-address">
@@ -1246,7 +1245,6 @@ function allaround_card_form($user_id = '') {
         empty( $phone ) ||
         empty( $billing_address ) ||
         empty( $city ) ||
-        empty( $invoice ) ||
         empty( $name ) ||
         empty( $email )
     ) {
@@ -1260,7 +1258,7 @@ function allaround_card_form($user_id = '') {
         <div id="alarnd__details_preview">
             <div class="alarnd--payout-col alarnd--details-previewer">
                 <h3>כתובת למשלוח</h3>
-                <div class="tokenized_inv_name_cont"><?php esc_html_e( 'חשבונית על שם', 'hello-elementor' ); ?>:<?php echo ! empty( $invoice ) ? '<p class="tokenized_user_name">'. esc_html( $invoice ) .'</p>' : ''; ?></div>
+                <div class="tokenized_inv_name_cont"><?php esc_html_e( 'חשבונית על שם', 'hello-elementor' ); ?>:<?php echo ! empty( $invoice ) ? '<p class="tokenized_user_name">'. esc_html( $invoice ) .'</p>' : '<p class="tokenized_user_name">'. esc_html( $name ) .'</p>'; ?></div>
 
                 <div class="alarnd--user-address">
                     <div class="alarnd--user-address-wrap">
@@ -1984,6 +1982,9 @@ function acf_customers_list_choices_cb( $field ) {
 }
 add_filter( 'acf/load_field/name=customers_list', 'acf_customers_list_choices_cb' );
 
+function update_acf_anyway($user_id, $meta_key, $new_value) {
+    update_field($meta_key, $new_value, 'user_' . $user_id);
+}
 
 function ml_products_per_page() {
     $products_per_page = get_field('products_per_page', 'option');
