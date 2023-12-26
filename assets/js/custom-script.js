@@ -850,16 +850,26 @@ jQuery(document).ready(function ($) {
   }
   
   $(document).ajaxSend(function(event, xhr, settings) {
-    // Check if the AJAX request is a cart update
-    if (settings.url.indexOf('/cart') !== -1) {
-        // It's a cart update AJAX request
-        $('.alarnd--cart-wrapper-inner').addClass('loading');
-        console.log("started update");
+      // Check if the AJAX request is a cart update
+      if (settings.url.indexOf('/cart') !== -1) {
+          // It's a cart update AJAX request
+          $('.alarnd--cart-wrapper-inner').addClass('loading');
+          console.log("started update");
 
-        // Append HTML code
-        var cartLoaderHTML = '<section class="cart_loader_section"><aside class="cart_loader_aside"><div class="info__box"><div class="left_box"><p class="shinny info__text_one"></p><p class="shinny info__text_two"></p><p class="shinny info__text_three"></p></div><div class="right_box"><div class="shinny image"></div></div></div><div class="info__box"><div class="left_box"><p class="shinny info__text_one"></p><p class="shinny info__text_two"></p><p class="shinny info__text_three"></p></div><div class="right_box"><div class="shinny image"></div></div></div></aside><div class="shipping_side"><div class="left_box"><p class="shinny info__text_one"></p><p class="shinny info__text_two"></p></div><div class="left_box"><p class="shinny info__text_one"></p><p class="shinny info__text_two"></p></div><div class="left_box cartLoader__total"><p class="shinny info__text_one"></p><p class="shinny info__text_two"></p></div><div class="right_box cartLoader_button"><div class="shinny image"></div></div></div></section>';
-        $('#cart_loader').append(cartLoaderHTML);
-    }
+          // Count the number of cart items
+          var cartItemCount = $('.cart_item').length;
+
+          // Append HTML code based on cart item count
+          var cartLoaderHTML = '<section class="cart_loader_section"><aside class="cart_loader_aside">';
+          
+          for (var i = 0; i < cartItemCount; i++) {
+              cartLoaderHTML += '<div class="info__box"><div class="left_box"><p class="shinny info__text_one"></p><p class="shinny info__text_two"></p><p class="shinny info__text_three"></p></div><div class="right_box"><div class="shinny image"></div></div></div>';
+          }
+
+          cartLoaderHTML += '</aside><div class="shipping_side"><div class="left_box"><p class="shinny info__text_one"></p><p class="shinny info__text_two"></p></div><div class="left_box"><p class="shinny info__text_one"></p><p class="shinny info__text_two"></p></div><div class="left_box cartLoader__total"><p class="shinny info__text_one"></p><p class="shinny info__text_two"></p></div><div class="right_box cartLoader_button"><div class="shinny image"></div></div></div></section>';
+          
+          $('#cart_loader').append(cartLoaderHTML);
+      }
   });
 
   $(document.body).on('updated_wc_div', function(){

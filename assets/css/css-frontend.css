@@ -984,7 +984,7 @@ span.price_step_qty {
   direction: ltr;
 }
 .woocommerce-product-gallery.alarn--pricing-column .slick-list {
-  min-height: 268px;
+  height: auto !important;
 }
 .woocommerce-product-gallery.alarn--pricing-column .slick-slide {
   float: left !important;
@@ -1952,7 +1952,7 @@ section.cart_loader_section .info__box {
 
 section.cart_loader_section .info__text_one {
   width: 100%;
-  height: 20px;
+  height: 15px;
   border-radius: 4px;
 }
 
@@ -1974,8 +1974,8 @@ section.cart_loader_section .left_box {
 }
 
 section.cart_loader_section .image {
-  height: 90px;
-  width: 125px;
+  height: 76px;
+  width: 120px;
   border-radius: 25px;
 }
 
@@ -2245,7 +2245,7 @@ section.cart_loader_section .cartLoader_button .image {
     flex: 0 0 100%;
   }
   .woocommerce-product-gallery.alarn--pricing-column .slick-list {
-    height: auto !important;
+    min-height: 205px;
   }
   ol.mlCustomDots {
     margin-bottom: 15px;

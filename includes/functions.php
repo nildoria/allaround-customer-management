@@ -1498,7 +1498,6 @@ function allaround_customer_form($is_disabled = false) {
     $invoice = get_field('invoice', "user_{$current_user_id}");
     $city = get_user_meta( $current_user_id, 'billing_city', true );
     $billing_address = get_user_meta( $current_user_id, 'billing_address_1', true );
-    $lock_profile = get_field('lock_profile', 'user_' . $current_user_id);
     ?>
     <form action="" id="customerDetails" class="allaround--card-form<?php echo $is_disabled === false ? ' hidden_form' : ''; ?>">
         <h3>כתובת למשלוח</h3>
@@ -1506,7 +1505,7 @@ function allaround_customer_form($is_disabled = false) {
             <div class="form-row">
                 <div class="form-label"><?php esc_html_e("Name", "mini-store" ); ?></div>
                 <div class="form-input">
-                    <input type="text" id="userName" name="userName" placeholder="<?php esc_attr_e("required", "mini-store" ); ?>" value="<?php echo $lock_profile ? '' : esc_attr( $the_user->display_name ); ?>" required>
+                    <input type="text" id="userName" name="userName" placeholder="<?php esc_attr_e("required", "mini-store" ); ?>" value="<?php echo esc_attr( $the_user->display_name ); ?>" required>
                 </div>
             </div>
             <div class="form-row">
