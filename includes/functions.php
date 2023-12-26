@@ -1237,6 +1237,7 @@ function allaround_card_form($user_id = '') {
 
     $name = isset( $the_user->display_name ) && ! empty( $the_user->display_name ) ? $the_user->display_name : $current_user_id;
     $email = $the_user->user_email;
+    $lock_profile = get_field('lock_profile', 'user_' . $current_user_id);
     error_log("email $email");
     
     
@@ -1246,7 +1247,8 @@ function allaround_card_form($user_id = '') {
         empty( $billing_address ) ||
         empty( $city ) ||
         empty( $name ) ||
-        empty( $email )
+        empty( $email ) ||
+        ($lock_profile === true)
     ) {
         $is_disabled = true;
     }
@@ -1434,20 +1436,20 @@ function allaround_card_form($user_id = '') {
                     <div class="form-row">
                         <div class="form-label"><?php esc_html_e("Name", "mini-store" ); ?></div>
                         <div class="form-input">
-                            <input type="text" id="cardholderName" maxlength="20" name="cardholderName" placeholder="<?php esc_attr_e("required", "mini-store" ); ?>" value="<?php echo esc_attr( $name ); ?>" required>
+                            <input type="text" id="cardholderName" maxlength="20" name="cardholderName" placeholder="<?php esc_attr_e("required", "mini-store" ); ?>" value="<?php echo $lock_profile ? '' : esc_attr( $name ); ?>" required>
                         </div>
                     </div>
                     <div class="form-row">
                         <div class="form-label"><?php esc_html_e("Invoice Name", "mini-store" ); ?></div>
                         <div class="form-input">
-                            <input type="text" id="cardholderInvoiceName" maxlength="20" name="cardholderInvoiceName" placeholder="<?php esc_attr_e("required", "mini-store" ); ?>" value="<?php echo esc_attr( $invoice ); ?>">
+                            <input type="text" id="cardholderInvoiceName" maxlength="20" name="cardholderInvoiceName" placeholder="<?php esc_attr_e("required", "mini-store" ); ?>" value="<?php echo $lock_profile ? '' : esc_attr( $invoice ); ?>">
                         </div>
                     </div>
                 </div>
                 <div class="form-row">
                     <div class="form-label"><?php esc_html_e("Email", "mini-store" ); ?></div>
                     <div class="form-input">
-                        <input type="text" id="cardholderEmail" name="cardholderEmail" placeholder="<?php esc_attr_e("required", "mini-store" ); ?>" value="<?php echo esc_attr( $email ); ?>" required>
+                        <input type="text" id="cardholderEmail" name="cardholderEmail" placeholder="<?php esc_attr_e("required", "mini-store" ); ?>" value="<?php echo $lock_profile ? '' : esc_attr( $email ); ?>" required>
                     </div>
                 </div>
 
@@ -1455,13 +1457,13 @@ function allaround_card_form($user_id = '') {
                     <div class="form-row">
                         <div class="form-label"><?php esc_html_e("Phone", "mini-store" ); ?></div>
                         <div class="form-input">
-                            <input type="text" id="cardholderPhone" name="cardholderPhone" placeholder="<?php esc_attr_e("required", "mini-store" ); ?>" value="<?php echo esc_attr( $phone ); ?>" required>
+                            <input type="text" id="cardholderPhone" name="cardholderPhone" placeholder="<?php esc_attr_e("required", "mini-store" ); ?>" value="<?php echo $lock_profile ? '' : esc_attr( $phone ); ?>" required>
                         </div>
                     </div>
                     <div class="form-row">
                         <div class="form-label"><?php esc_html_e("City", "mini-store" ); ?></div>
                         <div class="form-input">
-                            <input type="text" id="cardholderCity" name="cardholderCity" placeholder="<?php esc_attr_e("required", "mini-store" ); ?>" value="<?php echo esc_attr( $city ); ?>" required>
+                            <input type="text" id="cardholderCity" name="cardholderCity" placeholder="<?php esc_attr_e("required", "mini-store" ); ?>" value="<?php echo $lock_profile ? '' : esc_attr( $city ); ?>" required>
                         </div>
                     </div>
                 </div>
@@ -1469,7 +1471,7 @@ function allaround_card_form($user_id = '') {
                 <div class="form-row">
                     <div class="form-label"><?php esc_html_e("Address", "mini-store" ); ?></div>
                     <div class="form-input">
-                        <input type="text" id="cardholderAdress" name="cardholderAdress" placeholder="<?php esc_attr_e("required", "mini-store" ); ?>" value="<?php echo esc_attr( $billing_address ); ?>" required>
+                        <input type="text" id="cardholderAdress" name="cardholderAdress" placeholder="<?php esc_attr_e("required", "mini-store" ); ?>" value="<?php echo $lock_profile ? '' : esc_attr( $billing_address ); ?>" required>
                     </div>
                 </div>
 
@@ -1496,6 +1498,7 @@ function allaround_customer_form($is_disabled = false) {
     $invoice = get_field('invoice', "user_{$current_user_id}");
     $city = get_user_meta( $current_user_id, 'billing_city', true );
     $billing_address = get_user_meta( $current_user_id, 'billing_address_1', true );
+    $lock_profile = get_field('lock_profile', 'user_' . $current_user_id);
     ?>
     <form action="" id="customerDetails" class="allaround--card-form<?php echo $is_disabled === false ? ' hidden_form' : ''; ?>">
         <h3>כתובת למשלוח</h3>
@@ -1503,7 +1506,7 @@ function allaround_customer_form($is_disabled = false) {
             <div class="form-row">
                 <div class="form-label"><?php esc_html_e("Name", "mini-store" ); ?></div>
                 <div class="form-input">
-                    <input type="text" id="userName" name="userName" placeholder="<?php esc_attr_e("required", "mini-store" ); ?>" value="<?php echo esc_attr( $the_user->display_name ); ?>" required>
+                    <input type="text" id="userName" name="userName" placeholder="<?php esc_attr_e("required", "mini-store" ); ?>" value="<?php echo $lock_profile ? '' : esc_attr( $the_user->display_name ); ?>" required>
                 </div>
             </div>
             <div class="form-row">

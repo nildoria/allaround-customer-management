@@ -949,12 +949,12 @@ jQuery(document).ready(function ($) {
         setTimeout(function () {
           $(".white-popup-block button.mfp-close").click();
           // Smooth scroll to #woocommerce_cart
-          // $("html, body").animate(
-          //   {
-          //     scrollTop: $("#woocommerce_cart").offset().top,
-          //   },
-          //   1000
-          // );
+          $("html, body").animate(
+            {
+              scrollTop: $("#woocommerce_cart").offset().top,
+            },
+            1100
+          );
         }, 500);
       }
     }

@@ -2245,7 +2245,7 @@ section.cart_loader_section .cartLoader_button .image {
     flex: 0 0 100%;
   }
   .woocommerce-product-gallery.alarn--pricing-column .slick-list {
-    min-height: 205px;
+    height: auto !important;
   }
   ol.mlCustomDots {
     margin-bottom: 15px;
