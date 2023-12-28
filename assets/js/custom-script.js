@@ -856,6 +856,10 @@ jQuery(document).ready(function ($) {
           $('.alarnd--cart-wrapper-inner').addClass('loading');
           console.log("started update");
 
+          // Set the height of #cart_loader dynamically
+          var cartLoaderHeight = $('.alarnd--cart-wrapper-inner').height();
+          $('.alarnd--cart-wrapper-inner').height(cartLoaderHeight);
+
           // Count the number of cart items
           var cartItemCount = $('.cart_item').length;
 
@@ -876,6 +880,7 @@ jQuery(document).ready(function ($) {
     // Add your class to the element you want to target
     setTimeout(function () {
       $('.alarnd--cart-wrapper-inner').removeClass('loading');
+      $('.alarnd--cart-wrapper-inner').removeAttr('style');
       console.log("completed update");
 
       // Call the function to attach the tooltip to product thumbnails

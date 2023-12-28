@@ -863,7 +863,7 @@ ol.mlCustomDots {
   gap: 10px;
   justify-content: center;
   padding: 0;
-  margin-top: 10px;
+  margin-top: 20px;
   flex-wrap: wrap;
 }
 
@@ -985,10 +985,13 @@ span.price_step_qty {
 }
 .woocommerce-product-gallery.alarn--pricing-column .slick-list {
   height: auto !important;
+  border-radius: 11px;
+  overflow: hidden;
 }
 .woocommerce-product-gallery.alarn--pricing-column .slick-slide {
   float: left !important;
   pointer-events: none;
+  padding-bottom: 0;
 }
 .mfp-image-holder .mfp-close,
 .mfp-iframe-holder .mfp-close {
