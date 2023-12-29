@@ -1691,7 +1691,7 @@ function ministore_empty_cart_message($message) {
 add_filter('wc_empty_cart_message', 'ministore_empty_cart_message');
 
 /**
- * Replace src from cart item image
+ * Replace src and srcset from cart item image
  *
  * @param string $content
  * @param array $cart_item
@@ -1719,8 +1719,12 @@ function ml_cart_item_thumbnail( $content, $cart_item, $cart_item_key ) {
         // replace the src and add the data-src attribute
         $replaceHTML = $imgHTML;
 
-        if ( ! empty( $wc_thumb ) && preg_match( "/ src=['\"]/is", $replaceHTML ) ) {
+        if ( ! empty( $wc_thumb ) ) {
+            // Replace src attribute
             $replaceHTML = preg_replace( '/ src=(["\'])(.*?)["\']/is', ' src="' . $wc_thumb . '"', $replaceHTML );
+
+            // Replace srcset attribute
+            $replaceHTML = preg_replace( '/ srcset=(["\'])(.*?)["\']/is', ' srcset="' . $wc_thumb . '"', $replaceHTML );
         }
 
         array_push( $search, $imgHTML );
@@ -1734,6 +1738,7 @@ function ml_cart_item_thumbnail( $content, $cart_item, $cart_item_key ) {
     return $content;
 }
 add_filter( 'woocommerce_cart_item_thumbnail', 'ml_cart_item_thumbnail', 3, 250 );
+
 
 /**
  * Get generate cart thumbnail
