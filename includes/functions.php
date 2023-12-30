@@ -1739,7 +1739,6 @@ function ml_cart_item_thumbnail( $content, $cart_item, $cart_item_key ) {
 }
 add_filter( 'woocommerce_cart_item_thumbnail', 'ml_cart_item_thumbnail', 3, 250 );
 
-
 /**
  * Get generate cart thumbnail
  *
