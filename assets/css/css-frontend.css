@@ -322,6 +322,9 @@ button,
   border-top: 1px solid #ccc;
   margin-top: 15px;
 }
+.woocommerce-shipping-calculator {
+	display: none;
+}
 span.shipping-title {
   padding: 0px 0 9px;
 }
@@ -916,12 +919,12 @@ ol.mlCustomDots a {
 
 .woocommerce-product-gallery .allaround--slick-carousel .slick-next {
   right: -25px !important;
-  /* background-image: url(../images/right.png) !important; */
+  background-image: url(../images/right.png) !important;
   background-size: contain !important;
 }
 .woocommerce-product-gallery .allaround--slick-carousel .slick-prev {
   right: auto !important;
-  /* background-image: url(../images/left.png) !important; */
+  background-image: url(../images/left.png) !important;
   background-size: contain !important;
   left: -25px !important;
 }
@@ -1213,17 +1216,46 @@ body.rtl .alarnd--xoo-otp-wrap input {
   opacity: 0;
 }
 
-button.xoo-ml-login-otp-btn.ml_add_loading.button.btn {
-  border-radius: 11px;
-  margin-top: 25px;
+input.alarnd--otp-input.xoo-ml-phone-obj.alrn-pre-filled-digits::-webkit-input-placeholder { /* Chrome/Opera/Safari */
+  color: #000000;
+}
+input.alarnd--otp-input.xoo-ml-phone-obj.alrn-pre-filled-digits::-moz-placeholder { /* Firefox 19+ */
+  color: #000000;
+}
+input.alarnd--otp-input.xoo-ml-phone-obj.alrn-pre-filled-digits:-ms-input-placeholder { /* IE 10+ */
+  color: #000000;
+}
+input.alarnd--otp-input.xoo-ml-phone-obj.alrn-pre-filled-digits:-moz-placeholder { /* Firefox 18- */
+  color: #000000;
 }
 
+.alarnd_login_form_main button.xoo-ml-login-otp-btn.ml_add_loading.button.btn {
+  border-radius: 11px;
+  margin-top: 25px;
+	margin-left: auto;
+    margin-right: auto;
+    clear: both;
+    display: block;
+}
+.alarnd_login_form_main button.button.btn.xoo-ml-low-back {
+    margin-top: 15px;
+    margin-left: auto;
+    margin-right: auto;
+    clear: both;
+    display: block;
+}
+.xoo-ml-otp-input-cont-wrap.cccode-wrap {
+	display: none;
+}
 .xoo-ml-otp-form .xoo-ml-otp-sent-txt {
   margin-bottom: 0;
   font-size: 20px;
   margin-top: 20px;
 }
-
+.xoo-ml-phinput-cont.woocommerce-form-row.woocommerce-form-row--wide {
+    max-width: 410px;
+    margin: auto;
+}
 .alarnd--load-overlay .alarnd--overlay {
   background-color: #0baaf7 !important;
 }
@@ -1248,7 +1280,7 @@ form.allaround--card-form .form-input {
 .flex-row .form-row {
   flex: 1;
 }
-.form-input input.error {
+.form-input input.error, .xoo-ml-otp-input-cont-wrap.xoo-ml-otp-input-cont-main input.error {
   border: 1px solid red;
 }
 .form-input label {
@@ -2284,7 +2316,7 @@ section.cart_loader_section .cartLoader_button .image {
     margin-bottom: 15px;
   }
   .alarnd--price-chart-price {
-    justify-content: flex-start;
+    justify-content: center;
   }
   .white-popup-block.alarnd--info-modal.alarnd--quantity-modal,
   .white-popup-block.alarnd--info-modal.alarnd--variable-modal {

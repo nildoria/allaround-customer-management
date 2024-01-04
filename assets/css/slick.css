@@ -198,7 +198,7 @@
   opacity: 0.25;
 }
 
-.slick-prev:before,
+/* .slick-prev:before,
 .slick-next:before {
   font-family: "Font Awesome 5 Free" !important;
   font-size: 20px;
@@ -210,7 +210,7 @@
 
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-}
+} */
 
 .slick-prev {
   left: 40px !important;
@@ -228,7 +228,7 @@
   content: "\f053" !important;
   font-weight: bold;
 }
-.slick-prev:before {
+/* .slick-prev:before {
   content: "\f053" !important;
 }
 .slick-next::before {
@@ -239,7 +239,7 @@
 }
 [dir="rtl"] .slick-next::before {
     content: "\f054" !important;
-}
+} */
 
 .slick-next {
   right: 40px !important;

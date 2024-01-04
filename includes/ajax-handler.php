@@ -459,7 +459,7 @@ class ML_Ajax {
                             <div class="alarnd--popup-inline">
                                 <h5><?php printf( '%s %s', esc_html__( 'Please confirm by clicking on the button below and we’ll charge your card by', 'allaroundminilng' ), WC()->cart->get_total() ); ?></h5>
                             </div>
-                            <span class="alrnd--create-order alarnd--submit-btn ml_add_loading button"><?php esc_html_e( 'Confirm', 'allaroundminilng' ); ?></span>
+                            <span class="alrnd--create-order alarnd--submit-btn ml_add_loading button"><?php esc_html_e( 'Click To Pay ', 'allaroundminilng' ); ?> <?php printf( WC()->cart->get_total() ); ?></span>
                             <div class="form-message"></div>
                         </div>
                     </div>

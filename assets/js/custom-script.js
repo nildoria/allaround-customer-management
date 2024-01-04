@@ -523,6 +523,42 @@ jQuery(document).ready(function ($) {
     return false;
   });
 
+
+        // Function to check and update the 'error' class
+        function checkAndUpdateErrorClass() {
+            var anyEmpty = false;
+
+            // Loop through each input field with the class 'xoo-ml-phone-obj'
+            $('.allrnd-inputable-fields').each(function() {
+                // Check if the current input field is empty
+                if ($(this).val().trim() === '') {
+                    anyEmpty = true;
+                    // Add the 'error' class to the current input field
+                    $(this).addClass('error');
+                } else {
+                    // Remove the 'error' class from the current input field if not empty
+                    $(this).removeClass('error');
+                }
+            });
+
+            // If any input field is empty, prevent the default form submission
+            if (anyEmpty) {
+                return false;
+            }
+        }
+
+        // Attach the checkAndUpdateErrorClass function to the input event of .xoo-ml-phone-obj fields
+        $('.allrnd-inputable-fields').on('input', function() {
+            // Call the function to check and update the 'error' class
+            checkAndUpdateErrorClass();
+        });
+
+        // Attach the checkAndUpdateErrorClass function to the click event of the submit button
+        $('.xoo-ml-login-otp-btn').on('click', function() {
+            // Call the function to check and update the 'error' class
+            checkAndUpdateErrorClass();
+        });
+
   //   $(document).on("click", ".alarnd__return_token_payout", function (e) {
   //     e.preventDefault();
 
@@ -680,6 +716,13 @@ jQuery(document).ready(function ($) {
 
         setTimeout(function () {
           attachTooltipToProductThumbnails();
+          // Smooth scroll to #woocommerce_cart
+          $("html, body").animate(
+            {
+              scrollTop: $("#woocommerce_cart").offset().top,
+            },
+            1100
+          );
         }, 1500);
 
         console.log(data);
@@ -963,13 +1006,6 @@ jQuery(document).ready(function ($) {
         // Trigger a click event with a delay
         setTimeout(function () {
           $(".white-popup-block button.mfp-close").click();
-          // Smooth scroll to #woocommerce_cart
-          $("html, body").animate(
-            {
-              scrollTop: $("#woocommerce_cart").offset().top,
-            },
-            1100
-          );
         }, 500);
       }
     }
