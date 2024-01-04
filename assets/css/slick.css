@@ -197,7 +197,10 @@
 .slick-next.slick-disabled:before {
   opacity: 0.25;
 }
-
+.slick-prev:before,
+.slick-next:before {
+	display: none;	
+}
 /* .slick-prev:before,
 .slick-next:before {
   font-family: "Font Awesome 5 Free" !important;

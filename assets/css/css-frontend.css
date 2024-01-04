@@ -508,6 +508,8 @@ form#cardDetailsForm label.error {
   border: 1px solid #ccc;
   border-radius: 4px;
   width: 49px;
+  height: 30px;
+  object-fit: contain;
 }
 
 .alarnd--single-payout input:checked {

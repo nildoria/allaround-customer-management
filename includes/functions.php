@@ -52,15 +52,22 @@ add_shortcode('ml_logout', 'ml_logout_shortcode');
 
 class ML_Custom_Menu_Walker extends Walker_Nav_Menu {
     function start_el(&$output, $item, $depth = 0, $args = NULL, $id = 0) {
+        $get_current_author = get_query_var('author_name');
+        $get_current_puser = get_user_by('login', $get_current_author); 
+        $current_user_id = isset( $get_current_puser->ID ) ? $get_current_puser->ID : '';
+        $token_available = alarnd_get_token($current_user_id);
+        $phone = ml_get_user_phone($current_user_id, 'number');
         if ($item->title == 'Logout') {
-            $logout_url = home_url('my-account');
+            $logout_url = home_url('/' . $get_current_author);
             $title = esc_html__("Login", "hello-elementor");
             if( is_user_logged_in() ) {
                 $logout_url =  esc_url(add_query_arg('custom_logout', 'logout', home_url('/custom-logout/')));
                 $title = $item->title;
             }
 
-            $output .= '<li><a href="' . esc_url($logout_url) . '">' . esc_html($title) . '</a></li>';
+            if (! empty($token_available) && ! empty($phone)) {
+                $output .= '<li class="login-logout-menu"><a href="' . esc_url($logout_url) . '">' . esc_html($title) . '</a></li>';
+            }
         } else {
             parent::start_el($output, $item, $depth, $args, $id);
         }
@@ -320,6 +327,18 @@ function alarnd_get_logo( $user_id, $type = '' ) {
     }
 
     return $profile_picture_url;
+
+}
+
+
+function alarnd_get_token( $user_id ) {
+    $user_token = get_field('token', "user_{$user_id}");
+
+    if (! empty($user_token)) {
+        $user_token_val = $user_token;
+    }
+
+    return $user_token_val;
 
 }
 
@@ -1297,7 +1316,7 @@ function allaround_card_form($user_id = '') {
                     <div class="form-row">
                         <div class="form-label"><?php esc_html_e("Card Number", "mini-store" ); ?></div>
                         <div class="form-input">
-                            <input type="text" id="cardNumber" name="cardNumber" maxlength="19" placeholder="<?php esc_attr_e("1111 1111 1111 1111", "mini-store" ); ?>" dir="ltr" required>
+                            <input type="text" id="cardNumber" name="cardNumber" maxlength="19" placeholder="<?php esc_attr_e("1111 1111 1111 1111", "mini-store" ); ?>" dir="ltr" inputmode="numeric" required>
                             <svg id="ccicon" class="ccicon" width="750" height="471" viewBox="0 0 750 471" version="1.1" xmlns="http://www.w3.org/2000/svg"
                             xmlns:xlink="http://www.w3.org/1999/xlink"></svg>
                         </div>
@@ -1313,7 +1332,7 @@ function allaround_card_form($user_id = '') {
                         <div class="form-row">
                             <div class="form-label"><?php esc_html_e("CVC", "mini-store" ); ?></div>
                             <div class="form-input">
-                                <input type="number" id="cvvCode" maxlength="3" name="cvvCode" placeholder="<?php esc_attr_e("CVC", "mini-store" ); ?>" required>
+                                <input type="number" id="cvvCode" maxlength="3" name="cvvCode" placeholder="<?php esc_attr_e("CVC", "mini-store" ); ?>" inputmode="numeric" required>
                                 <div class="cvc-info tooltip-left" data-tooltip="3 סיטרכה בגב תורפס">
                                     <img src="<?php echo esc_url($cvc_info_path); ?>" alt="CVC Info" loading="lazy">
                                 </div>
@@ -1436,7 +1455,7 @@ function allaround_card_form($user_id = '') {
                     <div class="form-row">
                         <div class="form-label"><?php esc_html_e("Name", "mini-store" ); ?></div>
                         <div class="form-input">
-                            <input type="text" id="cardholderName" maxlength="20" name="cardholderName" placeholder="<?php esc_attr_e("required", "mini-store" ); ?>" value="<?php echo $lock_profile ? '' : esc_attr( $name ); ?>" required>
+                            <input type="text" id="cardholderName" maxlength="20" name="cardholderName" placeholder="<?php esc_attr_e("required", "mini-store" ); ?>" value="<?php echo $lock_profile ? '' : esc_attr( $name ); ?>" inputmode="numeric" required>
                         </div>
                     </div>
                     <div class="form-row">
@@ -1525,7 +1544,7 @@ function allaround_customer_form($is_disabled = false) {
             <div class="form-row">
                 <div class="form-label"><?php esc_html_e("Phone", "mini-store" ); ?></div>
                 <div class="form-input">
-                    <input type="text" id="userPhone" name="userPhone" placeholder="<?php esc_attr_e("required", "mini-store" ); ?>" value="<?php echo esc_attr( $phone ); ?>" required>
+                    <input type="text" id="userPhone" name="userPhone" placeholder="<?php esc_attr_e("required", "mini-store" ); ?>" value="<?php echo esc_attr( $phone ); ?>" inputmode="numeric" required>
                 </div>
             </div>
             <div class="form-row">
