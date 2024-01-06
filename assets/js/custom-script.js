@@ -1105,8 +1105,6 @@ jQuery(document).ready(function ($) {
             isApplicable = true;
             currentInstance.close();
           });
-
-          $("html").css("overflow", "hidden");
         },
         afterClose: function () {
           const product_id = this.st.el.data("product_id");
@@ -1120,8 +1118,6 @@ jQuery(document).ready(function ($) {
             //   .find(".mlGallerySingle")
             //   .magnificPopup("open");
           }
-
-          $("html").css("overflow", "");
         },
       },
     });
@@ -1381,9 +1377,6 @@ jQuery(document).ready(function ($) {
     var $self = $(this),
       productId = $self.data("product-id");
       
-    if ($(window).width() < 768) {
-      $("html").css("overflow", "hidden");
-    }
 
     if ($("#ml--product_id-" + productId).length !== 0) {
       $.magnificPopup.open({
@@ -1406,10 +1399,9 @@ jQuery(document).ready(function ($) {
 
             apearelsModalSize(productId);
 
-            $("html").css("overflow", "hidden");
           },
           close: function () {
-            $("html").css("overflow", "");
+            
           },
         },
       });
@@ -1449,13 +1441,10 @@ jQuery(document).ready(function ($) {
                 $(".alarnd_trigger_details_modal").removeClass("ml_loading");
 
                 apearelsModalSize(productId);
-
-                $("html").css("overflow", "hidden");
               },
               close: function () {
                 $("body").append(response);
                 $("#ml--product_id-" + productId).addClass("mfp-hide");
-                $("html").css("overflow", "");
               },
             },
           });

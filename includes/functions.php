@@ -1569,6 +1569,59 @@ function allaround_customer_form($is_disabled = false) {
     <?php
 }
 
+function add_address_phone_fields_to_user_form() {
+    global $pagenow;
+    // Check if we are on the Add New User page
+    if ($pagenow === 'user-new.php') {
+
+        // Output the billing address fields before the "Add New User" button
+        echo '<table class="form-table" id="fieldset-billing">';
+        $countryCode = ml_get_country_code();
+        ?>
+            <tr>
+                <th><label for="xoo-ml-user-reg-phone">Mobile Number (Without Country Code)</label></th>
+                <td>
+                    <input type="hidden" name="xoo-ml-user-reg-phone-cc" id="xoo-ml-user-reg-phone-cc" value="<?php echo $countryCode; ?>">
+                    <input type="text" name="xoo-ml-user-reg-phone" id="xoo-ml-user-reg-phone" class="regular-text">
+                </td>
+            </tr>
+            <tr>
+                <th><label for="billing_address_1">Address</label></th>
+                <td>
+                    <input type="text" name="billing_address_1" id="billing_address_1" class="regular-text">
+                </td>
+            </tr>
+            <tr>
+                <th><label for="billing_city">City</label></th>
+                <td>
+                    <input type="text" name="billing_city" id="billing_city" class="regular-text">
+                </td>
+            </tr>
+        <?php
+        echo '</table>';
+    }
+}
+add_action('user_new_form', 'add_address_phone_fields_to_user_form');
+
+
+function save_address_phone_fields($user_id) {
+    
+    if( function_exists( 'xoo_ml_users_table' ) ) {
+        xoo_ml_users_table()->save_customer_meta_fields($user_id);
+    }
+
+    if (isset($_POST['billing_address_1'])) {
+        update_user_meta($user_id, 'billing_address_1', sanitize_text_field($_POST['billing_address_1']));
+    }
+    if (isset($_POST['billing_city'])) {
+        update_user_meta($user_id, 'billing_city', sanitize_text_field($_POST['billing_city']));
+    }
+}
+
+add_action('user_register', 'save_address_phone_fields', 10, 1);
+add_action('profile_update', 'save_address_phone_fields', 10, 1);
+
+
 function ml_response($response) {
     $parts = explode('|', $response);
     $result = array();
@@ -2127,3 +2180,37 @@ function customer_leads_form_shortcode() {
 }
 
 add_shortcode('customer_leads_form', 'customer_leads_form_shortcode');
+
+
+function custom_remove_woocommerce_shipping_details() {
+    $screen = get_current_screen();
+
+    // Check if we are on the user edit page and the user has the necessary capabilities
+    if ($screen->id === 'user-edit' && current_user_can('edit_user', get_current_user_id())) {
+        ?>
+        <script>
+            jQuery(document).ready(function($) {
+                // Hide the WooCommerce shipping details fields
+                $('#fieldset-shipping').hide();
+                $('#billing_company').closest('tr').hide();
+                $('#billing_address_2').closest('tr').hide();
+                $('#billing_postcode').closest('tr').hide();
+                $('#billing_country').closest('tr').hide();
+                $('#billing_state').closest('tr').hide();
+                $('#billing_phone').closest('tr').hide();
+                $('#billing_email').closest('tr').hide();
+                $('.user-description-wrap').closest('table').hide();
+                $('.user-admin-color-wrap').closest('table').hide();
+                $('.user-url-wrap').hide();
+                $('#application-passwords-section').hide();
+                $('h2:contains("Customer shipping address")').hide();
+                $('h2:contains("About the user")').hide();
+                $('h2:contains("Personal Options")').hide();
+                $('label[for="billing_address_1"]').text('Address');
+                $('select[name="xoo-ml-user-reg-phone-cc"]').hide();
+            });
+        </script>
+        <?php
+    }
+}
+add_action('admin_footer', 'custom_remove_woocommerce_shipping_details');

@@ -694,11 +694,14 @@ span.alarnd__return_token_payout {
 .mfp-content .mfp-hide {
   display: block !important;
 }
-
+.mfp-wrap {
+  top: 0 !important;
+  height: 100vh !important;
+  position: fixed !important;
+}
 .alarnd--popup-middle {
   padding: 30px;
 }
-
 .white-popup-block.alarnd--payout-modal.alarnd--info-modal {
   max-width: 650px;
 }
@@ -2185,6 +2188,11 @@ section.cart_loader_section .cartLoader_button .image {
   }
   .iconLibraryTooltip:hover span.tooltipContainer {
     display: none;
+  }
+  .mfp-wrap.mfp-ready .mfp-content {
+    max-height: 99%;
+    overflow-y: scroll;
+    overflow-x: hidden;
   }
 }
 /*For 320-384px up Mobile Layout*/
