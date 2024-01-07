@@ -4,7 +4,7 @@ Plugin Name: AllAround Mini Store
 Plugin URI: https://allaround.co.il/
 Description: AllAround User Management and Mini Store.
 Version: 1.4
-Text Domain: mini-store
+Text Domain: hello-elementor
 */
 
 // If this file is called directly, abort.
@@ -49,7 +49,7 @@ class AlrndCustomerManagement {
 
         add_action( 'plugins_loaded', array( $this, 'init' ) );
 
-		load_plugin_textdomain( 'allaroundminilng', false, basename( dirname( __FILE__ ) ) . '/languages' );
+		load_plugin_textdomain( 'hello-elementor', false, basename( dirname( __FILE__ ) ) . '/languages' );
 	}
 
     /**

@@ -149,7 +149,7 @@ $current_user_id = $get_current_puser->ID;
             }
 
             // Display category filters
-            echo '<button class="filter-button" data-filter="*">'.esc_html__("All", "allaroundminilng").'</button>';
+            echo '<button class="filter-button" data-filter="*">'.esc_html__("All", "hello-elementor").'</button>';
             foreach ($product_categories as $category) {
                 echo '<button class="filter-button" data-filter=".category-' . $category->term_id . '">' . esc_html($category->name) . '</button>';
             }
@@ -326,7 +326,7 @@ $current_user_id = $get_current_puser->ID;
             echo '</ul>';
             ?>
             <div class="allaround--loadmore-wrap">
-                <button type="button" class="alarnd--regular-button alarnd--loadmore-trigger ml_add_loading button" data-page_num="1"><?php esc_html_e("Load More", "allaroundminilng"); ?></button>
+                <button type="button" class="alarnd--regular-button alarnd--loadmore-trigger ml_add_loading button" data-page_num="1"><?php esc_html_e("Load More", "hello-elementor"); ?></button>
             </div>
             <?php
             echo '</div>'; // End mini-store-product-list woocommerce

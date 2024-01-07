@@ -1314,9 +1314,9 @@ function allaround_card_form($user_id = '') {
                 </div>
                 <div class="form-cardDetail-fields">
                     <div class="form-row">
-                        <div class="form-label"><?php esc_html_e("Card Number", "mini-store" ); ?></div>
+                        <div class="form-label"><?php esc_html_e("Card Number", "hello-elementor" ); ?></div>
                         <div class="form-input">
-                            <input type="text" id="cardNumber" name="cardNumber" maxlength="19" placeholder="<?php esc_attr_e("1111 1111 1111 1111", "mini-store" ); ?>" dir="ltr" inputmode="numeric" required>
+                            <input type="text" id="cardNumber" name="cardNumber" maxlength="19" placeholder="<?php esc_attr_e("1111 1111 1111 1111", "hello-elementor" ); ?>" dir="ltr" inputmode="numeric" required>
                             <svg id="ccicon" class="ccicon" width="750" height="471" viewBox="0 0 750 471" version="1.1" xmlns="http://www.w3.org/2000/svg"
                             xmlns:xlink="http://www.w3.org/1999/xlink"></svg>
                         </div>
@@ -1324,15 +1324,15 @@ function allaround_card_form($user_id = '') {
                     </div>
                     <div class="form-row flex-row exp-cvc-con">
                         <div class="form-row">
-                            <div class="form-label"><?php esc_html_e("Expiration Date", "mini-store" ); ?></div>
+                            <div class="form-label"><?php esc_html_e("Expiration Date", "hello-elementor" ); ?></div>
                             <div class="form-input">
-                                <input type="text" inputmode="numeric" id="expirationDate" maxlength="5" name="expirationDate" placeholder="<?php esc_attr_e("MM/YY", "mini-store" ); ?>" required>
+                                <input type="text" inputmode="numeric" id="expirationDate" maxlength="5" name="expirationDate" placeholder="<?php esc_attr_e("MM/YY", "hello-elementor" ); ?>" required>
                             </div>
                         </div>
                         <div class="form-row">
-                            <div class="form-label"><?php esc_html_e("CVC", "mini-store" ); ?></div>
+                            <div class="form-label"><?php esc_html_e("CVC", "hello-elementor" ); ?></div>
                             <div class="form-input">
-                                <input type="number" id="cvvCode" maxlength="3" name="cvvCode" placeholder="<?php esc_attr_e("CVC", "mini-store" ); ?>" inputmode="numeric" required>
+                                <input type="number" id="cvvCode" maxlength="3" name="cvvCode" placeholder="<?php esc_attr_e("CVC", "hello-elementor" ); ?>" inputmode="numeric" required>
                                 <div class="cvc-info tooltip-left" data-tooltip="3 סיטרכה בגב תורפס">
                                     <img src="<?php echo esc_url($cvc_info_path); ?>" alt="CVC Info" loading="lazy">
                                 </div>
@@ -1453,44 +1453,44 @@ function allaround_card_form($user_id = '') {
                 <h3>כתובת למשלוח</h3>
                 <div class="form-row flex-row">
                     <div class="form-row">
-                        <div class="form-label"><?php esc_html_e("Name", "mini-store" ); ?></div>
+                        <div class="form-label"><?php esc_html_e("Name", "hello-elementor" ); ?></div>
                         <div class="form-input">
-                            <input type="text" id="cardholderName" maxlength="20" name="cardholderName" placeholder="<?php esc_attr_e("required", "mini-store" ); ?>" value="<?php echo $lock_profile ? '' : esc_attr( $name ); ?>" inputmode="numeric" required>
+                            <input type="text" id="cardholderName" maxlength="20" name="cardholderName" placeholder="<?php esc_attr_e("required", "hello-elementor" ); ?>" value="<?php echo $lock_profile ? '' : esc_attr( $name ); ?>" inputmode="numeric" required>
                         </div>
                     </div>
                     <div class="form-row">
-                        <div class="form-label"><?php esc_html_e("Invoice Name", "mini-store" ); ?></div>
+                        <div class="form-label"><?php esc_html_e("Invoice Name", "hello-elementor" ); ?></div>
                         <div class="form-input">
-                            <input type="text" id="cardholderInvoiceName" maxlength="20" name="cardholderInvoiceName" placeholder="<?php esc_attr_e("required", "mini-store" ); ?>" value="<?php echo $lock_profile ? '' : esc_attr( $invoice ); ?>">
+                            <input type="text" id="cardholderInvoiceName" maxlength="20" name="cardholderInvoiceName" placeholder="<?php esc_attr_e("required", "hello-elementor" ); ?>" value="<?php echo $lock_profile ? '' : esc_attr( $invoice ); ?>">
                         </div>
                     </div>
                 </div>
                 <div class="form-row">
-                    <div class="form-label"><?php esc_html_e("Email", "mini-store" ); ?></div>
+                    <div class="form-label"><?php esc_html_e("Email", "hello-elementor" ); ?></div>
                     <div class="form-input">
-                        <input type="text" id="cardholderEmail" name="cardholderEmail" placeholder="<?php esc_attr_e("required", "mini-store" ); ?>" value="<?php echo $lock_profile ? '' : esc_attr( $email ); ?>" required>
+                        <input type="text" id="cardholderEmail" name="cardholderEmail" placeholder="<?php esc_attr_e("required", "hello-elementor" ); ?>" value="<?php echo $lock_profile ? '' : esc_attr( $email ); ?>" required>
                     </div>
                 </div>
 
                 <div class="form-row flex-row">
                     <div class="form-row">
-                        <div class="form-label"><?php esc_html_e("Phone", "mini-store" ); ?></div>
+                        <div class="form-label"><?php esc_html_e("Phone", "hello-elementor" ); ?></div>
                         <div class="form-input">
-                            <input type="text" id="cardholderPhone" name="cardholderPhone" placeholder="<?php esc_attr_e("required", "mini-store" ); ?>" value="<?php echo $lock_profile ? '' : esc_attr( $phone ); ?>" required>
+                            <input type="text" id="cardholderPhone" name="cardholderPhone" placeholder="<?php esc_attr_e("required", "hello-elementor" ); ?>" value="<?php echo $lock_profile ? '' : esc_attr( $phone ); ?>" required>
                         </div>
                     </div>
                     <div class="form-row">
-                        <div class="form-label"><?php esc_html_e("City", "mini-store" ); ?></div>
+                        <div class="form-label"><?php esc_html_e("City", "hello-elementor" ); ?></div>
                         <div class="form-input">
-                            <input type="text" id="cardholderCity" name="cardholderCity" placeholder="<?php esc_attr_e("required", "mini-store" ); ?>" value="<?php echo $lock_profile ? '' : esc_attr( $city ); ?>" required>
+                            <input type="text" id="cardholderCity" name="cardholderCity" placeholder="<?php esc_attr_e("required", "hello-elementor" ); ?>" value="<?php echo $lock_profile ? '' : esc_attr( $city ); ?>" required>
                         </div>
                     </div>
                 </div>
 
                 <div class="form-row">
-                    <div class="form-label"><?php esc_html_e("Address", "mini-store" ); ?></div>
+                    <div class="form-label"><?php esc_html_e("Address", "hello-elementor" ); ?></div>
                     <div class="form-input">
-                        <input type="text" id="cardholderAdress" name="cardholderAdress" placeholder="<?php esc_attr_e("required", "mini-store" ); ?>" value="<?php echo $lock_profile ? '' : esc_attr( $billing_address ); ?>" required>
+                        <input type="text" id="cardholderAdress" name="cardholderAdress" placeholder="<?php esc_attr_e("required", "hello-elementor" ); ?>" value="<?php echo $lock_profile ? '' : esc_attr( $billing_address ); ?>" required>
                     </div>
                 </div>
 
@@ -1500,7 +1500,7 @@ function allaround_card_form($user_id = '') {
         <div class="form-row">
             <div class="form-label"></div>
             <div class="form-input form-submit-container">
-                <button type="submit" class="ml_add_loading button allaround_card_details_submit" <?php echo WC()->cart->is_empty() ? 'disabled' : ''; ?>><?php esc_html_e("התקדם לנקודת הביקורת", "mini-store" ); ?></button>
+                <button type="submit" class="ml_add_loading button allaround_card_details_submit" <?php echo WC()->cart->is_empty() ? 'disabled' : ''; ?>><?php esc_html_e("התקדם לנקודת הביקורת", "hello-elementor" ); ?></button>
             </div>
         </div>
     </form>
@@ -1522,47 +1522,47 @@ function allaround_customer_form($is_disabled = false) {
         <h3>כתובת למשלוח</h3>
         <div class="form-row flex-row">
             <div class="form-row">
-                <div class="form-label"><?php esc_html_e("Name", "mini-store" ); ?></div>
+                <div class="form-label"><?php esc_html_e("Name", "hello-elementor" ); ?></div>
                 <div class="form-input">
-                    <input type="text" id="userName" name="userName" placeholder="<?php esc_attr_e("required", "mini-store" ); ?>" value="<?php echo esc_attr( $the_user->display_name ); ?>" required>
+                    <input type="text" id="userName" name="userName" placeholder="<?php esc_attr_e("required", "hello-elementor" ); ?>" value="<?php echo esc_attr( $the_user->display_name ); ?>" required>
                 </div>
             </div>
             <div class="form-row">
-                <div class="form-label"><?php esc_html_e("Invoice Name", "mini-store" ); ?></div>
+                <div class="form-label"><?php esc_html_e("Invoice Name", "hello-elementor" ); ?></div>
                 <div class="form-input">
-                    <input type="text" id="userInvoiceName" name="userInvoiceName" placeholder="<?php esc_attr_e("required", "mini-store" ); ?>" value="<?php echo esc_attr( $invoice ); ?>">
+                    <input type="text" id="userInvoiceName" name="userInvoiceName" placeholder="<?php esc_attr_e("required", "hello-elementor" ); ?>" value="<?php echo esc_attr( $invoice ); ?>">
                 </div>
             </div>
         </div>
         <div class="form-row">
-            <div class="form-label"><?php esc_html_e("Email", "mini-store" ); ?></div>
+            <div class="form-label"><?php esc_html_e("Email", "hello-elementor" ); ?></div>
             <div class="form-input">
-                <input type="text" id="userEmail" name="userEmail" placeholder="<?php esc_attr_e("required", "mini-store" ); ?>" value="<?php echo esc_attr( $the_user->user_email ); ?>" required>
+                <input type="text" id="userEmail" name="userEmail" placeholder="<?php esc_attr_e("required", "hello-elementor" ); ?>" value="<?php echo esc_attr( $the_user->user_email ); ?>" required>
             </div>
         </div>
         <div class="form-row flex-row">
             <div class="form-row">
-                <div class="form-label"><?php esc_html_e("Phone", "mini-store" ); ?></div>
+                <div class="form-label"><?php esc_html_e("Phone", "hello-elementor" ); ?></div>
                 <div class="form-input">
-                    <input type="text" id="userPhone" name="userPhone" placeholder="<?php esc_attr_e("required", "mini-store" ); ?>" value="<?php echo esc_attr( $phone ); ?>" inputmode="numeric" required>
+                    <input type="text" id="userPhone" name="userPhone" placeholder="<?php esc_attr_e("required", "hello-elementor" ); ?>" value="<?php echo esc_attr( $phone ); ?>" inputmode="numeric" required>
                 </div>
             </div>
             <div class="form-row">
-                <div class="form-label"><?php esc_html_e("City", "mini-store" ); ?></div>
+                <div class="form-label"><?php esc_html_e("City", "hello-elementor" ); ?></div>
                 <div class="form-input">
-                    <input type="text" id="userCity" name="userCity" placeholder="<?php esc_attr_e("required", "mini-store" ); ?>" value="<?php echo esc_attr( $city ); ?>" required>
+                    <input type="text" id="userCity" name="userCity" placeholder="<?php esc_attr_e("required", "hello-elementor" ); ?>" value="<?php echo esc_attr( $city ); ?>" required>
                 </div>
             </div>
         </div>
         <div class="form-row">
-            <div class="form-label"><?php esc_html_e("Address", "mini-store" ); ?></div>
+            <div class="form-label"><?php esc_html_e("Address", "hello-elementor" ); ?></div>
             <div class="form-input">
-                <input type="text" id="userAdress" name="userAdress" placeholder="<?php esc_attr_e("required", "mini-store" ); ?>" value="<?php echo esc_attr( $billing_address ); ?>" required>
+                <input type="text" id="userAdress" name="userAdress" placeholder="<?php esc_attr_e("required", "hello-elementor" ); ?>" value="<?php echo esc_attr( $billing_address ); ?>" required>
             </div>
         </div>
         <div class="form-row form-submit-row">
-            <button type="submit" class="button alarnd--regular-button alt ml_add_loading ml_save_customer_info" disabled><?php esc_html_e( "Update", "mini-store" ); ?></button>
-            <a href="#" class="ml_customer_info_edit_cancel"><?php esc_html_e("Return", "mini-store"); ?></a>
+            <button type="submit" class="button alarnd--regular-button alt ml_add_loading ml_save_customer_info" disabled><?php esc_html_e( "Update", "hello-elementor" ); ?></button>
+            <a href="#" class="ml_customer_info_edit_cancel"><?php esc_html_e("Return", "hello-elementor"); ?></a>
         </div>
         <div class="form-message"></div>
     </form>

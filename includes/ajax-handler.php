@@ -149,7 +149,7 @@ class ML_Ajax {
             empty( $phone )
         ) {
             wp_send_json_error( array(
-                "message" => esc_html__("Required field are empty. Please fill all the field.", "allaroundminilng")
+                "message" => esc_html__("Required field are empty. Please fill all the field.", "hello-elementor")
             ) );
             wp_die();
         }
@@ -446,20 +446,20 @@ class ML_Ajax {
                     <div class="alarnd--failed-wrap">
                         <div class="alarn--popup-thankyou">
                             <img src="<?php echo AlRNDCM_URL; ?>assets/images/failed.png" alt="">
-                            <h2><?php esc_html_e("Order Didn't go through", "allaroundminilng"); ?></h2>
+                            <h2><?php esc_html_e("Order Didn't go through", "hello-elementor"); ?></h2>
                             <h3>לצערנו העסקה לא אושרה.</h3>
                             <p>נטפל בבעיה וניצור איתך קשר בהקדם :)</p>
-                            <a href="<?php echo esc_url( home_url('/') ); ?>" class="alarnd--submit-btn alarnd--continue-btn"><?php esc_html_e('Continue Shopping', 'allaroundminilng'); ?></a>
+                            <a href="<?php echo esc_url( home_url('/') ); ?>" class="alarnd--submit-btn alarnd--continue-btn"><?php esc_html_e('Continue Shopping', 'hello-elementor'); ?></a>
                         </div>
                     </div>
 
                     <div class="alarnd--popup-confirmation">
                         <div class="alarnd--popup-middle">
-                            <h5><?php esc_html_e( 'Thanks for adding it to your order!', 'allaroundminilng' ); ?></h5>
+                            <h5><?php esc_html_e( 'Thanks for adding it to your order!', "hello-elementor" ); ?></h5>
                             <div class="alarnd--popup-inline">
-                                <h5><?php printf( '%s %s', esc_html__( 'Please confirm by clicking on the button below and we’ll charge your card by', 'allaroundminilng' ), WC()->cart->get_total() ); ?></h5>
+                                <h5><?php printf( '%s %s', esc_html__( 'Please confirm by clicking on the button below and we’ll charge your card by', 'hello-elementor' ), WC()->cart->get_total() ); ?></h5>
                             </div>
-                            <span class="alrnd--create-order alarnd--submit-btn ml_add_loading button"><?php esc_html_e( 'Click To Pay ', 'allaroundminilng' ); ?> <?php printf( WC()->cart->get_total() ); ?></span>
+                            <span class="alrnd--create-order alarnd--submit-btn ml_add_loading button"><?php esc_html_e( 'Click To Pay ', "hello-elementor" ); ?> <?php printf( WC()->cart->get_total() ); ?></span>
                             <div class="form-message"></div>
                         </div>
                     </div>
@@ -529,7 +529,7 @@ class ML_Ajax {
             empty( $userEmail ) 
         ) {
             wp_send_json_error( array(
-                "message" => esc_html__("Required field are empty. Please fill all the field.", "allaroundminilng")
+                "message" => esc_html__("Required field are empty. Please fill all the field.", "hello-elementor")
             ) );
             wp_die();
         }
@@ -538,7 +538,7 @@ class ML_Ajax {
             ! is_email( $userEmail )
         ) {
             wp_send_json_error( array(
-                "message" => esc_html__("Please enter a valid email address.", "allaroundminilng")
+                "message" => esc_html__("Please enter a valid email address.", "hello-elementor")
             ) );
             wp_die();
         }
@@ -730,7 +730,7 @@ class ML_Ajax {
             empty( $cvvCode )
         ) {
             wp_send_json_error( array(
-                "message" => esc_html__("Required field are empty. Please fill all the field.", "allaroundminilng")
+                "message" => esc_html__("Required field are empty. Please fill all the field.", "hello-elementor")
             ) );
             wp_die();
         }
@@ -739,7 +739,7 @@ class ML_Ajax {
             ! is_email( $cardholderEmail )
         ) {
             wp_send_json_error( array(
-                "message" => esc_html__("Please enter a valid email address.", "allaroundminilng")
+                "message" => esc_html__("Please enter a valid email address.", "hello-elementor")
             ) );
             wp_die();
         }
@@ -931,25 +931,25 @@ class ML_Ajax {
         $invalid_inputs = [];
 
         if( empty( $userName ) ) {
-            $invalid_inputs['userName'] = esc_html__("Please enter your full name.", "allaroundminilng");
+            $invalid_inputs['userName'] = esc_html__("Please enter your full name.", "hello-elementor");
         }
         if( empty( $userPhone ) ) {
-            $invalid_inputs['userPhone'] = esc_html__("Please enter a valid phone number.", "allaroundminilng");
+            $invalid_inputs['userPhone'] = esc_html__("Please enter a valid phone number.", "hello-elementor");
         }
         if( empty( $userAdress ) ) {
-            $invalid_inputs['userAdress'] = esc_html__("Please provide your complete address.", "allaroundminilng");
+            $invalid_inputs['userAdress'] = esc_html__("Please provide your complete address.", "hello-elementor");
         }
         if( empty( $userCity ) ) {
-            $invalid_inputs['userCity'] = esc_html__("Please provide your city.", "allaroundminilng");
+            $invalid_inputs['userCity'] = esc_html__("Please provide your city.", "hello-elementor");
         }
         // if( empty( $userInvoiceName ) ) {
-        //     $invalid_inputs['userInvoiceName'] = esc_html__("Please enter the invoice number.", "allaroundminilng");
+        //     $invalid_inputs['userInvoiceName'] = esc_html__("Please enter the invoice number.", "hello-elementor");
         // }
         if( 
             empty( $userEmail ) ||
             ! is_email( $userEmail )
         ) {
-            $invalid_inputs['userEmail'] = esc_html__("Please provide a valid email address.", "allaroundminilng");
+            $invalid_inputs['userEmail'] = esc_html__("Please provide a valid email address.", "hello-elementor");
         } 
         
         if( 
@@ -957,7 +957,7 @@ class ML_Ajax {
             $current_email != $userEmail &&
             email_exists( $userEmail )
         ) {
-            $invalid_inputs['userEmail'] = esc_html__("This email address is already in use.", "allaroundminilng");
+            $invalid_inputs['userEmail'] = esc_html__("This email address is already in use.", "hello-elementor");
         }
         
         if( 
@@ -1377,11 +1377,11 @@ class ML_Ajax {
                     </div>
                     
                     <div class="alarnd--next-target-message">
-                        <h6><?php printf( '%1$s <span class="ml_next_target"></span> %2$s %3$s %4$s', __( "Add", "allaroundminilng" ), __( "more items to reduce your cost to", "allaroundminilng" ), wc_price(0, array('decimals' => 0)), __( "per item", "allaroundminilng" ) ); ?></h6>
+                        <h6><?php printf( '%1$s <span class="ml_next_target"></span> %2$s %3$s %4$s', __( "Add", "hello-elementor" ), __( "more items to reduce your cost to", "hello-elementor" ), wc_price(0, array('decimals' => 0)), __( "per item", "hello-elementor" ) ); ?></h6>
                     </div>
                     
                     <div class="alarnd--limit-message">
-                        <h6><?php esc_html_e("Can't order more than 999", "allaroundminilng"); ?></h6>
+                        <h6><?php esc_html_e("Can't order more than 999", "hello-elementor"); ?></h6>
                     </div>
 
                     <div class="alarnd--price-show-wrap">
@@ -1392,12 +1392,12 @@ class ML_Ajax {
                         ?>
                             <div class="alarnd--price-by-shirt">
                                 <p class="alarnd--group-price"><?php echo wc_price($product->get_regular_price(), array('decimals' => 0)); ?> / <?php echo $first_line_keyword; ?></p>
-                                <p><?php echo esc_html( $second_line_keyword ); ?>: <span class="alarnd__total_qty"><?php esc_html_e( '0', 'allaroundminilng' ); ?></span></p>
+                                <p><?php echo esc_html( $second_line_keyword ); ?>: <span class="alarnd__total_qty"><?php esc_html_e( '0', "hello-elementor" ); ?></span></p>
                                 <span class="alarnd--total-price">סה"כ: <?php echo wc_price($product->get_regular_price(), array('decimals' => 0)); ?></span>
                             </div>
                             <button type="submit" name="add-to-cart"value="<?php echo esc_attr( $product->get_id() ); ?>" disabled="disabled" class="single_add_to_cart_button button alt ml_add_loading ml_add_to_cart_trigger"><?php echo esc_html( $product->single_add_to_cart_text() ); ?></button>
                         </div>
-                        <div class="alanrd--product-added-message"><?php esc_html_e( 'Added to Cart', 'allaroundminilng' ); ?></div>
+                        <div class="alanrd--product-added-message"><?php esc_html_e( 'Added to Cart', "hello-elementor" ); ?></div>
                         <input type="hidden" name="ml_type" value="group">
                         <input type="hidden" name="alarnd__group_id" value="<?php echo $uniqid; ?>">
                     </div>
@@ -1414,7 +1414,7 @@ class ML_Ajax {
         $saving_info = get_field( 'saving_info', $product->get_id() );
         $colors = get_field( 'colors', $product->get_id() );
         $colors_title = get_field( 'title_for_colors', $product->get_id() );
-        $the_color_title = ! empty( $colors_title ) ? $colors_title : esc_html__('Select a Color', 'allaroundminilng');
+        $the_color_title = ! empty( $colors_title ) ? $colors_title : esc_html__('Select a Color', 'hello-elementor');
         $custom_quanity = get_field( 'enable_custom_quantity', $product->get_id() );
 
         $steps = get_field( 'quantity_steps', $product->get_id() );
@@ -1456,14 +1456,14 @@ class ML_Ajax {
                     </div>
                     <?php endif; ?>
                     <div class="alarnd--single-cart-row" data-reqular-price="<?php echo $product->get_regular_price(); ?>">
-                        <span><?php esc_html_e('Select a Quantity', 'allaroundminilng'); ?></span>
+                        <span><?php esc_html_e('Select a Quantity', 'hello-elementor'); ?></span>
                         <?php $the_price = isset( $steps[$last_step]['amount'] ) ? $steps[$last_step]['amount'] : $product->get_regular_price(); ?>
                         <div class="alarnd--custom-qtys-wrap alarnd--single-custom-qty alarnd--single-var-labelonly">
                             <div class="alarnd--single-variable alarnd--hide-price" data-min="<?php echo esc_attr( $steps[0]['quantity'] ); ?>" data-price="<?php echo esc_attr( $the_price ); ?>">
                                 <span class="alarnd--single-var-info">
                                     <input type="radio" name="cutom_quantity" id="cutom_quantity_special-custom" value="<?php echo esc_attr( $the_price ); ?>" checked="checked">
                                     <input type="text" name="attribute_quantity" autocomplete="off" pattern="[0-9]*" class="alarnd_custom_input" inputmode="numeric" placeholder="<?php esc_html_e( 'הקלידו כמות…', 'hello-elementor' ); ?>" id="attribute_quanity_custom_val">
-                                    <!-- <label for="cutom_quantity_special-custom"><//?//php esc_html_e( 'Custom Quantity', 'allaroundminilng' ); ?></label> -->
+                                    <!-- <label for="cutom_quantity_special-custom"><//?//php esc_html_e( 'Custom Quantity', "hello-elementor" ); ?></label> -->
                                 </span>
                                 <?php echo wc_price( 0, array('decimals' => 0)); ?>
                                 <span class="alarnd--single-saving"><span class="alarnd__cqty_amount"><?php echo esc_html( $steps[$last_step]['amount'] ); ?></span> <?php echo esc_html( $saving_info ); ?></span>
@@ -1506,7 +1506,7 @@ class ML_Ajax {
                 <input type="hidden" name="ml_type" value="quantity">
                 <button type="submit" name="add-to-cart" value="<?php echo esc_attr( $product->get_id() ); ?>" class="single_add_to_cart_button button alt ml_add_loading ml_quantity_product_addtocart"><?php echo esc_html( $product->single_add_to_cart_text() ); ?></button>
             </div>
-            <div class="alanrd--product-added-message"><?php esc_html_e( 'Added to Cart', 'allaroundminilng' ); ?></div>
+            <div class="alanrd--product-added-message"><?php esc_html_e( 'Added to Cart', "hello-elementor" ); ?></div>
             </form>
            </div>
         </div>

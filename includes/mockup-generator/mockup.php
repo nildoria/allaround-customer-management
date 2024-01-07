@@ -16,7 +16,7 @@ class ALRN_Genrator {
     }
 
     function bulk_action($actions) {
-        $actions['alaround_mockup_gen'] = __('Generate Mockup', 'allaroundminilng');
+        $actions['alaround_mockup_gen'] = __('Generate Mockup', 'hello-elementor');
         return $actions;
     }
     
@@ -176,7 +176,7 @@ class ALRN_Genrator {
     }
 
     function users_column($columns) {
-        $columns['mockup_generate'] = esc_html__('Mockup Generate', 'allaroundminilng');
+        $columns['mockup_generate'] = esc_html__('Mockup Generate', 'hello-elementor');
         return $columns;
     }
 
@@ -203,9 +203,9 @@ class ALRN_Genrator {
             // user meta.
             $progress = get_user_meta($user_id, 'mockup_generation_status', true);
 
-            $button_text = __("Generate", "allaroundminilng");
+            $button_text = __("Generate", "hello-elementor");
             // if( "completed" === $progress ) {
-            //     $button_text = __("Regenerate", "allaroundminilng");
+            //     $button_text = __("Regenerate", "hello-elementor");
             // };
 
             $thumbnails = $this->get_thumbnails( $user_id );
@@ -307,9 +307,9 @@ class ALRN_Genrator {
             // user meta.
             $progress = get_user_meta($user_id, 'mockup_generation_status', true);
 
-            $button_text = __("Generate", "allaroundminilng");
+            $button_text = __("Generate", "hello-elementor");
             // if( "completed" === $progress ) {
-            //     $button_text = __("Regenerate", "allaroundminilng");
+            //     $button_text = __("Regenerate", "hello-elementor");
             // };
 
             $thumbnails = $this->get_thumbnails( $user_id );
