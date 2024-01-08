@@ -999,7 +999,7 @@ class ML_Ajax {
 
         ?>
         <div class="alarnd--payout-col alarnd--details-previewer">
-            <h3>כתובת למשלוח</h3>
+            <h3><?php esc_html_e( 'כתובת למשלוח', 'hello-elementor' ); ?></h3>
             <div class="tokenized_inv_name_cont"><?php esc_html_e( 'חשבונית על שם', 'hello-elementor' ); ?>:<p class="tokenized_user_name"><?php echo $userInvoiceName ?></p></div>
 
             <div class="alarnd--user-address">

@@ -1063,7 +1063,7 @@ function alarnd_single_checkout($user_id = false) {
             <div class="alarnd--payout-col alrnd_tokenized_col">
                 <div class="alarnd--payout-col alrnd_wooz_col">
                     <div class="alrnd--pay_details_tokenized">
-                        <h2>פרטי תשלום</h2>
+                        <h2><?php esc_html_e( 'פרטי תשלום', 'hello-elementor' ); ?></h2>
                         <div class="alarnd--payout-options">
                             <div class="alarnd-payout-choose">
                                 <div class="alarnd--single-payout">
@@ -1192,7 +1192,7 @@ function alarnd_single_checkout($user_id = false) {
                     <?php if( $is_disabled === false ) : ?>
                     <div id="alarnd__details_preview">
                         <div class="alarnd--payout-col alarnd--details-previewer">
-                            <h3>כתובת למשלוח</h3>
+                            <h3><?php esc_html_e("כתובת למשלוח", "hello-elementor" ); ?></h3>
                             <div class="tokenized_inv_name_cont"><?php esc_html_e( 'חשבונית על שם', 'hello-elementor' ); ?>:
                             <?php echo ! empty( $invoice ) ? '<p class="tokenized_user_name">'. esc_html( $invoice ) .'</p>' : '<p class="tokenized_user_name">'. esc_html( $display_name ) .'</p>'; ?>
                             </div>
@@ -1278,7 +1278,7 @@ function allaround_card_form($user_id = '') {
         <?php if( $is_disabled === false ) : ?>
         <div id="alarnd__details_preview">
             <div class="alarnd--payout-col alarnd--details-previewer">
-                <h3>כתובת למשלוח</h3>
+                <h3><?php esc_html_e("כתובת למשלוח", "hello-elementor" ); ?></h3>
                 <div class="tokenized_inv_name_cont"><?php esc_html_e( 'חשבונית על שם', 'hello-elementor' ); ?>:<?php echo ! empty( $invoice ) ? '<p class="tokenized_user_name">'. esc_html( $invoice ) .'</p>' : '<p class="tokenized_user_name">'. esc_html( $name ) .'</p>'; ?></div>
 
                 <div class="alarnd--user-address">
@@ -1333,7 +1333,7 @@ function allaround_card_form($user_id = '') {
                             <div class="form-label"><?php esc_html_e("CVC", "hello-elementor" ); ?></div>
                             <div class="form-input">
                                 <input type="number" id="cvvCode" maxlength="3" name="cvvCode" placeholder="<?php esc_attr_e("CVC", "hello-elementor" ); ?>" inputmode="numeric" required>
-                                <div class="cvc-info tooltip-left" data-tooltip="3 סיטרכה בגב תורפס">
+                                <div class="cvc-info tooltip-left" data-tooltip="<?php esc_html_e( '3 סיטרכה בגב תורפס', 'hello-elementor' ); ?>">
                                     <img src="<?php echo esc_url($cvc_info_path); ?>" alt="CVC Info" loading="lazy">
                                 </div>
                             </div>
@@ -1450,7 +1450,7 @@ function allaround_card_form($user_id = '') {
             </div>
 
             <div class="allaround_carf_form-userDetail">
-                <h3>כתובת למשלוח</h3>
+                <h3><?php esc_html_e("כתובת למשלוח", "hello-elementor" ); ?></h3>
                 <div class="form-row flex-row">
                     <div class="form-row">
                         <div class="form-label"><?php esc_html_e("Name", "hello-elementor" ); ?></div>
@@ -1519,7 +1519,7 @@ function allaround_customer_form($is_disabled = false) {
     $billing_address = get_user_meta( $current_user_id, 'billing_address_1', true );
     ?>
     <form action="" id="customerDetails" class="allaround--card-form<?php echo $is_disabled === false ? ' hidden_form' : ''; ?>">
-        <h3>כתובת למשלוח</h3>
+        <h3><?php esc_html_e("כתובת למשלוח", "hello-elementor" ); ?></h3>
         <div class="form-row flex-row">
             <div class="form-row">
                 <div class="form-label"><?php esc_html_e("Name", "hello-elementor" ); ?></div>
