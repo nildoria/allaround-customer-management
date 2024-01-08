@@ -8,6 +8,9 @@ class ML_Ajax {
 
         add_action( 'wp_ajax_confirm_payout', array( $this, 'confirm_payout' ) );
         add_action( 'wp_ajax_nopriv_confirm_payout', array( $this, 'confirm_payout' ) );
+        
+        add_action( 'wp_ajax_cardform_confirm_payout', array( $this, 'cardform_confirm_payout' ) );
+        add_action( 'wp_ajax_nopriv_cardform_confirm_payout', array( $this, 'cardform_confirm_payout' ) );
 
         add_action( 'wp_ajax_ml_add_to_cart', array( $this, 'ml_add_to_cart' ) );
         add_action( 'wp_ajax_nopriv_ml_add_to_cart', array( $this, 'ml_add_to_cart' ) );
@@ -414,64 +417,84 @@ class ML_Ajax {
 
     public function confirm_payout() {
         check_ajax_referer( 'aum_ajax_nonce', 'nonce' );
-        
-        try {
-            $customerDetails = isset( $_POST['customerDetails'] ) && ! empty( $_POST['customerDetails'] ) ? $_POST['customerDetails'] : '';
-            // error_log( print_r( $customerDetails, true ) );
-            if (empty($customerDetails)) {
-                throw new Exception('Customer Details field is empty.');
-            } elseif( ! isset($customerDetails['userName']) || empty($customerDetails['userName']) ) {
-                throw new Exception('Customer Name field is empty.');
-            } elseif( ! isset($customerDetails['userPhone']) || empty($customerDetails['userPhone']) ) {
-                throw new Exception('Customer Phone field is empty.');
-            } elseif( ! isset($customerDetails['userEmail']) || empty($customerDetails['userEmail']) ) {
-                throw new Exception('Customer Email field is empty.');
-            } elseif( ! isset($customerDetails['userAdress']) || empty($customerDetails['userAdress']) ) {
-                throw new Exception('Customer Adress field is empty.');
-            }
-    
-            ?>
-            <div class="white-popup-block alarnd--payout-modal mfp-hide alarnd--info-modal">
-                <div class="popup_product_details">
-                    <div class="alarnd--success-wrap">
-                        <div class="alarn--popup-thankyou">
-                            <img src="<?php echo AlRNDCM_URL; ?>assets/images/tick.png" alt="">
-                            <h2>תודה שהוספת את "<?php the_title(); ?>" להזמנה שלך!</h2>
-                            <h3>דגם יישלח עם שאר המוצרים המותאמים אישית שהזמנת.</h3>
-                            <p>אתה עדיין יכול להוסיף את שאר <br>המוצרים בעמוד זה וליהנות ממבצעים מעולים :)</p>
-                            <a href="<?php echo esc_url( home_url('/') ); ?>" class="alarnd--submit-btn alarnd--continue-btn">המשך בקניות</a>
-                        </div>
+        ?>
+        <div class="white-popup-block alarnd--payout-modal mfp-hide alarnd--info-modal">
+            <div class="popup_product_details">
+                <div class="alarnd--success-wrap">
+                    <div class="alarn--popup-thankyou">
+                        <img src="<?php echo AlRNDCM_URL; ?>assets/images/tick.png" alt="">
+                        <h2>תודה שהוספת את "<?php the_title(); ?>" להזמנה שלך!</h2>
+                        <h3>דגם יישלח עם שאר המוצרים המותאמים אישית שהזמנת.</h3>
+                        <p>אתה עדיין יכול להוסיף את שאר <br>המוצרים בעמוד זה וליהנות ממבצעים מעולים :)</p>
+                        <a href="<?php echo esc_url( home_url('/') ); ?>" class="alarnd--submit-btn alarnd--continue-btn">המשך בקניות</a>
                     </div>
+                </div>
 
-                    <div class="alarnd--failed-wrap">
-                        <div class="alarn--popup-thankyou">
-                            <img src="<?php echo AlRNDCM_URL; ?>assets/images/failed.png" alt="">
-                            <h2><?php esc_html_e("Order Didn't go through", "hello-elementor"); ?></h2>
-                            <h3>לצערנו העסקה לא אושרה.</h3>
-                            <p>נטפל בבעיה וניצור איתך קשר בהקדם :)</p>
-                            <a href="<?php echo esc_url( home_url('/') ); ?>" class="alarnd--submit-btn alarnd--continue-btn"><?php esc_html_e('Continue Shopping', 'hello-elementor'); ?></a>
-                        </div>
+                <div class="alarnd--failed-wrap">
+                    <div class="alarn--popup-thankyou">
+                        <img src="<?php echo AlRNDCM_URL; ?>assets/images/failed.png" alt="">
+                        <h2><?php esc_html_e("Order Didn't go through", "hello-elementor"); ?></h2>
+                        <h3>לצערנו העסקה לא אושרה.</h3>
+                        <p>נטפל בבעיה וניצור איתך קשר בהקדם :)</p>
+                        <a href="<?php echo esc_url( home_url('/') ); ?>" class="alarnd--submit-btn alarnd--continue-btn"><?php esc_html_e('Continue Shopping', 'hello-elementor'); ?></a>
+                        <div class="form-message"></div>
                     </div>
+                </div>
 
-                    <div class="alarnd--popup-confirmation">
-                        <div class="alarnd--popup-middle">
-                            <h5><?php esc_html_e( 'Thanks for adding it to your order!', "hello-elementor" ); ?></h5>
-                            <div class="alarnd--popup-inline">
-                                <h5><?php printf( '%s %s', esc_html__( 'Please confirm by clicking on the button below and we’ll charge your card by', 'hello-elementor' ), WC()->cart->get_total() ); ?></h5>
-                            </div>
-                            <span class="alrnd--create-order alarnd--submit-btn ml_add_loading button"><?php esc_html_e( 'Click To Pay ', "hello-elementor" ); ?> <?php printf( WC()->cart->get_total() ); ?></span>
-                            <div class="form-message"></div>
+                <div class="alarnd--popup-confirmation">
+                    <div class="alarnd--popup-middle">
+                        <h5><?php esc_html_e( 'Thanks for adding it to your order!', "hello-elementor" ); ?></h5>
+                        <div class="alarnd--popup-inline">
+                            <h5><?php printf( '%s %s', esc_html__( 'Please confirm by clicking on the button below and we’ll charge your card by', 'hello-elementor' ), WC()->cart->get_total() ); ?></h5>
                         </div>
+                        <span class="alrnd--create-order alarnd--submit-btn ml_add_loading button"><?php esc_html_e( 'Click To Pay ', "hello-elementor" ); ?> <?php printf( WC()->cart->get_total() ); ?></span>
+                        <div class="form-message"></div>
                     </div>
                 </div>
             </div>
-            <?php
-        } catch (Exception $e) {
-            // Catch the error and send an error response
-            echo '<p>' .$e->getMessage() . '</p>';
-        }
+        </div>
+        <?php
+        wp_die();
+    }
+
+    public function cardform_confirm_payout() {
+        check_ajax_referer( 'aum_ajax_nonce', 'nonce' );
         ?>
-        
+        <div class="white-popup-block alarnd--payout-modal mfp-hide alarnd--info-modal">
+            <div class="popup_product_details">
+                <div class="alarnd--success-wrap">
+                    <div class="alarn--popup-thankyou">
+                        <img src="<?php echo AlRNDCM_URL; ?>assets/images/tick.png" alt="">
+                        <h2>תודה שהוספת את "<?php the_title(); ?>" להזמנה שלך!</h2>
+                        <h3>דגם יישלח עם שאר המוצרים המותאמים אישית שהזמנת.</h3>
+                        <p>אתה עדיין יכול להוסיף את שאר <br>המוצרים בעמוד זה וליהנות ממבצעים מעולים :)</p>
+                        <a href="<?php echo esc_url( home_url('/') ); ?>" class="alarnd--submit-btn alarnd--continue-btn">המשך בקניות</a>
+                    </div>
+                </div>
+
+                <div class="alarnd--failed-wrap">
+                    <div class="alarn--popup-thankyou">
+                        <img src="<?php echo AlRNDCM_URL; ?>assets/images/failed.png" alt="">
+                        <h2><?php esc_html_e("Order Didn't go through", "hello-elementor"); ?></h2>
+                        <h3>לצערנו העסקה לא אושרה.</h3>
+                        <p>נטפל בבעיה וניצור איתך קשר בהקדם :)</p>
+                        <a href="<?php echo esc_url( home_url('/') ); ?>" class="alarnd--submit-btn alarnd--continue-btn"><?php esc_html_e('Continue Shopping', 'hello-elementor'); ?></a>
+                        <div class="form-message"></div>
+                    </div>
+                </div>
+
+                <div class="alarnd--popup-confirmation">
+                    <div class="alarnd--popup-middle">
+                        <h5><?php esc_html_e( 'Thanks for adding it to your order!', "hello-elementor" ); ?></h5>
+                        <div class="alarnd--popup-inline">
+                            <h5><?php printf( '%s %s', esc_html__( 'Please confirm by clicking on the button below and we’ll charge your card by', 'hello-elementor' ), WC()->cart->get_total() ); ?></h5>
+                        </div>
+                        <span class="alrnd--send_carddetails alarnd--submit-btn ml_add_loading button" style="width: 100%"><?php esc_html_e( 'Click To Pay ', "hello-elementor" ); ?> <?php printf( WC()->cart->get_total() ); ?></span>
+                        <div class="form-message"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
         <?php
         wp_die();
     }
@@ -486,14 +509,14 @@ class ML_Ajax {
 
         if ( WC()->cart->get_cart_contents_count() == 0 ) {
             wp_send_json_error( array(
-                "message" => "Cart is empty."
+                "message" => esc_html__( "Cart is empty.", "hello-elementor" )
             ) );
             wp_die();
         }
         
         if ( ! is_user_logged_in() ) {
             wp_send_json_error( array(
-                "message" => "User need to logged in."
+                "message" => esc_html__( "User need to logged in.", "hello-elementor" )
             ) );
             wp_die();
         }
@@ -508,7 +531,7 @@ class ML_Ajax {
 
         if( empty( $token ) ) {
             wp_send_json_error( array(
-                "message" => "Token value empty."
+                "message" => esc_html__("Token value empty.", "hello-elementor")
             ) );
             wp_die();
         }
@@ -522,6 +545,7 @@ class ML_Ajax {
         $cardholderInvoiceName = isset( $customerDetails['userInvoiceName'] ) && ! empty( $customerDetails['userInvoiceName'] ) ? sanitize_text_field( $customerDetails['userInvoiceName'] ) : '';
 
         if( 
+            empty( $customerDetails ) || 
             empty( $userName ) ||
             empty( $userPhone ) ||
             empty( $userAdress ) ||
@@ -533,6 +557,7 @@ class ML_Ajax {
             ) );
             wp_die();
         }
+    
         
         if( 
             ! is_email( $userEmail )
@@ -561,7 +586,6 @@ class ML_Ajax {
                 $cart_filter_data[$cart_item_key]["total_price"] = (int) $cart_item['quantity'] * (int) $cart_item['data']->get_price();
             }
 
-            
             if( $_product->is_type( 'variable' ) ) {
 
             }

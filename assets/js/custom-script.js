@@ -282,28 +282,57 @@ jQuery(document).ready(function ($) {
           }
         );
 
-        button.addClass("ml_loading");
-        messagWrap.html("").slideUp();
-
-        // Form is valid, send data via AJAX
         $.ajax({
-          type: "POST",
-          dataType: "json",
           url: ajax_object.ajax_url,
-          data: getData,
+          type: "POST",
+          dataType: "html",
+          beforeSend: function () {
+            button.addClass("ml_loading");
+          },
+          data: {
+            action: "cardform_confirm_payout",
+            nonce: ajax_object.nonce
+          },
           success: function (response) {
             button.removeClass("ml_loading");
-
-            if (response.success === false) {
-              messagWrap
-                .html("<p>" + response.data.message + "</p>")
-                .slideDown();
-            }
+    
+            if ($(response).closest(".alarnd--payout-modal").length !== 0) {
+              // Open directly via API
+              $.magnificPopup.open({
+                items: {
+                  src: response,
+                  type: "inline",
+                },
+              });
+            } 
           },
           error: function (xhr, status, error) {
-            button.removeClass("ml_loading");
+            console.log(error);
           },
         });
+
+        // button.addClass("ml_loading");
+        // messagWrap.html("").slideUp();
+
+        // // Form is valid, send data via AJAX
+        // $.ajax({
+        //   type: "POST",
+        //   dataType: "json",
+        //   url: ajax_object.ajax_url,
+        //   data: getData,
+        //   success: function (response) {
+        //     button.removeClass("ml_loading");
+
+        //     if (response.success === false) {
+        //       messagWrap
+        //         .html("<p>" + response.data.message + "</p>")
+        //         .slideDown();
+        //     }
+        //   },
+        //   error: function (xhr, status, error) {
+        //     button.removeClass("ml_loading");
+        //   },
+        // });
       },
     });
 
@@ -365,6 +394,65 @@ jQuery(document).ready(function ($) {
     this.value = this.value.replace(/[^0-9+]/g, "");
   });
 
+  $(document).on("click", ".alrnd--send_carddetails", function (e) {
+    e.preventDefault();
+
+    var $self = $(this),
+        form = $('form#cardDetailsForm'),
+        getData = form.serializeArray(),
+          messagWrap = form.find(".form-message"),
+          user_id = $('#main').data('user_id'),
+          item = $self.closest(".popup_product_details"),
+          button = form.find(".allaround_card_details_submit");
+
+        getData.push(
+          {
+            name: "action",
+            value: "ml_send_card",
+          },
+          {
+            name: "user_id",
+            value: user_id,
+          },
+          {
+            name: "nonce",
+            value: ajax_object.nonce,
+          }
+        );
+
+        button.addClass("ml_loading");
+        $self.addClass("ml_loading");
+        messagWrap.html("").slideUp();
+
+        // Form is valid, send data via AJAX
+        $.ajax({
+          type: "POST",
+          dataType: "json",
+          url: ajax_object.ajax_url,
+          data: getData,
+          success: function (response) {
+            button.removeClass("ml_loading");
+            $self.removeClass("ml_loading");
+
+            if (response && response.success && response.success === true) {
+              item.find(".alarnd--popup-confirmation").slideUp();
+              item.find(".alarnd--success-wrap").slideDown();
+              // console.log( "Success" );
+            } else {
+              item.find(".alarnd--popup-confirmation").slideUp();
+              item.find(".alarnd--failed-wrap").slideDown();
+              console.log(response.data.message);
+              if( response && response.data && response.data.message ) {
+                item.find('.form-message').html(response.data.message).slideDown();
+              }
+            }
+          },
+          error: function (xhr, status, error) {
+            button.removeClass("ml_loading");
+          },
+        });
+  });
+
   $(document).on("click", ".alrnd--create-order", function (e) {
     e.preventDefault();
 
@@ -407,6 +495,10 @@ jQuery(document).ready(function ($) {
         } else {
           item.find(".alarnd--popup-confirmation").slideUp();
           item.find(".alarnd--failed-wrap").slideDown();
+          console.log(response.data.message);
+          if( response && response.data && response.data.message ) {
+            item.find('.form-message').html(response.data.message).slideDown();
+          }
         }
       },
     }).fail(function (jqXHR, textStatus) {
