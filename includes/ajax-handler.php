@@ -442,10 +442,11 @@ class ML_Ajax {
                 </div>
 
                 <div class="alarnd--popup-confirmation">
-                    <div class="alarnd--popup-middle">
+                    <div class="alarnd--popup-middle alarn--popup-thankyou">
                         <h5><?php esc_html_e( 'Thanks for adding it to your order!', "hello-elementor" ); ?></h5>
                         <div class="alarnd--popup-inline">
-                            <h5><?php printf( '%s %s', esc_html__( 'Please confirm by clicking on the button below and we’ll charge your card by', 'hello-elementor' ), WC()->cart->get_total() ); ?></h5>
+                            <!-- <h5><?//php //printf( '%s %s', esc_html__( 'Please confirm by clicking on the button below and we’ll charge your card by', 'hello-elementor' ), WC()->cart->get_total() ); ?></h5> -->
+                            <h5><?php esc_html_e( 'Please confirm by clicking on the button below and we’ll charge your card by', 'hello-elementor' ); ?></h5>
                         </div>
                         <span class="alrnd--create-order alarnd--submit-btn ml_add_loading button"><?php esc_html_e( 'Click To Pay ', "hello-elementor" ); ?> <?php printf( WC()->cart->get_total() ); ?></span>
                         <div class="form-message"></div>
@@ -484,10 +485,11 @@ class ML_Ajax {
                 </div>
 
                 <div class="alarnd--popup-confirmation">
-                    <div class="alarnd--popup-middle">
+                    <div class="alarnd--popup-middle alarn--popup-thankyou">
                         <h5><?php esc_html_e( 'Thanks for adding it to your order!', "hello-elementor" ); ?></h5>
                         <div class="alarnd--popup-inline">
-                            <h5><?php printf( '%s %s', esc_html__( 'Please confirm by clicking on the button below and we’ll charge your card by', 'hello-elementor' ), WC()->cart->get_total() ); ?></h5>
+                            <!-- <h5><?//php printf( '%s %s', esc_html__( 'Please confirm by clicking on the button below and we’ll charge your card by', 'hello-elementor' ), WC()->cart->get_total() ); ?></h5> -->
+                            <h5><?php esc_html_e( 'Please confirm by clicking on the button below and we’ll charge your card by', 'hello-elementor' ); ?></h5>
                         </div>
                         <span class="alrnd--send_carddetails alarnd--submit-btn ml_add_loading button" style="width: 100%"><?php esc_html_e( 'Click To Pay ', "hello-elementor" ); ?> <?php printf( WC()->cart->get_total() ); ?></span>
                         <div class="form-message"></div>
@@ -1033,7 +1035,7 @@ class ML_Ajax {
                     <?php echo ! empty( $userPhone ) ? '<p>'. esc_html( $userPhone ) .'</p>' : ''; ?>
                     <?php echo ! empty( $userCity ) ? '<p>'. esc_html( $userCity ) .'</p>' : ''; ?>
                 </div>
-                <span class="alarnd--user_address_edit">שינוי</span>
+                <span class="alarnd--user_address_edit"><?php esc_html_e( 'שינוי', 'hello-elementor' ); ?></span>
             </div>
         </div>
         <?php

@@ -1306,11 +1306,11 @@ function allaround_card_form($user_id = '') {
             <div class="allaround_carf_form-cardDetail">
 
                 <?php if( !is_user_logged_in() ) : ?>
-                <h2>מעובד לקופה</h2>
+                <h2><?php esc_html_e( 'מעובד לקופה', 'hello-elementor' ); ?></h2>
                 <?php endif; ?>
 
                 <div class="ministore_available_pay_options">
-                    <span>יארשא סיטרכ</span> <img src="<?php echo esc_url($available_card_path); ?>" alt="Available Payment Options" loading="lazy">
+                    <span><?php esc_html_e( 'יארשא סיטרכ', 'hello-elementor' ); ?></span> <img src="<?php echo esc_url($available_card_path); ?>" alt="Available Payment Options" loading="lazy">
                 </div>
                 <div class="form-cardDetail-fields">
                     <div class="form-row">

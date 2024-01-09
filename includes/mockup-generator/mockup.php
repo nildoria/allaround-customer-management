@@ -65,10 +65,10 @@ class ALRN_Genrator {
         if ($original_image !== false) {
             // Calculate the new dimensions while preserving the aspect ratio
             list($original_width, $original_height) = getimagesize($original_image_path);
-            $max_dimension = 600; // Maximum dimension for the resized image
+            $max_dimension = 1000; // Maximum dimension for the resized image
 
             $resize_data = array(
-                "width" => 600,
+                "width" => 1000,
                 "original_height" => $original_height,
                 "original_width" => $original_width,
                 "original_image" => $original_image,
@@ -81,8 +81,8 @@ class ALRN_Genrator {
 
             if( true === $is_feature_image ) {
                 $resize_data = array(
-                    "width" => 400,
-                    "height" => 300,
+                    "width" => 1000,
+                    "height" => 666,
                     "original_height" => $original_height,
                     "original_width" => $original_width,
                     "original_image" => $original_image,
@@ -143,7 +143,7 @@ class ALRN_Genrator {
         $resized_image_path = $user_directory . '/' . $name . $filename;
 
         // Save the resized image
-        imagejpeg($resized_image, $resized_image_path, 90); // You can adjust the quality (90 in this example)
+        imagejpeg($resized_image, $resized_image_path, 100); // You can adjust the quality (90 in this example)
 
         imagedestroy($resized_image);
     }

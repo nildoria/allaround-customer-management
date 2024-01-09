@@ -1271,7 +1271,25 @@ input.alarnd--otp-input.xoo-ml-phone-obj.alrn-pre-filled-digits:-moz-placeholder
 .alarnd--custom-checkout-section.ml_pay_hidden {
   display: none;
 }
-
+body.woocommerce-page.woocommerce-account .alarnd--single-content.default-page-content {
+    min-height: 500px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+body.woocommerce-page.woocommerce-account .woocommerce * {
+    display: none;
+}
+body.woocommerce-page.woocommerce-account .woocommerce form.xoo-lwo-form, body.woocommerce-page.woocommerce-account .woocommerce button.xoo-ml-low-back {
+  display: block;
+}
+form.woocommerce-form.woocommerce-form-login.login * {
+    display: initial;
+}
+form.woocommerce-form.woocommerce-form-login.login button.xoo-ml-open-lwo-btn.button.btn.button.btn, form.woocommerce-form.woocommerce-form-login.login span.xoo-ml-or, form.woocommerce-form.woocommerce-form-login.login p.woocommerce-LostPassword.lost_password {
+  display: none;
+}
 /* New addition */
 form.allaround--card-form .form-input {
   margin-bottom: 15px;
