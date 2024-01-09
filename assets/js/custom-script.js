@@ -84,62 +84,62 @@ jQuery(document).ready(function ($) {
     }
   }
 
-  $(document).on("click", ".alarnd--payout-trigger", function (e) {
-    e.preventDefault();
+  // $(document).on("click", ".alarnd--payout-trigger", function (e) {
+  //   e.preventDefault();
 
-    var current = $(this),
-      customerDetails = $("#customerDetails");
+  //   var current = $(this),
+  //     customerDetails = $("#customerDetails");
 
-    if (!customerDetails.valid()) {
-      current.prop("disabled", true);
-      return false;
-    }
+  //   if (!customerDetails.valid()) {
+  //     current.prop("disabled", true);
+  //     return false;
+  //   }
 
-    var cdetails = customerDetails.serializeArray();
-    var customerDetails = {};
+  //   var cdetails = customerDetails.serializeArray();
+  //   var customerDetails = {};
 
-    // Convert the serialized array to a key-value object
-    $.each(cdetails, function (index, item) {
-      customerDetails[item.name] = item.value;
-    });
-    // console.log("cdetails", customerDetails);
+  //   // Convert the serialized array to a key-value object
+  //   $.each(cdetails, function (index, item) {
+  //     customerDetails[item.name] = item.value;
+  //   });
+  //   // console.log("cdetails", customerDetails);
 
-    $.ajax({
-      url: ajax_object.ajax_url,
-      type: "POST",
-      dataType: "html",
-      beforeSend: function () {
-        current.addClass("ml_loading");
-      },
-      data: {
-        action: "confirm_payout",
-        nonce: ajax_object.nonce,
-        customerDetails,
-      },
-      success: function (response) {
-        current.removeClass("ml_loading");
+  //   $.ajax({
+  //     url: ajax_object.ajax_url,
+  //     type: "POST",
+  //     dataType: "html",
+  //     beforeSend: function () {
+  //       current.addClass("ml_loading");
+  //     },
+  //     data: {
+  //       action: "confirm_payout",
+  //       nonce: ajax_object.nonce,
+  //       customerDetails,
+  //     },
+  //     success: function (response) {
+  //       current.removeClass("ml_loading");
 
-        $(".alarnd--payout-validation").slideUp().html("");
+  //       $(".alarnd--payout-validation").slideUp().html("");
 
-        if ($(response).closest(".alarnd--payout-modal").length !== 0) {
-          // Open directly via API
-          $.magnificPopup.open({
-            items: {
-              src: response,
-              type: "inline",
-            },
-          });
-        } else {
-          $(".alarnd--payout-validation").html(response).slideDown();
-        }
-      },
-      error: function (xhr, status, error) {
-        console.log(error);
-      },
-    });
+  //       if ($(response).closest(".alarnd--payout-modal").length !== 0) {
+  //         // Open directly via API
+  //         $.magnificPopup.open({
+  //           items: {
+  //             src: response,
+  //             type: "inline",
+  //           },
+  //         });
+  //       } else {
+  //         $(".alarnd--payout-validation").html(response).slideDown();
+  //       }
+  //     },
+  //     error: function (xhr, status, error) {
+  //       console.log(error);
+  //     },
+  //   });
 
-    return false;
-  });
+  //   return false;
+  // });
   
   $(document).on(
     "input",
@@ -282,57 +282,28 @@ jQuery(document).ready(function ($) {
           }
         );
 
+        button.addClass("ml_loading");
+        messagWrap.html("").slideUp();
+
+        // Form is valid, send data via AJAX
         $.ajax({
-          url: ajax_object.ajax_url,
           type: "POST",
-          dataType: "html",
-          beforeSend: function () {
-            button.addClass("ml_loading");
-          },
-          data: {
-            action: "cardform_confirm_payout",
-            nonce: ajax_object.nonce
-          },
+          dataType: "json",
+          url: ajax_object.ajax_url,
+          data: getData,
           success: function (response) {
             button.removeClass("ml_loading");
-    
-            if ($(response).closest(".alarnd--payout-modal").length !== 0) {
-              // Open directly via API
-              $.magnificPopup.open({
-                items: {
-                  src: response,
-                  type: "inline",
-                },
-              });
-            } 
+
+            if (response.success === false) {
+              messagWrap
+                .html("<p>" + response.data.message + "</p>")
+                .slideDown();
+            }
           },
           error: function (xhr, status, error) {
-            console.log(error);
+            button.removeClass("ml_loading");
           },
         });
-
-        // button.addClass("ml_loading");
-        // messagWrap.html("").slideUp();
-
-        // // Form is valid, send data via AJAX
-        // $.ajax({
-        //   type: "POST",
-        //   dataType: "json",
-        //   url: ajax_object.ajax_url,
-        //   data: getData,
-        //   success: function (response) {
-        //     button.removeClass("ml_loading");
-
-        //     if (response.success === false) {
-        //       messagWrap
-        //         .html("<p>" + response.data.message + "</p>")
-        //         .slideDown();
-        //     }
-        //   },
-        //   error: function (xhr, status, error) {
-        //     button.removeClass("ml_loading");
-        //   },
-        // });
       },
     });
 
@@ -453,12 +424,13 @@ jQuery(document).ready(function ($) {
         });
   });
 
-  $(document).on("click", ".alrnd--create-order", function (e) {
+  $(document).on("click", ".alarnd--payout-trigger", function (e) {
     e.preventDefault();
 
     var $self = $(this),
       item = $self.closest(".popup_product_details"),
-      customerDetails = $("#customerDetails");
+      customerDetails = $("#customerDetails"),
+      messagWrap = $self.closest('.alarnd--payout-main').find(".form-message");
 
     customerDetails.trigger("submit");
     if (!customerDetails.valid()) return false;
@@ -471,7 +443,10 @@ jQuery(document).ready(function ($) {
       customerDetails[item.name] = item.value;
     });
 
-    if ($self.hasClass("loading")) return false;
+    if ($self.hasClass("ml_loading")) return false;
+
+    $self.addClass("ml_loading");
+    messagWrap.html("").slideUp();
 
     // create a order behind the scene first.
     $.ajax({
@@ -484,25 +459,18 @@ jQuery(document).ready(function ($) {
         customerDetails,
       },
       beforeSend: function () {
-        $self.addClass("loading");
+        $self.addClass("ml_loading");
       },
       success: function (response) {
-        $self.removeClass("loading");
-        if (response && response.success && response.success === true) {
-          item.find(".alarnd--popup-confirmation").slideUp();
-          item.find(".alarnd--success-wrap").slideDown();
-          // console.log( "Success" );
-        } else {
-          item.find(".alarnd--popup-confirmation").slideUp();
-          item.find(".alarnd--failed-wrap").slideDown();
-          console.log(response.data.message);
-          if( response && response.data && response.data.message ) {
-            item.find('.form-message').html(response.data.message).slideDown();
-          }
+        $self.removeClass("ml_loading");
+        if (response.success === false) {
+          messagWrap
+            .html("<p>" + response.data.message + "</p>")
+            .slideDown();
         }
       },
     }).fail(function (jqXHR, textStatus) {
-      $self.removeClass("loading");
+      $self.removeClass("ml_loading");
       console.log("Request failed: " + textStatus);
       console.log(jqXHR);
     });
@@ -590,6 +558,8 @@ jQuery(document).ready(function ($) {
   $(document).on("change", 'input[name="alarnd_payout"]', function () {
     var current = $(this);
 
+    $('.form-message').hide();
+
     if ("woocommerce" === current.val()) {
     //   $(".alrnd--shipping_address_tokenized").hide();
       $(".alarnd--single-payout-submit").hide();
@@ -608,6 +578,8 @@ jQuery(document).ready(function ($) {
 
   $(document).on("change", 'input[name="alarnd_payout"]', function () {
     var current = $(this);
+
+    $('.form-message').hide();
 
     if ("tokenizer" === current.val()) {
       ml_show_tokenized_checkout();

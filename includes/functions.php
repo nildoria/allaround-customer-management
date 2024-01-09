@@ -225,8 +225,22 @@ function woocommerce_header_add_to_cart_fragment( $fragments ) {
 	return $fragments;
 }
 
+add_filter( 'woocommerce_add_to_cart_fragments', 'update_order_total' );
 
-// functions.php or your custom plugin file
+function update_order_total( $fragments ) {
+	ob_start();
+
+    WC()->cart->calculate_totals();
+
+    // Output the updated order total HTML
+    ?>
+    <div class="your-order-total-container"><?php esc_html_e("Total Amount", "hello-elementor" ); ?>: <?php printf(WC()->cart->get_total()); ?></div>
+    <?php
+
+	$fragments['div.your-order-total-container'] = ob_get_clean();
+	
+	return $fragments;
+}
 
 add_action('init', 'set_author_name_global_variable_anohter');
 
@@ -1222,10 +1236,12 @@ function alarnd_single_checkout($user_id = false) {
 
         </div>
 
+        <div class="your-order-total-container"><?php esc_html_e("Total Amount", "hello-elementor" ); ?>: <?php printf( WC()->cart->get_total() ); ?></div>
+
         <div class="alarnd--single-payout-submit">
             <button type="submit" class="alarnd--regular-button alarnd--payout-trigger ml_add_loading button" <?php echo $is_disabled === true ? 'disabled="disabled"' : ""; ?>>התקדם לנקודת הביקורת</button>
         </div>
-        <div class="alarnd--payout-validation"></div>
+        <div class="form-message text-center"></div>
     </div>
     <?php
 }
@@ -1320,7 +1336,6 @@ function allaround_card_form($user_id = '') {
                             <svg id="ccicon" class="ccicon" width="750" height="471" viewBox="0 0 750 471" version="1.1" xmlns="http://www.w3.org/2000/svg"
                             xmlns:xlink="http://www.w3.org/1999/xlink"></svg>
                         </div>
-                        <div class="form-message"></div>
                     </div>
                     <div class="form-row flex-row exp-cvc-con">
                         <div class="form-row">
@@ -1498,10 +1513,12 @@ function allaround_card_form($user_id = '') {
                 
         </div>
         <div class="form-row">
+            <div class="your-order-total-container"><?php esc_html_e("Total Amount", "hello-elementor" ); ?>: <?php printf( WC()->cart->get_total() ); ?></div>
             <div class="form-label"></div>
             <div class="form-input form-submit-container">
                 <button type="submit" class="ml_add_loading button allaround_card_details_submit" <?php echo WC()->cart->is_empty() ? 'disabled' : ''; ?>><?php esc_html_e("התקדם לנקודת הביקורת", "hello-elementor" ); ?></button>
             </div>
+			<div class="form-message text-center"></div>
         </div>
     </form>
     <?php

@@ -1123,7 +1123,7 @@ button.btn.xoo-ml-otp-submit-btn,
   margin-top: 15px;
   border: none;
 }
-.form-submit-container {
+.form-submit-container, .form-message.text-center {
   text-align: center;
 }
 button.button.btn.xoo-ml-login-otp-btn:hover,
@@ -1834,6 +1834,10 @@ body.rtl .alarnd--payout-col.alrnd_wooz_col {
 }
 .alarnd--single-payout-submit {
   padding-top: 0px;
+}
+.your-order-total-container {
+    text-align: center;
+    margin-bottom: 20px;
 }
 .alarnd--woocommerce-checkout-page .allaround_carf_form-cardDetail {
   position: relative;

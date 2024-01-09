@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: AllAround Mini Store\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-01-07 17:21+0000\n"
-"PO-Revision-Date: 2024-01-07 18:54+0000\n"
+"PO-Revision-Date: 2024-01-08 14:30+0000\n"
 "Last-Translator: admin\n"
 "Language-Team: עִבְרִית\n"
 "Language: he_IL\n"
@@ -15,7 +15,7 @@ msgstr ""
 "X-Loco-Version: 2.6.6; wp-6.4.2\n"
 "X-Domain: hello-elementor"
 
-#: includes/ajax-handler.php:1395
+#: includes/ajax-handler.php:1419
 msgid "0"
 msgstr ""
 
@@ -23,11 +23,15 @@ msgstr ""
 msgid "1111 1111 1111 1111"
 msgstr ""
 
-#: includes/ajax-handler.php:1380
+#: includes/functions.php:1336
+msgid "3 סיטרכה בגב תורפס"
+msgstr ""
+
+#: includes/ajax-handler.php:1404
 msgid "Add"
 msgstr "הוסיפו"
 
-#: includes/ajax-handler.php:1400 includes/ajax-handler.php:1509
+#: includes/ajax-handler.php:1424 includes/ajax-handler.php:1533
 msgid "Added to Cart"
 msgstr "התווסף לעגלה"
 
@@ -47,7 +51,7 @@ msgstr ""
 msgid "AllAround User Management and Mini Store."
 msgstr ""
 
-#: includes/ajax-handler.php:1384
+#: includes/ajax-handler.php:1408
 msgid "Can't order more than 999"
 msgstr ""
 
@@ -55,15 +59,19 @@ msgstr ""
 msgid "Card Number"
 msgstr "מספר כרטיס אשראי"
 
+#: includes/ajax-handler.php:512
+msgid "Cart is empty."
+msgstr ""
+
 #: includes/functions.php:1483 includes/functions.php:1551
 msgid "City"
 msgstr "עיר"
 
-#: includes/ajax-handler.php:462
+#: includes/ajax-handler.php:450 includes/ajax-handler.php:492
 msgid "Click To Pay "
-msgstr ""
+msgstr "לחצו לתשלום על סך "
 
-#: includes/ajax-handler.php:452
+#: includes/ajax-handler.php:439 includes/ajax-handler.php:481
 msgid "Continue Shopping"
 msgstr ""
 
@@ -120,7 +128,7 @@ msgstr ""
 msgid "Mockup Generate"
 msgstr ""
 
-#: includes/ajax-handler.php:1380
+#: includes/ajax-handler.php:1404
 msgid "more items to reduce your cost to"
 msgstr "מוצרים נוספים להורדת המחיר ל-"
 
@@ -128,11 +136,11 @@ msgstr "מוצרים נוספים להורדת המחיר ל-"
 msgid "Name"
 msgstr "שם מלא"
 
-#: includes/ajax-handler.php:449
+#: includes/ajax-handler.php:436 includes/ajax-handler.php:478
 msgid "Order Didn't go through"
 msgstr ""
 
-#: includes/ajax-handler.php:1380
+#: includes/ajax-handler.php:1404
 msgid "per item"
 msgstr "ליחידה"
 
@@ -140,32 +148,32 @@ msgstr "ליחידה"
 msgid "Phone"
 msgstr "טלפון"
 
-#: includes/ajax-handler.php:460
+#: includes/ajax-handler.php:448 includes/ajax-handler.php:490
 msgid ""
 "Please confirm by clicking on the button below and we’ll charge your card by"
-msgstr ""
+msgstr "בבקשה לחצו על הכפתור מטה לאישור ההזמנה וחיוב של "
 
-#: includes/ajax-handler.php:541 includes/ajax-handler.php:742
+#: includes/ajax-handler.php:566 includes/ajax-handler.php:766
 msgid "Please enter a valid email address."
 msgstr ""
 
-#: includes/ajax-handler.php:937
+#: includes/ajax-handler.php:961
 msgid "Please enter a valid phone number."
 msgstr ""
 
-#: includes/ajax-handler.php:934
+#: includes/ajax-handler.php:958
 msgid "Please enter your full name."
 msgstr ""
 
-#: includes/ajax-handler.php:952
+#: includes/ajax-handler.php:976
 msgid "Please provide a valid email address."
 msgstr ""
 
-#: includes/ajax-handler.php:943
+#: includes/ajax-handler.php:967
 msgid "Please provide your city."
 msgstr ""
 
-#: includes/ajax-handler.php:940
+#: includes/ajax-handler.php:964
 msgid "Please provide your complete address."
 msgstr ""
 
@@ -178,48 +186,78 @@ msgstr ""
 msgid "required"
 msgstr "חובה"
 
-#: includes/ajax-handler.php:152 includes/ajax-handler.php:532
-#: includes/ajax-handler.php:733
+#: includes/ajax-handler.php:155 includes/ajax-handler.php:556
+#: includes/ajax-handler.php:757
 msgid "Required field are empty. Please fill all the field."
 msgstr ""
 
 #: includes/functions.php:1565
 msgid "Return"
-msgstr ""
+msgstr "חזרה"
 
-#: includes/ajax-handler.php:1417
+#: includes/ajax-handler.php:1441
 msgid "Select a Color"
 msgstr ""
 
-#: includes/ajax-handler.php:1459
+#: includes/ajax-handler.php:1483
 msgid "Select a Quantity"
 msgstr ""
 
-#: includes/ajax-handler.php:458
+#: includes/ajax-handler.php:446 includes/ajax-handler.php:488
 msgid "Thanks for adding it to your order!"
+msgstr "תודה רבה על הזמנתך! :)"
+
+#: includes/ajax-handler.php:984
+msgid "This email address is already in use."
 msgstr ""
 
-#: includes/ajax-handler.php:960
-msgid "This email address is already in use."
+#: includes/ajax-handler.php:534
+msgid "Token value empty."
 msgstr ""
 
 #: includes/functions.php:1564
 msgid "Update"
+msgstr "עדכון"
+
+#: includes/ajax-handler.php:519
+msgid "User need to logged in."
 msgstr ""
 
-#: includes/ajax-handler.php:400 templates/author-custom-page.php:315
+#: includes/ajax-handler.php:403 templates/author-custom-page.php:315
 msgid "הוסיפו לעגלה"
 msgstr ""
 
-#: includes/ajax-handler.php:1465
+#: includes/ajax-handler.php:1489
 msgid "הקלידו כמות…"
 msgstr ""
 
 #: includes/functions.php:1503
 msgid "התקדם לנקודת הביקורת"
-msgstr "לחצו לתשלום של:"
+msgstr "לחצו למעבר לתשלום"
 
-#: includes/ajax-handler.php:1003 includes/functions.php:1196
+#: includes/ajax-handler.php:1027 includes/functions.php:1196
 #: includes/functions.php:1282
 msgid "חשבונית על שם"
 msgstr ""
+
+#: includes/functions.php:1313
+msgid "יארשא סיטרכ"
+msgstr "פרטי כרטיס אשראי"
+
+#: includes/ajax-handler.php:1026 includes/functions.php:1195
+#: includes/functions.php:1281 includes/functions.php:1453
+#: includes/functions.php:1522
+msgid "כתובת למשלוח"
+msgstr ""
+
+#: includes/functions.php:1309
+msgid "מעובד לקופה"
+msgstr ""
+
+#: includes/functions.php:1066
+msgid "פרטי תשלום"
+msgstr ""
+
+#: includes/ajax-handler.php:1036
+msgid "שינוי"
+msgstr "עריכה"

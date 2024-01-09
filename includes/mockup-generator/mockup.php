@@ -65,7 +65,7 @@ class ALRN_Genrator {
         if ($original_image !== false) {
             // Calculate the new dimensions while preserving the aspect ratio
             list($original_width, $original_height) = getimagesize($original_image_path);
-            $max_dimension = 1000; // Maximum dimension for the resized image
+            $max_dimension =1000; // Maximum dimension for the resized image
 
             $resize_data = array(
                 "width" => 1000,
@@ -81,8 +81,8 @@ class ALRN_Genrator {
 
             if( true === $is_feature_image ) {
                 $resize_data = array(
-                    "width" => 1000,
-                    "height" => 666,
+                    "width" => 400,
+                    "height" => 300,
                     "original_height" => $original_height,
                     "original_width" => $original_width,
                     "original_image" => $original_image,
