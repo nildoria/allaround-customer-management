@@ -141,6 +141,33 @@ jQuery(document).ready(function ($) {
   //   return false;
   // });
   
+
+  // Function to initialize or destroy the Slick slider based on the window width
+  function initOrDestroySlick() {
+    var mediaQuery = window.matchMedia("(max-width: 767px)");
+    var $promoItems = $(".miniStore-promo-container");
+
+    if ($promoItems.length) {
+      if (mediaQuery.matches) {
+        if (!$promoItems.hasClass("slick-initialized")) {
+          $promoItems.slick({
+            dots: true,
+          });
+        }
+      } else {
+        if ($promoItems.hasClass("slick-initialized")) {
+          $promoItems.slick("unslick");
+        }
+      }
+    }
+  }
+  initOrDestroySlick();
+
+  // Run the function on window load and window resize
+  $(window).on("load resize", function () {
+    initOrDestroySlick();
+  });
+
   $(document).on(
     "input",
     "#customerDetails input",

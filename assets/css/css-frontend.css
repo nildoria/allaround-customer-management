@@ -1849,6 +1849,7 @@ body.rtl .alarnd--payout-col.alrnd_wooz_col {
 }
 .your-order-total-container {
   text-align: center;
+  margin-top: 20px;
   margin-bottom: 20px;
 }
 .alarnd--woocommerce-checkout-page .allaround_carf_form-cardDetail {
@@ -1999,7 +2000,7 @@ form.allaround--card-form .form-input.form-submit-container {
   margin-bottom: 0;
   margin-left: auto;
   margin-right: auto;
-  margin-top: 40px;
+  margin-top: 20px;
 }
 .alarnd--woocommerce-checkout-page.alarnd--default-visible {
   position: relative;
@@ -2217,6 +2218,9 @@ section.cart_loader_section .cartLoader_button .image {
     overflow-y: scroll;
     overflow-x: hidden;
   }
+  .alarnd--slect-opt-modal .alarnd--price-by-shirt {
+    width: calc(100% - 160px);
+  }
 }
 /*For 320-384px up Mobile Layout*/
 @media (max-width: 479px) {
@@ -2229,6 +2233,7 @@ section.cart_loader_section .cartLoader_button .image {
     width: 100%;
   }
   .aum_auth_page .profile-picture-column img {
+    max-width: 115px;
     max-height: 80px;
   }
   .miniStore-promo-container {
