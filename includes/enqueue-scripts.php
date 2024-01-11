@@ -71,18 +71,6 @@ function enqueue_aum_script() {
             'nonce' => wp_create_nonce( "aum_ajax_nonce" )
         ) 
     );
-
-    wp_enqueue_script('leads', AlRNDCM_URL . 'assets/js/leads.js', array(
-        'jquery',
-        'validate'
-    ), AlRNDCM_VERSION, true);
-
-    wp_localize_script( 'leads', 'leads_object',
-        array( 
-            'ajax_url' => admin_url( 'admin-ajax.php' ),
-            'nonce' => wp_create_nonce( "leads_ajax_nonce" )
-        ) 
-    );
 }
 add_action('wp_enqueue_scripts', 'enqueue_aum_script', 99);
 

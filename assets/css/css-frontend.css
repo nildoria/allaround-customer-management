@@ -323,7 +323,7 @@ button,
   margin-top: 15px;
 }
 .woocommerce-shipping-calculator {
-	display: none;
+  display: none;
 }
 span.shipping-title {
   padding: 0px 0 9px;
@@ -368,7 +368,7 @@ span.shipping-title {
   gap: 0;
   line-height: 1.5;
   margin: 16px 0;
-  padding: 16px!important;
+  padding: 16px !important;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -381,7 +381,7 @@ span.shipping-title {
   border-radius: 11px;
   font-size: 16px;
 }
-.wc-block-components-notice-banner>svg {
+.wc-block-components-notice-banner > svg {
   display: none;
 }
 .woocommerce
@@ -1123,7 +1123,8 @@ button.btn.xoo-ml-otp-submit-btn,
   margin-top: 15px;
   border: none;
 }
-.form-submit-container, .form-message.text-center {
+.form-submit-container,
+.form-message.text-center {
   text-align: center;
 }
 button.button.btn.xoo-ml-login-otp-btn:hover,
@@ -1221,36 +1222,40 @@ body.rtl .alarnd--xoo-otp-wrap input {
   opacity: 0;
 }
 
-input.alarnd--otp-input.xoo-ml-phone-obj.alrn-pre-filled-digits::-webkit-input-placeholder { /* Chrome/Opera/Safari */
+input.alarnd--otp-input.xoo-ml-phone-obj.alrn-pre-filled-digits::-webkit-input-placeholder {
+  /* Chrome/Opera/Safari */
   color: #000000;
 }
-input.alarnd--otp-input.xoo-ml-phone-obj.alrn-pre-filled-digits::-moz-placeholder { /* Firefox 19+ */
+input.alarnd--otp-input.xoo-ml-phone-obj.alrn-pre-filled-digits::-moz-placeholder {
+  /* Firefox 19+ */
   color: #000000;
 }
-input.alarnd--otp-input.xoo-ml-phone-obj.alrn-pre-filled-digits:-ms-input-placeholder { /* IE 10+ */
+input.alarnd--otp-input.xoo-ml-phone-obj.alrn-pre-filled-digits:-ms-input-placeholder {
+  /* IE 10+ */
   color: #000000;
 }
-input.alarnd--otp-input.xoo-ml-phone-obj.alrn-pre-filled-digits:-moz-placeholder { /* Firefox 18- */
+input.alarnd--otp-input.xoo-ml-phone-obj.alrn-pre-filled-digits:-moz-placeholder {
+  /* Firefox 18- */
   color: #000000;
 }
 
 .alarnd_login_form_main button.xoo-ml-login-otp-btn.ml_add_loading.button.btn {
   border-radius: 11px;
   margin-top: 25px;
-	margin-left: auto;
-    margin-right: auto;
-    clear: both;
-    display: block;
+  margin-left: auto;
+  margin-right: auto;
+  clear: both;
+  display: block;
 }
 .alarnd_login_form_main button.button.btn.xoo-ml-low-back {
-    margin-top: 15px;
-    margin-left: auto;
-    margin-right: auto;
-    clear: both;
-    display: block;
+  margin-top: 15px;
+  margin-left: auto;
+  margin-right: auto;
+  clear: both;
+  display: block;
 }
 .xoo-ml-otp-input-cont-wrap.cccode-wrap {
-	display: none;
+  display: none;
 }
 .xoo-ml-otp-form .xoo-ml-otp-sent-txt {
   margin-bottom: 0;
@@ -1258,8 +1263,8 @@ input.alarnd--otp-input.xoo-ml-phone-obj.alrn-pre-filled-digits:-moz-placeholder
   margin-top: 20px;
 }
 .xoo-ml-phinput-cont.woocommerce-form-row.woocommerce-form-row--wide {
-    max-width: 410px;
-    margin: auto;
+  max-width: 410px;
+  margin: auto;
 }
 .alarnd--load-overlay .alarnd--overlay {
   background-color: #0baaf7 !important;
@@ -1271,23 +1276,29 @@ input.alarnd--otp-input.xoo-ml-phone-obj.alrn-pre-filled-digits:-moz-placeholder
 .alarnd--custom-checkout-section.ml_pay_hidden {
   display: none;
 }
-body.woocommerce-page.woocommerce-account .alarnd--single-content.default-page-content {
-    min-height: 500px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+body.woocommerce-page.woocommerce-account
+  .alarnd--single-content.default-page-content {
+  min-height: 500px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 body.woocommerce-page.woocommerce-account .woocommerce * {
-    display: none;
+  display: none;
 }
-body.woocommerce-page.woocommerce-account .woocommerce form.xoo-lwo-form, body.woocommerce-page.woocommerce-account .woocommerce button.xoo-ml-low-back {
+body.woocommerce-page.woocommerce-account .woocommerce form.xoo-lwo-form,
+body.woocommerce-page.woocommerce-account .woocommerce button.xoo-ml-low-back {
   display: block;
 }
 form.woocommerce-form.woocommerce-form-login.login * {
-    display: initial;
+  display: initial;
 }
-form.woocommerce-form.woocommerce-form-login.login button.xoo-ml-open-lwo-btn.button.btn.button.btn, form.woocommerce-form.woocommerce-form-login.login span.xoo-ml-or, form.woocommerce-form.woocommerce-form-login.login p.woocommerce-LostPassword.lost_password {
+form.woocommerce-form.woocommerce-form-login.login
+  button.xoo-ml-open-lwo-btn.button.btn.button.btn,
+form.woocommerce-form.woocommerce-form-login.login span.xoo-ml-or,
+form.woocommerce-form.woocommerce-form-login.login
+  p.woocommerce-LostPassword.lost_password {
   display: none;
 }
 /* New addition */
@@ -1303,7 +1314,8 @@ form.allaround--card-form .form-input {
 .flex-row .form-row {
   flex: 1;
 }
-.form-input input.error, .xoo-ml-otp-input-cont-wrap.xoo-ml-otp-input-cont-main input.error {
+.form-input input.error,
+.xoo-ml-otp-input-cont-wrap.xoo-ml-otp-input-cont-main input.error {
   border: 1px solid red;
 }
 .form-input label {
@@ -1836,8 +1848,8 @@ body.rtl .alarnd--payout-col.alrnd_wooz_col {
   padding-top: 0px;
 }
 .your-order-total-container {
-    text-align: center;
-    margin-bottom: 20px;
+  text-align: center;
+  margin-bottom: 20px;
 }
 .alarnd--woocommerce-checkout-page .allaround_carf_form-cardDetail {
   position: relative;
@@ -1972,10 +1984,14 @@ img.verified_tick {
   form#customerDetails {
   max-width: 96%;
 }
-.alarnd--payout-col.alrnd_tokenized_col .alrnd--shipping_address_tokenized.allrnd_keepSaved_userData form#customerDetails {
+.alarnd--payout-col.alrnd_tokenized_col
+  .alrnd--shipping_address_tokenized.allrnd_keepSaved_userData
+  form#customerDetails {
   display: none;
 }
-.alarnd--payout-col.alrnd_tokenized_col .alrnd--shipping_address_tokenized form#customerDetails {
+.alarnd--payout-col.alrnd_tokenized_col
+  .alrnd--shipping_address_tokenized
+  form#customerDetails {
   padding-top: 0;
   margin-top: -10px;
 }
@@ -2126,21 +2142,6 @@ section.cart_loader_section .cartLoader_button .image {
 .woocommerce .blockUI.blockOverlay::before {
   display: none;
 }
-
-/* Custom Leeds form */
-#customerLeadsForm {
-  max-width: 480px;
-  margin: 0 auto;
-}
-
-#customerLeadsForm input {
-  margin-bottom: 0;
-}
-
-#customerLeadsForm .error {
-  border: 1px solid red;
-}
-/* Custom Leeds Form */
 
 /*For pad/Tablet Layout*/
 @media (max-width: 991px) {
