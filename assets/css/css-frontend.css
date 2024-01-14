@@ -1221,7 +1221,12 @@ body.rtl .alarnd--xoo-otp-wrap input {
   visibility: hidden;
   opacity: 0;
 }
-
+form.xoo-ml-otp-form input.xoo-ml-otp-input {
+  border: 1px solid #000 !important;
+}
+form.woocommerce-form.woocommerce-form-login.login {
+  min-width: 400px;
+}
 input.alarnd--otp-input.xoo-ml-phone-obj.alrn-pre-filled-digits::-webkit-input-placeholder {
   /* Chrome/Opera/Safari */
   color: #000000;
@@ -1284,23 +1289,7 @@ body.woocommerce-page.woocommerce-account
   align-items: center;
   justify-content: center;
 }
-body.woocommerce-page.woocommerce-account .woocommerce * {
-  display: none;
-}
-body.woocommerce-page.woocommerce-account .woocommerce form.xoo-lwo-form,
-body.woocommerce-page.woocommerce-account .woocommerce button.xoo-ml-low-back {
-  display: block;
-}
-form.woocommerce-form.woocommerce-form-login.login * {
-  display: initial;
-}
-form.woocommerce-form.woocommerce-form-login.login
-  button.xoo-ml-open-lwo-btn.button.btn.button.btn,
-form.woocommerce-form.woocommerce-form-login.login span.xoo-ml-or,
-form.woocommerce-form.woocommerce-form-login.login
-  p.woocommerce-LostPassword.lost_password {
-  display: none;
-}
+
 /* New addition */
 form.allaround--card-form .form-input {
   margin-bottom: 15px;

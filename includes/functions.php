@@ -7,42 +7,52 @@
  * @param object $user Logged user's data.
  * @return string
  */
-function ml_login_redirect( $redirect_to, $request, $user ) {
-	//is there a user to check?
-	if ( isset( $user->roles ) && is_array( $user->roles ) ) {
-		//check for admins
-		if ( in_array( 'administrator', $user->roles ) ) {
-			// redirect them to the default place
-			return admin_url();
-		} else {
-			return home_url();
-		}
-	} else {
-		return $redirect_to;
-	}
-}
+// function ml_login_redirect( $redirect_to, $request, $user ) {
+// 	//is there a user to check?
+// 	if ( isset( $user->roles ) && is_array( $user->roles ) ) {
+// 		//check for admins
+// 		if ( in_array( 'administrator', $user->roles ) ) {
+// 			// redirect them to the default place
+// 			return admin_url();
+// 		} else {
+// 			return home_url('/' . $user->user_login);
+// 		}
+// 	} else {
+// 		return $redirect_to;
+// 	}
+// }
 
-add_filter( 'login_redirect', 'ml_login_redirect', 10, 3 );
+// add_filter( 'login_redirect', 'ml_login_redirect', 10, 3 );
 
 
 // Redirect customers to the homepage after login
 function custom_login_redirect($redirect, $user) {
-
-    if ( isset( $user->roles ) && is_array( $user->roles ) ) {
-		//check for admins
-		if ( in_array( 'administrator', $user->roles ) ) {
-			// redirect them to the default place
-			return admin_url();
-		} else {
-			return home_url();
-		}
-	} else {
-		return $redirect;
-	}
-    
-    return $redirect; // For other user roles, return the default redirect
+    if (isset($user->roles) && is_array($user->roles)) {
+        // Check for admins
+        if (in_array('administrator', $user->roles)) {
+            // Redirect administrators to the default place
+            return admin_url();
+        } else {
+            // Redirect other users to home_url/username
+            return home_url('/' . $user->user_login);
+        }
+    } else {
+        return $redirect;
+    }
 }
 add_filter('woocommerce_login_redirect', 'custom_login_redirect', 10, 2);
+
+
+// function custom_woocommerce_my_account_redirect($url, $endpoint, $user) {
+//     // Check if the user is an administrator
+//     if (isset($user->roles) && is_array($user->roles) && in_array('administrator', $user->roles)) {
+//         return admin_url();
+//     } else {
+//         // Redirect other users to home_url/username
+//         return home_url('/' . $user->user_login);
+//     }
+// }
+// add_filter('woocommerce_get_endpoint_url', 'custom_woocommerce_my_account_redirect', 10, 3);
 
 
 function ml_logout_shortcode() {

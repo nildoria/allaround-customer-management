@@ -1544,38 +1544,39 @@ jQuery(document).ready(function ($) {
     }
   });
 
-  $(".xoo-ml-otp-input-cont-main input:first").focus();
+  $(".xoo-ml-otp-input-cont-main").find("input:eq(2)").focus();
+
   $(window).on("load", function () {
-    $(".xoo-ml-otp-input-cont-main input:first").focus();
+    $(".xoo-ml-otp-input-cont-main").find("input:eq(2)").focus();
 
     attachTooltipToProductThumbnails();
   });
 
-  $("body").on("keyup change", "input.alarnd--otp-input", function () {
-    //Switch Input
-    if (
-      $(this).val().length === parseInt($(this).attr("maxlength")) &&
-      $(this).next("input.alarnd--otp-input").length !== 0
-    ) {
-      $(this).next("input.alarnd--otp-input").focus();
-    }
+  // $("body").on("keyup change", "input.alarnd--otp-input", function () {
+  //   //Switch Input
+  //   if (
+  //     $(this).val().length === parseInt($(this).attr("maxlength")) &&
+  //     $(this).next("input.alarnd--otp-input").length !== 0
+  //   ) {
+  //     $(this).next("input.alarnd--otp-input").focus();
+  //   }
 
-    //Backspace is pressed
-    if (
-      $(this).val().length === 0 &&
-      event.keyCode == 8 &&
-      $(this).prev("input.alarnd--otp-input").length !== 0
-    ) {
-      $(this).prev("input.alarnd--otp-input").focus().val("");
-    }
+  //   //Backspace is pressed
+  //   if (
+  //     $(this).val().length === 0 &&
+  //     event.keyCode == 8 &&
+  //     $(this).prev("input.alarnd--otp-input").length !== 0
+  //   ) {
+  //     $(this).prev("input.alarnd--otp-input").focus().val("");
+  //   }
 
-    var otp = "";
-    $("input.alarnd--otp-input").each(function () {
-      otp += $(this).val();
-    });
+  //   var otp = "";
+  //   $("input.alarnd--otp-input").each(function () {
+  //     otp += $(this).val();
+  //   });
 
-    $("input.xoo-ml-phone-input").val(otp).change();
-  });
+  //   $("input.xoo-ml-phone-input").val(otp).change();
+  // });
 
   $(document).on(
     "click",
