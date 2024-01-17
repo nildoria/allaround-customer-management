@@ -256,7 +256,6 @@ $current_user_id = $get_current_puser->ID;
                                 <h2><?php echo get_the_title( $product->get_id() ); ?></h2>
 
                                 <div class="alarnd--pricing-wrapper-new">
-
                                     <?php echo ml_gallery_carousels($product->get_id(), $current_user_id); ?>
 
                                     <div class="pricingDescSteps">
@@ -294,17 +293,26 @@ $current_user_id = $get_current_puser->ID;
                                             <h5>תמחור כמות</h5>
                                             <div class="alarnd--price-chart-price <?php echo count($customQuantity_steps) > 4 ? 'alarnd--plus4item-box' : ''; ?>">
                                                 <?php 
-                                                $index = 0;
-                                                foreach( $customQuantity_steps as $step ) :
-                                                $prev = ($index == 0) ? false : $customQuantity_steps[$index-1];                            
-                                                $qty = ml_get_price_range($step['quantity'], $step['amount'], $prev);
+                                                foreach ($customQuantity_steps as $key => $step) :
+
+                                                $startRange = $step['quantity'];
+                                                $endRange = isset($customQuantity_steps[$key + 1]) ? $customQuantity_steps[$key + 1]['quantity'] - 1 : null;
+                                                
+                                                $range_title = '';
+                                                if ($endRange === null) {
+                                                    $range_title = "$startRange+";
+                                                } elseif ($startRange == $endRange) {
+                                                    $range_title = "$startRange";
+                                                } else {
+                                                    $range_title = "$startRange-$endRange";
+                                                }
 
                                                 ?>
-                                                <div class="alarnd--price-chart-item">
+                                                <div class="alarnd--price-chart-item yyy">
                                                     <span class="price_step_price"><?php echo $step['amount'] == 0 ? wc_price($product->get_regular_price(), array('decimals' => 0)) : wc_price($step['amount'], array('decimals' => 0)); ?></span>
-                                                    <span class="price_step_qty">כמות: <span><?php echo esc_html( $qty); ?></span></span>
+                                                    <span class="price_step_qty">כמות: <span><?php echo esc_html( $range_title); ?></span></span>
                                                 </div>
-                                                <?php $index++; endforeach; ?>
+                                                <?php endforeach; ?>
                                             </div>
                                             
                                         </div>

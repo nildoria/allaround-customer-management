@@ -180,7 +180,19 @@ function ml_custom_logout_redirect( $user_id ) {
 
 add_action('wp_logout', 'ml_custom_logout_redirect');
 
+if (!function_exists('ml_get_price_range')) {
+    function ml_get_price_range($qty, $amount, $prev) {
+        
+        if( 0 == $amount ) {
+            $range = "1-$qty";
+        }
+        
+        $i = is_bool($prev) ? '1' : (int) $prev['quantity']+1;
+        $range = $i == $qty ? "$qty+": "$i-$qty";
 
+        return $range;
+    }
+}
 
 
 function ml_redirect_to_home() {
@@ -358,11 +370,7 @@ function alarnd_get_logo( $user_id, $type = '' ) {
 function alarnd_get_token( $user_id ) {
     $user_token = get_field('token', "user_{$user_id}");
 
-    if (! empty($user_token)) {
-        $user_token_val = $user_token;
-    }
-
-    return $user_token_val;
+    return $user_token;
 
 }
 
