@@ -50,6 +50,7 @@ $current_user_id = $get_current_puser->ID;
         $user_header_title = get_field('user_header_title', "user_{$current_user_id}");
         $user_header_content = get_field('user_header_content', "user_{$current_user_id}");
         $profile_picture_url = wp_get_attachment_image_url($profile_picture_id, 'medium');
+        $about_page_slug = 'about';
 
        
         $tick = '<img src="'.AlRNDCM_URL.'assets/images/verified.png" class="verified_tick" loading="lazy" /> ';
@@ -71,6 +72,10 @@ $current_user_id = $get_current_puser->ID;
             } else {
                 echo 'N/A';
             }
+            echo '<a href="' . esc_url(home_url('/') . $current_author . '/about') . '" class="aboutus--page-slug"></a>';
+            echo '<a href="' . esc_url(home_url('/') . $current_author . '/services') . '" class="services--page-slug"></a>';
+            echo '<a href="' . esc_url(home_url('/') . $current_author . '/contact') . '" class="contact--page-slug"></a>';
+            echo '<a href="' . esc_url(home_url('/') . $current_author) . '" class="load--username"></a>';
             echo '</div>';
             echo '</div>';
 
@@ -85,38 +90,38 @@ $current_user_id = $get_current_puser->ID;
         }
         ?>
         <div class="aum-customer-elementor-widget">
-        <!-- Customer page Promo Section -->
-        <section class="minStore-profile-promi-section">
-            <div class="miniStore-promo-container">
-                <div class="miniStore-promo-item">
-                    <div class="miniStore-promo-icon">
-                        <img src="<?php echo (AlRNDCM_URL); ?>/assets/images/device-mini.svg" class="miniStore-promo-icon-img" loading="lazy" alt="Promo Icon" />
+            <!-- Customer page Promo Section -->
+            <section class="minStore-profile-promi-section">
+                <div class="miniStore-promo-container">
+                    <div class="miniStore-promo-item">
+                        <div class="miniStore-promo-icon">
+                            <img src="<?php echo (AlRNDCM_URL); ?>/assets/images/device-mini.svg" class="miniStore-promo-icon-img" loading="lazy" alt="Promo Icon" />
+                        </div>
+                        <h3 class="miniStore-promo-title">משלוחים מהירים</h3>
+                        <div class="miniStore-promo-text">
+                            <p>משלוח מהיר לכל הארץ ע"י שליח בעלות של 29 ש"ח או איסוף עצמי בתאום מראש מגבעתיים.</p>
+                        </div>
                     </div>
-                    <h3 class="miniStore-promo-title">משלוחים מהירים</h3>
-                    <div class="miniStore-promo-text">
-                        <p>משלוח מהיר לכל הארץ ע"י שליח בעלות של 29 ש"ח או איסוף עצמי בתאום מראש מגבעתיים.</p>
+                    <div class="miniStore-promo-item">
+                        <div class="miniStore-promo-icon">
+                            <img src="<?php echo (AlRNDCM_URL); ?>/assets/images/rocket-mini.svg" class="miniStore-promo-icon-img" loading="lazy" alt="Promo Icon" />
+                        </div>
+                        <h3 class="miniStore-promo-title">משלוחים מהירים</h3>
+                        <div class="miniStore-promo-text">
+                            <p>משלוח מהיר לכל הארץ ע"י שליח בעלות של 29 ש"ח או איסוף עצמי בתאום מראש מגבעתיים.</p>
+                        </div>
+                    </div>
+                    <div class="miniStore-promo-item">
+                        <div class="miniStore-promo-icon">
+                            <img src="<?php echo (AlRNDCM_URL); ?>/assets/images/hand-mini.svg" class="miniStore-promo-icon-img" loading="lazy" alt="Promo Icon" />
+                        </div>
+                        <h3 class="miniStore-promo-title">משלוחים מהירים</h3>
+                        <div class="miniStore-promo-text">
+                            <p>משלוח מהיר לכל הארץ ע"י שליח בעלות של 29 ש"ח או איסוף עצמי בתאום מראש מגבעתיים.</p>
+                        </div>
                     </div>
                 </div>
-                <div class="miniStore-promo-item">
-                    <div class="miniStore-promo-icon">
-                        <img src="<?php echo (AlRNDCM_URL); ?>/assets/images/rocket-mini.svg" class="miniStore-promo-icon-img" loading="lazy" alt="Promo Icon" />
-                    </div>
-                    <h3 class="miniStore-promo-title">משלוחים מהירים</h3>
-                    <div class="miniStore-promo-text">
-                        <p>משלוח מהיר לכל הארץ ע"י שליח בעלות של 29 ש"ח או איסוף עצמי בתאום מראש מגבעתיים.</p>
-                    </div>
-                </div>
-                <div class="miniStore-promo-item">
-                    <div class="miniStore-promo-icon">
-                        <img src="<?php echo (AlRNDCM_URL); ?>/assets/images/hand-mini.svg" class="miniStore-promo-icon-img" loading="lazy" alt="Promo Icon" />
-                    </div>
-                    <h3 class="miniStore-promo-title">משלוחים מהירים</h3>
-                    <div class="miniStore-promo-text">
-                        <p>משלוח מהיר לכל הארץ ע"י שליח בעלות של 29 ש"ח או איסוף עצמי בתאום מראש מגבעתיים.</p>
-                    </div>
-                </div>
-            </div>
-        </section>
+            </section>
         </div>
 
         <?php

@@ -54,6 +54,23 @@ add_filter('woocommerce_login_redirect', 'custom_login_redirect', 10, 2);
 // }
 // add_filter('woocommerce_get_endpoint_url', 'custom_woocommerce_my_account_redirect', 10, 3);
 
+/**
+ * Overwrite otp login redirect url
+ *
+ * @param string $redirect
+ * @return string
+ */
+function ml_xoo_ml_login_redirect( $redirect ) {
+    $otp_data = Xoo_Ml_Otp_Handler::get_otp_data();
+    $user = xoo_ml_get_user_by_phone( $otp_data['phone_no'], $otp_data['phone_code'] );
+    if( $user ){
+        return home_url('/' . $user->user_login);
+    }
+
+    return $redirect;
+}
+add_filter( 'xoo_ml_login_with_otp_redirect', 'ml_xoo_ml_login_redirect' );
+
 
 function ml_logout_shortcode() {
     return '<a href="' . wp_logout_url(home_url()) . '">' . esc_html__( 'Logout', 'hello-elementor' ) . '</a>';

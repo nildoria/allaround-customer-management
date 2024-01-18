@@ -1290,6 +1290,25 @@ body.woocommerce-page.woocommerce-account
   justify-content: center;
 }
 
+body.state-loaded>.ekit-template-content-footer {
+    display: none;
+}
+body.state-loaded .ekit-template-content-header {
+    display: none;
+}
+body.state-loaded>.ekit-template-content-header {
+    display: block;
+}
+body.state-loaded main#main {
+  max-width: 100% !important;
+}
+body.state-loaded .alarnd--single-content.default-page-content {
+	padding-top: 0px;
+    padding-bottom: 0px;
+}
+a.load--username, a.contact--page-slug, a.services--page-slug, a.aboutus--page-slug {
+    display: none !important;
+}
 /* New addition */
 form.allaround--card-form .form-input {
   margin-bottom: 15px;
@@ -2222,7 +2241,7 @@ section.cart_loader_section .cartLoader_button .image {
     width: 100%;
   }
   .aum_auth_page .profile-picture-column img {
-    max-width: 115px;
+    max-width: 140px;
     max-height: 80px;
   }
   .miniStore-promo-container {

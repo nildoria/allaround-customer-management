@@ -1593,4 +1593,57 @@ jQuery(document).ready(function ($) {
     }
   );
 
+  if ($('body').hasClass('author')) {
+      // Get the target URL from the element with the class "load--username-slug"
+      var targetUrl = $('.aboutus--page-slug').attr('href');
+      var targetUrl2 = $('.services--page-slug').attr('href');
+      var targetUrl3 = $('.contact--page-slug').attr('href');
+
+      var authorTargetUrl = $('.load--username').attr('href');
+      // Set the href value of the anchor tag within .load-with-username
+      $('.about-page a').attr('href', targetUrl);
+      $('.services-page a').attr('href', targetUrl2);
+      $('.contact-page a').attr('href', targetUrl3);
+      $('#alrnd-minisite-logo a').attr('href', authorTargetUrl);
+      
+  }
+  // Intercept clicks on links with the class "load-with-username"
+  $('.load-with-username a').on('click', function(e) {
+      e.preventDefault();
+
+      // Get the target URL from the link
+      var targetUrl = $(this).attr('href');
+
+      // Load content using AJAX
+      $.ajax({
+          url: targetUrl,
+          type: 'GET',
+          success: function(response) {
+              // Hide the #primary container
+              $('#primary').hide();
+
+              // Replace the content of the container with the loaded content
+              $('#primary').html(response);
+
+              // Show the #primary container after the content is loaded
+              $('#primary').show();
+
+              // Add the 'state-loaded' class to the body
+              $('body').addClass('state-loaded');
+
+              // Update the browser URL without triggering a full page reload
+              history.pushState({}, null, targetUrl);
+          }
+      });
+  });
+
+  // Restore the initial content when navigating back
+  window.onpopstate = function(event) {
+      // Show the #primary container
+      $('body').show();
+
+      // Remove the 'state-loaded' class from the body
+      $('body').removeClass('state-loaded');
+  };
+
 });
