@@ -7,22 +7,22 @@
  * @param object $user Logged user's data.
  * @return string
  */
-// function ml_login_redirect( $redirect_to, $request, $user ) {
-// 	//is there a user to check?
-// 	if ( isset( $user->roles ) && is_array( $user->roles ) ) {
-// 		//check for admins
-// 		if ( in_array( 'administrator', $user->roles ) ) {
-// 			// redirect them to the default place
-// 			return admin_url();
-// 		} else {
-// 			return home_url('/' . $user->user_login);
-// 		}
-// 	} else {
-// 		return $redirect_to;
-// 	}
-// }
+function ml_login_redirect( $redirect_to, $request, $user ) {
+	//is there a user to check?
+	if ( isset( $user->roles ) && is_array( $user->roles ) ) {
+		//check for admins
+		if ( in_array( 'administrator', $user->roles ) ) {
+			// redirect them to the default place
+			return admin_url();
+		} else {
+			return home_url('/' . $user->user_login);
+		}
+	} else {
+		return $redirect_to;
+	}
+}
 
-// add_filter( 'login_redirect', 'ml_login_redirect', 10, 3 );
+add_filter( 'login_redirect', 'ml_login_redirect', 10, 3 );
 
 
 // Redirect customers to the homepage after login
@@ -60,16 +60,18 @@ add_filter('woocommerce_login_redirect', 'custom_login_redirect', 10, 2);
  * @param string $redirect
  * @return string
  */
-function ml_xoo_ml_login_redirect( $redirect ) {
-    $otp_data = Xoo_Ml_Otp_Handler::get_otp_data();
-    $user = xoo_ml_get_user_by_phone( $otp_data['phone_no'], $otp_data['phone_code'] );
-    if( $user ){
-        return home_url('/' . $user->user_login);
+if( function_exists( 'ml_xoo_ml_login_redirect' ) ) {
+    function ml_xoo_ml_login_redirect( $redirect ) {
+        $otp_data = Xoo_Ml_Otp_Handler::get_otp_data();
+        $user = xoo_ml_get_user_by_phone( $otp_data['phone_no'], $otp_data['phone_code'] );
+        if( $user ){
+            return home_url('/' . $user->user_login);
+        }
+    
+        return $redirect;
     }
-
-    return $redirect;
+    add_filter( 'xoo_ml_login_with_otp_redirect', 'ml_xoo_ml_login_redirect' );
 }
-add_filter( 'xoo_ml_login_with_otp_redirect', 'ml_xoo_ml_login_redirect' );
 
 
 function ml_logout_shortcode() {
@@ -1274,7 +1276,7 @@ function alarnd_single_checkout($user_id = false) {
         <div class="your-order-total-container"><?php esc_html_e("Total Amount", "hello-elementor" ); ?>: <?php printf( WC()->cart->get_total() ); ?></div>
 
         <div class="alarnd--single-payout-submit">
-            <button type="submit" class="alarnd--regular-button alarnd--payout-trigger ml_add_loading button" <?php echo $is_disabled === true ? 'disabled="disabled"' : ""; ?>>התקדם לנקודת הביקורת</button>
+            <button type="submit" class="alarnd--regular-button alarnd--payout-trigger ml_add_loading button" <?php echo ($is_disabled === true ? 'disabled="disabled"' : WC()->cart->is_empty()) ? 'disabled="disabled"' : ''; ?>>התקדם לנקודת הביקורת</button>
         </div>
         <div class="form-message text-center"></div>
     </div>

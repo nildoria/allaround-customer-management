@@ -221,7 +221,12 @@ class ML_Ajax {
 
                                             ?>
                                             <div class="alarnd--price-chart-item yyy">
-                                                <span class="price_step_price"><?php echo $step['amount'] == 0 ? wc_price($product->get_regular_price(), array('decimals' => 0)) : wc_price($step['amount'], array('decimals' => 0)); ?></span>
+                                                <span class="price_step_price">
+                                                    <?php
+                                                        $price = $step['amount'] == 0 ? wc_price($product->get_regular_price()) : wc_price($step['amount']);
+                                                        echo preg_replace('/\.00/', '', $price); // Remove trailing .00
+                                                        ?>
+                                                </span>
                                                 <span class="price_step_qty">כמות: <span><?php echo esc_html( $range_title); ?></span></span>
                                             </div>
                                             <?php endforeach; ?>
@@ -330,7 +335,56 @@ class ML_Ajax {
         <?php
         wp_die();
     }
+	
+	public function popup_success_icon() {
+        $success_icon = AlRNDCM_URL . "assets/images/tick.png";
+        return $success_icon;
+    }
+    public function popup_failed_icon() {
+        $failed_icon = AlRNDCM_URL . "assets/images/failed.png";
+        return $failed_icon;
+    }
+    public function popup_success_markup() {
+        $success_icon = $this->popup_success_icon();
+        $success_popup = '<div class="white-popup-block alarnd--payout-modal mfp-hide alarnd--info-modal">
+            <div class="popup_product_details">
+                <div class="alarnd--success-wrap">
+                    <div class="alarn--popup-thankyou">
+                        <img src="'.$success_icon.'" alt="">
+                        <h2>תודה שהוספת את להזמנה שלך!</h2>
+                        <h3>דגם יישלח עם שאר המוצרים המותאמים אישית שהזמנת.</h3>
+                        <p>אתה עדיין יכול להוסיף את שאר <br>המוצרים בעמוד זה וליהנות ממבצעים מעולים :)</p>
+                        <a href="'.esc_url( home_url("/") ).'" class="alarnd--submit-btn alarnd--continue-btn">המשך בקניות</a>
+                    </div>
+                </div>
+            </div>
+        </div>';
+        return $success_popup;
+    }
+    public function popup_failed_markup() {
+        $failed_icon = $this->popup_failed_icon();
+        $failed_popup = '<div class="white-popup-block alarnd--payout-modal mfp-hide alarnd--info-modal">
+            <div class="popup_product_details">
+                <div class="alarnd--failed-wrap">
+                    <div class="alarn--popup-thankyou">
+                        <img src="'.$failed_icon.'" alt="">
+                        <h2>'. esc_html__("Order Didn\"t go through", "hello-elementor") . '</h2>
+                        <h3>לצערנו העסקה לא אושרה.</h3>
+                        <p>נטפל בבעיה וניצור איתך קשר בהקדם :)</p>
+                        <a href="'.esc_url( home_url("/") ).'" class="alarnd--submit-btn alarnd--continue-btn">'.esc_html__("Continue Shopping", "hello-elementor").'</a>
+                        <div class="form-message"></div>
+                    </div>
+                </div>
+            </div>
+        </div>';
+        return $failed_popup;
+    }
 
+    /**
+     * Add item to order from thankyou page
+     *
+     * @return void
+     */
     /**
      * Add item to order from thankyou page
      *
@@ -341,6 +395,7 @@ class ML_Ajax {
 
         if ( WC()->cart->get_cart_contents_count() == 0 ) {
             wp_send_json_error( array(
+                "message_type" => 'reqular',
                 "message" => esc_html__( "Cart is empty.", "hello-elementor" )
             ) );
             wp_die();
@@ -348,6 +403,7 @@ class ML_Ajax {
         
         if ( ! is_user_logged_in() ) {
             wp_send_json_error( array(
+                "message_type" => 'reqular',
                 "message" => esc_html__( "User need to logged in.", "hello-elementor" )
             ) );
             wp_die();
@@ -363,6 +419,7 @@ class ML_Ajax {
 
         if( empty( $token ) ) {
             wp_send_json_error( array(
+                "message_type" => 'reqular',
                 "message" => esc_html__("Token value empty.", "hello-elementor")
             ) );
             wp_die();
@@ -375,7 +432,7 @@ class ML_Ajax {
         $userEmail = isset( $customerDetails['userEmail'] ) && ! empty( $customerDetails['userEmail'] ) ? sanitize_text_field( $customerDetails['userEmail'] ) : '';
         $cardholderCity = isset( $customerDetails['userCity'] ) && ! empty( $customerDetails['userCity'] ) ? sanitize_text_field( $customerDetails['userCity'] ) : '';
         $cardholderInvoiceName = isset( $customerDetails['userInvoiceName'] ) && ! empty( $customerDetails['userInvoiceName'] ) ? sanitize_text_field( $customerDetails['userInvoiceName'] ) : '';
-
+        
         if( 
             empty( $customerDetails ) || 
             empty( $userName ) ||
@@ -385,6 +442,7 @@ class ML_Ajax {
             empty( $userEmail ) 
         ) {
             wp_send_json_error( array(
+                "message_type" => 'reqular',
                 "message" => esc_html__("Required field are empty. Please fill all the field.", "hello-elementor")
             ) );
             wp_die();
@@ -395,6 +453,7 @@ class ML_Ajax {
             ! is_email( $userEmail )
         ) {
             wp_send_json_error( array(
+                "message_type" => 'reqular',
                 "message" => esc_html__("Please enter a valid email address.", "hello-elementor")
             ) );
             wp_die();
@@ -440,6 +499,7 @@ class ML_Ajax {
             'email' => $userEmail,
             'phone' => $userPhone,
             'address' => $userAdress,
+            'cardholderInvoiceName' => $cardholderInvoiceName,
             'token' => $token,
             'cardNum' => $four_digit,
             'price' => (int) WC()->cart->get_cart_contents_total(),
@@ -454,13 +514,13 @@ class ML_Ajax {
             'headers'     => array(
                 'Content-Type'  => 'application/json',
             ),
-            'body'        => json_encode($body),
+            'body'        => json_encode($body, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
         );
         $args = apply_filters( 'allaround_order_api_args', $args, $current_user_id );
 
         $request = wp_remote_post( esc_url( $api_url ), $args );
 
-        error_log( print_r( $request, true ) );
+        // error_log( print_r( $request, true ) );
 
         // retrieve reponse body
         $message = wp_remote_retrieve_body( $request );
@@ -468,7 +528,7 @@ class ML_Ajax {
         // decode response into array
         $response_obj = ml_response($message);
 
-        error_log( print_r( $response_obj, true ) );
+        // error_log( print_r( $response_obj, true ) );
         
         // order data
         $first_name = empty( $current_user->first_name ) && empty( $current_user->last_name ) ? $userName : $current_user->first_name;
@@ -503,17 +563,23 @@ class ML_Ajax {
             "extraMeta" => $extraMeta,
             "update" => true
         );
+
+        $success_popup = $this->popup_success_markup();
+        $failed_popup = $this->popup_failed_markup();
         
         if ( ! is_wp_error( $request ) && wp_remote_retrieve_response_code( $request ) == 200 && $message !== "Accepted" ) {	
             
-            // Clear the cart
-            WC()->cart->empty_cart();
-            // Return fragments
-            WC_AJAX::get_refreshed_fragments();
-
+            // first create order
             $order_id = ml_create_order($order_data);
 
+            // Clear the cart
+            WC()->cart->empty_cart();
+
             wp_send_json_success( array(
+                "message_type" => 'api',
+                "result_popup" => $success_popup,
+                "response_obj" => $response_obj,
+                "message_server" => $message,
                 "message" => "Successfully products added to order #$order_id"
             ) );
 
@@ -536,6 +602,8 @@ class ML_Ajax {
         // error_log( print_r( $error_message, true ) );
         wp_send_json_error( array(
             "body" => $body,
+            "message_type" => 'api',
+            "result_popup" => $failed_popup,
             "message" => $error_message,
             "server_message" => $message,
             "server_body_obj" => $response_obj
@@ -554,6 +622,7 @@ class ML_Ajax {
 
         if ( WC()->cart->get_cart_contents_count() == 0 ) {
             wp_send_json_error( array(
+                "message_type" => 'reqular',
                 "message" => "Cart is empty."
             ) );
             wp_die();
@@ -586,6 +655,7 @@ class ML_Ajax {
             empty( $cvvCode )
         ) {
             wp_send_json_error( array(
+                "message_type" => 'reqular',
                 "message" => esc_html__("Required field are empty. Please fill all the field.", "hello-elementor")
             ) );
             wp_die();
@@ -595,6 +665,7 @@ class ML_Ajax {
             ! is_email( $cardholderEmail )
         ) {
             wp_send_json_error( array(
+                "message_type" => 'reqular',
                 "message" => esc_html__("Please enter a valid email address.", "hello-elementor")
             ) );
             wp_die();
@@ -650,7 +721,9 @@ class ML_Ajax {
             'price' => (int) WC()->cart->get_cart_contents_total(),
             'items' => $cart_filter_data
         );
+
         $body = apply_filters( 'allaround_card_api_body', $body, $current_user_id );
+
 
         $args = array(
             'method'      => 'POST',
@@ -659,7 +732,7 @@ class ML_Ajax {
             'headers'     => array(
                 'Content-Type'  => 'application/json',
             ),
-            'body'        => json_encode($body),
+            'body'        => json_encode($body, JSON_UNESCAPED_UNICODE),
         );
         $args = apply_filters( 'allaround_card_api_args', $args, $current_user_id );
 
@@ -718,18 +791,22 @@ class ML_Ajax {
             "update" => $update_order,
         );
 
+        $success_popup = $this->popup_success_markup();
+        $failed_popup = $this->popup_failed_markup();
+
         if ( ! is_wp_error( $request ) && wp_remote_retrieve_response_code( $request ) == 200 && $message !== "Accepted" ) {	
+            
+            // first create order
+            $order_id = ml_create_order($order_data);   
             
             // Clear the cart
             WC()->cart->empty_cart();
-            // Return fragments
-            WC_AJAX::get_refreshed_fragments();
 
-            $order_id = ml_create_order($order_data);
-
-            wp_send_json_success( array(
+            wp_send_json_success( json_encode( array(
+                "message_type" => 'api',
+                "result_popup" => $success_popup,
                 "message" => "Successfully products added to order #$order_id"
-            ) );
+            ) ) );
 
             wp_die();
         }
@@ -752,18 +829,19 @@ class ML_Ajax {
         // error_log( print_r( $response_obj, true ) );
 
         // error_log( print_r( $error_message, true ) );
-        wp_send_json_error( array(
+        wp_send_json_error( json_encode( array(
             "body" => $body,
+            "message_type" => 'api',
             "message" => $error_message,
             "server_message" => $message,
+            "result_popup" => $failed_popup,
             "server_body_obj" => $response_obj
-        ) );
+        ) ) );
 
         wp_die();
     }
-    
-    
-    public function ml_customer_details() {
+	
+	public function ml_customer_details() {
         check_ajax_referer( 'aum_ajax_nonce', 'nonce' );
 
         $user_id = isset( $_POST['user_id'] ) && ! empty( $_POST['user_id'] ) ? absint( $_POST['user_id'] ) : '';
@@ -861,9 +939,12 @@ class ML_Ajax {
             <div class="alarnd--user-address">
                 <div class="alarnd--user-address-wrap">
                     <?php echo ! empty( $userName ) ? '<p>'. esc_html( $userName ) .'</p>' : ''; ?>
-                    <?php echo ! empty( $userAdress ) ? '<p>'. esc_html( $userAdress ) .'</p>' : ''; ?>
                     <?php echo ! empty( $userPhone ) ? '<p>'. esc_html( $userPhone ) .'</p>' : ''; ?>
-                    <?php echo ! empty( $userCity ) ? '<p>'. esc_html( $userCity ) .'</p>' : ''; ?>
+                    <?php echo ! empty( $userEmail ) ? '<p>'. esc_html( $userEmail ) .'</p>' : ''; ?>
+                    <p>
+                    <?php echo ! empty( $userAdress ) ? '<span>'. esc_html( $userAdress ) .', </span>' : ''; ?>
+                    <?php echo ! empty( $userCity ) ? '<span>'. esc_html( $userCity ) .'</span>' : ''; ?>
+                    </p>
                 </div>
                 <span class="alarnd--user_address_edit"><?php esc_html_e( 'שינוי', 'hello-elementor' ); ?></span>
             </div>

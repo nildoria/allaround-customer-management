@@ -8,7 +8,7 @@ jQuery(document).ready(function ($) {
     if (windowWidth > 767) {
       var tallestHeight = 0;
       $(".product-item").each(function () {
-        var height = $(this).height() - 210;
+        var height = $(this).height() - 200;
         if (height > tallestHeight) {
           tallestHeight = height;
         }
@@ -22,9 +22,71 @@ jQuery(document).ready(function ($) {
 
   setProductDetailsHeight();
 
-  $(window).resize(function () {
-    setProductDetailsHeight();
-  });
+
+  function ajaxResponsePrint(response, messagWrap) {
+    console.log(response);
+
+    // Check if the response has the expected data
+    if (response && response.data) {
+      var responseData;
+
+      // Check if response.data is a string
+      if (typeof response.data === 'string') {
+          try {
+              // Attempt to parse the string as JSON
+              responseData = JSON.parse(response.data);
+          } catch (error) {
+              console.error('Error parsing response.data as JSON:', error);
+              return;
+          }
+      } else if (typeof response.data === 'object') {
+          // If it's already an object, use it directly
+          responseData = response.data;
+      } else {
+          console.error('Invalid type for response.data:', typeof response.data);
+          return;
+      }
+
+    }
+
+    console.log(responseData);
+
+    if (response.success === false && responseData.message_type !== 'api') {
+      messagWrap
+        .html("<p>" + responseData.message + "</p>")
+        .slideDown();
+    } else if ( responseData.message_type === 'api' ) {
+      if ($(responseData.result_popup).closest(".alarnd--payout-modal").length !== 0) {
+        console.log(responseData.result_popup);
+
+        // Open directly via API
+        $.magnificPopup.open({
+          items: {
+            src: responseData.result_popup,
+            type: "inline",
+          },
+          callbacks: {
+            open: function() {
+              if( response.success === true ) {
+                $(this.wrap).addClass('allaround-reload-onclose');
+              }
+            },
+            beforeClose: function () {
+              // Check if the class exists
+              if ($(this.wrap).hasClass('allaround-reload-onclose')) {
+                // Reload the page
+                location.reload(true);
+              }
+            },
+          }
+        });
+
+        if( response.success === true ) {
+          // refresh_cart_fragment();
+        }
+      }
+    }
+  }
 
   var isotope_initalize = function () {
     /**
@@ -166,6 +228,7 @@ jQuery(document).ready(function ($) {
   // Run the function on window load and window resize
   $(window).on("load resize", function () {
     initOrDestroySlick();
+    setProductDetailsHeight();
   });
 
   $(document).on(
@@ -321,11 +384,8 @@ jQuery(document).ready(function ($) {
           success: function (response) {
             button.removeClass("ml_loading");
 
-            if (response.success === false) {
-              messagWrap
-                .html("<p>" + response.data.message + "</p>")
-                .slideDown();
-            }
+            ajaxResponsePrint(response, messagWrap);
+
           },
           error: function (xhr, status, error) {
             button.removeClass("ml_loading");
@@ -350,6 +410,10 @@ jQuery(document).ready(function ($) {
   }
   initilize_validate();
 
+  function is_cart_empty() {
+    return $('.woocommerce-cart-form').length === 0;
+  }
+
   var $customerDetails = $("#customerDetails");
   var $cardDetails = $("#cardDetailsForm");
 
@@ -357,8 +421,11 @@ jQuery(document).ready(function ($) {
     function toggleSubmitButtonCustomer() {
       // console.log($("#customerDetails").valid());
       if ($("#customerDetails").valid()) {
-        $("button.alarnd--payout-trigger").prop("disabled", false);
-        $("button.ml_save_customer_info").prop("disabled", false);
+        console.log("is_cart_empty", is_cart_empty());
+        if( ! is_cart_empty() ) {
+          $("button.alarnd--payout-trigger").prop("disabled", false);
+          $("button.ml_save_customer_info").prop("disabled", false);
+        }
       } else {
         $("button.alarnd--payout-trigger").prop("disabled", true);
         $("button.ml_save_customer_info").prop("disabled", true);
@@ -375,7 +442,9 @@ jQuery(document).ready(function ($) {
     function toggleSubmitButtonCard() {
       // console.log($("#cardDetailsForm").valid());
       if ($("#cardDetailsForm").valid()) {
-        $("button.allaround_card_details_submit").prop("disabled", false);
+        if( ! is_cart_empty() ) {
+          $("button.allaround_card_details_submit").prop("disabled", false);
+        }
       } else {
         $("button.allaround_card_details_submit").prop("disabled", true);
       }
@@ -459,7 +528,7 @@ jQuery(document).ready(function ($) {
       customerDetails = $("#customerDetails"),
       messagWrap = $self.closest('.alarnd--payout-main').find(".form-message");
 
-    customerDetails.trigger("submit");
+    // customerDetails.trigger("submit");
     if (!customerDetails.valid()) return false;
 
     var cdetails = customerDetails.serializeArray();
@@ -490,11 +559,8 @@ jQuery(document).ready(function ($) {
       },
       success: function (response) {
         $self.removeClass("ml_loading");
-        if (response.success === false) {
-          messagWrap
-            .html("<p>" + response.data.message + "</p>")
-            .slideDown();
-        }
+        
+        ajaxResponsePrint(response, messagWrap);
       },
     }).fail(function (jqXHR, textStatus) {
       $self.removeClass("ml_loading");
@@ -593,12 +659,14 @@ jQuery(document).ready(function ($) {
       $(".alarnd--card-details-wrap").show();
       $(".payment-info-display").show();
       $(".alrnd--shipping_address_tokenized").addClass("allrnd_keepSaved_userData");
+      $('.alarnd--payout-main').addClass('woocommerce-pay_active').removeClass('tokenizer-pay_active');
     } else if ("tokenizer" === current.val()) {
       $(".alarnd--card-details-wrap").hide();
       $(".payment-info-display").hide();
     //   $(".alrnd--shipping_address_tokenized").show();
       $(".alarnd--single-payout-submit").show();
       $(".alrnd--shipping_address_tokenized").removeClass("allrnd_keepSaved_userData");
+      $('.alarnd--payout-main').addClass('tokenizer-pay_active').removeClass('woocommerce-pay_active');
     }
     return false;
   });
@@ -815,6 +883,11 @@ jQuery(document).ready(function ($) {
             1100
           );
         }, 1500);
+
+        // Trigger a click event with a delay
+        setTimeout(function () {
+          $(".white-popup-block button.mfp-close").click();
+        }, 1000);
 
         console.log(data);
         console.log('Item added to cart');
@@ -1061,46 +1134,47 @@ jQuery(document).ready(function ($) {
         .toString()
         .replace("%%endpoint%%", "get_refreshed_fragments")
     ) {
-      initilize_validate();
-      // Get the input value (replace this with your own logic)
-      var hidden_field = $("#ml_username_hidden");
-      if (hidden_field.length !== 0) {
-        $("form.woocommerce-checkout").append(
-          '<input type="hidden" name="user_profile_username" value="' +
-            hidden_field.val() +
-            '">'
-        );
-      }
-    }
-  });
-
-  $(document).ajaxComplete(function (event, xhr, settings) {
-    // console.log("ajaxComplete");
-    // Check if the AJAX request is for refreshing fragments
-    if (
-      settings.url ===
-      wc_cart_fragments_params.wc_ajax_url
-        .toString()
-        .replace("%%endpoint%%", "get_refreshed_fragments")
-    ) {
+      // initilize_validate();
       // console.log(settings.url);
       // Get the input value (replace this with your own logic)
       var hidden_field = $("#ml_username_hidden");
       if (hidden_field.length !== 0) {
-        // console.log("added", hidden_field.val());
         $("form.woocommerce-checkout").append(
           '<input type="hidden" name="user_profile_username" value="' +
             hidden_field.val() +
             '">'
         );
-
-        // Trigger a click event with a delay
-        setTimeout(function () {
-          $(".white-popup-block button.mfp-close").click();
-        }, 500);
       }
     }
   });
+
+  // $(document).ajaxComplete(function (event, xhr, settings) {
+  //   // console.log("ajaxComplete");
+  //   // Check if the AJAX request is for refreshing fragments
+  //   if (
+  //     settings.url ===
+  //     wc_cart_fragments_params.wc_ajax_url
+  //       .toString()
+  //       .replace("%%endpoint%%", "get_refreshed_fragments")
+  //   ) {
+  //     // console.log(settings.url);
+  //     // Get the input value (replace this with your own logic)
+  //     var hidden_field = $("#ml_username_hidden");
+  //     if (hidden_field.length !== 0) {
+  //       // console.log("added", hidden_field.val());
+  //       $("form.woocommerce-checkout").append(
+  //         '<input type="hidden" name="user_profile_username" value="' +
+  //           hidden_field.val() +
+  //           '">'
+  //       );
+
+  //       // Trigger a click event with a delay
+  //       setTimeout(function () {
+  //         $(".white-popup-block button.mfp-close").click();
+  //       }, 500);
+  //     }
+  //   }
+  // });
 
   $(window).on("load", function () {
     var hidden_field = $("#ml_username_hidden");
@@ -1645,5 +1719,34 @@ jQuery(document).ready(function ($) {
       // Remove the 'state-loaded' class from the body
       $('body').removeClass('state-loaded');
   };
+
+
+  // Hook into the wc-ajax=get_refreshed_fragments event
+  $(document.body).on('wc_fragments_refreshed', function() {
+      // Check if the cart has any items
+      var cartHasItems = $('.woocommerce-cart-form').length !== 0;
+
+      // console.log("helliodf");
+      // console.log(cartHasItems);
+
+      // Get the element you want to hide or show
+      var elementToToggle = $('#ministore--custom-checkout-section'),
+            customerDetails = $("#customerDetails"),
+            cardDetailsForm = $('#cardDetailsForm');
+
+      // Toggle the visibility based on cart items
+      if (cartHasItems) {
+          // elementToToggle.show();
+          if (customerDetails.valid() && cardDetailsForm.valid()) {
+            $("button.allaround_card_details_submit").prop("disabled", false);
+          }
+          if (customerDetails.valid()) {
+            $("button.alarnd--payout-trigger").prop("disabled", false);
+          }
+      } else {
+        $("button.alarnd--payout-trigger").prop("disabled", true);
+        $("button.allaround_card_details_submit").prop("disabled", true);
+      }
+  });
 
 });

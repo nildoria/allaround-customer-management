@@ -314,7 +314,12 @@ $current_user_id = $get_current_puser->ID;
 
                                                 ?>
                                                 <div class="alarnd--price-chart-item yyy">
-                                                    <span class="price_step_price"><?php echo $step['amount'] == 0 ? wc_price($product->get_regular_price(), array('decimals' => 0)) : wc_price($step['amount'], array('decimals' => 0)); ?></span>
+                                                    <span class="price_step_price">
+                                                        <?php
+                                                        $price = $step['amount'] == 0 ? wc_price($product->get_regular_price()) : wc_price($step['amount']);
+                                                        echo preg_replace('/\.00/', '', $price); // Remove trailing .00
+                                                        ?>
+                                                    </span>
                                                     <span class="price_step_qty">כמות: <span><?php echo esc_html( $range_title); ?></span></span>
                                                 </div>
                                                 <?php endforeach; ?>
