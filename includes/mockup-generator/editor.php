@@ -36,6 +36,10 @@ class ALRN_Metabox {
                     "square" => plugin_dir_url(__FILE__) . 'images/square.png',
                     "horizontal" => plugin_dir_url(__FILE__) . 'images/horizontal.png'
                 ),
+                "back_logo" => array(
+                    "square" => plugin_dir_url(__FILE__) . 'images/back-square.png',
+                    "horizontal" => plugin_dir_url(__FILE__) . 'images/back-horizontal.png'
+                ),
                 'positions' => $filter_arr,
                 "background" => $featured_img_url
             );
@@ -67,6 +71,10 @@ class ALRN_Metabox {
                 "logo" => array(
                     "square" => plugin_dir_url(__FILE__) . 'images/square.png',
                     "horizontal" => plugin_dir_url(__FILE__) . 'images/horizontal.png'
+                ),
+                "back_logo" => array(
+                    "square" => plugin_dir_url(__FILE__) . 'images/back-square.png',
+                    "horizontal" => plugin_dir_url(__FILE__) . 'images/back-horizontal.png'
                 ),
                 'positions' => $filter_arr,
                 "background" => $featured_img_url
@@ -183,6 +191,10 @@ class ALRN_Metabox {
                 "square" => plugin_dir_url(__FILE__) . 'images/square.png',
                 "horizontal" => plugin_dir_url(__FILE__) . 'images/horizontal.png'
             ),
+            "back_logo" => array(
+                "square" => plugin_dir_url(__FILE__) . 'images/back-square.png',
+                "horizontal" => plugin_dir_url(__FILE__) . 'images/back-horizontal.png'
+            ),
             'positions' => $filter_arr,
             "background" => $featured_img_url
         );
@@ -278,6 +290,10 @@ class ALRN_Metabox {
                 "square" => plugin_dir_url(__FILE__) . 'images/square.png',
                 "horizontal" => plugin_dir_url(__FILE__) . 'images/horizontal.png'
             ),
+            "back_logo" => array(
+                "square" => plugin_dir_url(__FILE__) . 'images/back-square.png',
+                "horizontal" => plugin_dir_url(__FILE__) . 'images/back-horizontal.png'
+            ),
             'positions' => $filter_arr,
             "background" => $featured_img_url
         );
@@ -317,6 +333,8 @@ class ALRN_Metabox {
                             $profile_logo = wp_get_attachment_image_url($customer_picture_id, 'full');
 
                             $profile_picture_id_second = get_field('profile_picture_id_second', "user_{$customer_id}");
+                            $custom_logo_lighter = get_field('custom_logo_lighter', "user_{$customer_id}");
+                            $custom_logo_darker = get_field('custom_logo_darker', "user_{$customer_id}");
 
                             if( empty( $profile_logo ) ) {
                                 continue;
@@ -324,7 +342,13 @@ class ALRN_Metabox {
                             $customer_has_logo[$customer_id] = $profile_logo;
                             $user_info = get_userdata($customer_id);
                             ?>
-                            <option value="<?php echo esc_url( $profile_logo ); ?>" data-second_logo="<?php echo esc_attr($profile_picture_id_second); ?>" data-user_id="<?php echo esc_attr( $customer_id ); ?>"><?php echo esc_html( $user_info->display_name ); ?> (<?php echo esc_html( $user_info->user_email ); ?>)</option>
+                            <option 
+                                value="<?php echo esc_url( $profile_logo ); ?>"
+                                data-second_logo="<?php echo esc_attr($profile_picture_id_second); ?>" 
+                                data-custom_logo_lighter="<?php echo esc_attr($custom_logo_lighter); ?>" 
+                                data-custom_logo_darker="<?php echo esc_attr($custom_logo_darker); ?>" 
+                                data-user_id="<?php echo esc_attr( $customer_id ); ?>"
+                            ><?php echo esc_html( $user_info->display_name ); ?> (<?php echo esc_html( $user_info->user_email ); ?>)</option>
                             <?php endforeach; ?>
                         </select>
                         <select id="logoNumber">

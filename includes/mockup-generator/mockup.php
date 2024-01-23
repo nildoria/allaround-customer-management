@@ -65,24 +65,12 @@ class ALRN_Genrator {
         if ($original_image !== false) {
             // Calculate the new dimensions while preserving the aspect ratio
             list($original_width, $original_height) = getimagesize($original_image_path);
-            $max_dimension =1000; // Maximum dimension for the resized image
+            $max_dimension =1500; // Maximum dimension for the resized image
 
-            $resize_data = array(
-                "width" => 1000,
-                "original_height" => $original_height,
-                "original_width" => $original_width,
-                "original_image" => $original_image,
-                "filename" => $filename,
-                "user_directory" => $user_directory,
-                "name" => "resized_"
-            );
-
-            $this->create_resize_image($resize_data);
-
-            if( true === $is_feature_image ) {
+            if( true !== $is_feature_image ) {
                 $resize_data = array(
-                    "width" => 400,
-                    "height" => 300,
+                    "width" => 500,
+                    "height" => 500,
                     "original_height" => $original_height,
                     "original_width" => $original_width,
                     "original_image" => $original_image,
@@ -93,6 +81,18 @@ class ALRN_Genrator {
     
                 $this->create_resize_image($resize_data);
             }
+
+            // $resize_data = array(
+            //     "width" => 1500,
+            //     "original_height" => $original_height,
+            //     "original_width" => $original_width,
+            //     "original_image" => $original_image,
+            //     "filename" => $filename,
+            //     "user_directory" => $user_directory,
+            //     "name" => "resized_"
+            // );
+
+            // $this->create_resize_image($resize_data);
     
             // Free up memory
             imagedestroy($original_image);

@@ -38,11 +38,25 @@ document.addEventListener('DOMContentLoaded', function () {
     console.log( saved_positions );
         
     let logo_src = settings.logo[logoType];
+    let back_logo_src = settings.back_logo[logoType];
+    let back_horizontal_logo_src = settings.back_logo['horizontal'];
     let original_logo_src = logo_src;
     let custom_logo_src = original_logo_src;
     // Define a variable to store the original dimensions of the logo before resizing
     let originalLogoDimensions = null;
-
+    function waitForImageChange(imageElement, expectedSrc) {
+        return new Promise(resolve => {
+          const checkImageChange = () => {
+            if (imageElement.src === expectedSrc) {
+              resolve();
+            } else {
+              setTimeout(checkImageChange, 100); // Check again after 100 milliseconds
+            }
+          };
+      
+          checkImageChange();
+        });
+    }
 
     // Background Image
     const backgroundImage = new Image();
@@ -65,7 +79,7 @@ document.addEventListener('DOMContentLoaded', function () {
             image.onload = resolve;
             image.onerror = reject;
         })))
-            .then(() => {
+            .then(async () => {
       
                 // Use the original width and height of the logo
                 const originalWidth = logoImage1.width;
@@ -85,8 +99,10 @@ document.addEventListener('DOMContentLoaded', function () {
                     
                     // Loop through the logo data and draw each logo on the canvas
                     for (const logoInfo of finalItem) {
-                        const { x, y, width, height, angle } = logoInfo;
+                        const { x, y, width, height, angle, custom } = logoInfo;
 
+                        console.log("logoInfo", logoInfo);
+            
                         const newHeight = aspect_height(originalWidth, originalHeight, width);
                         const newY =  aspectY(newHeight, height, y);
 
@@ -96,14 +112,22 @@ document.addEventListener('DOMContentLoaded', function () {
                             width: width,
                             height: newHeight,
                             angle: angle,
-                            image: logoImage1
+                            image: new Image()
                         };
 
+                        // Set the source of the newLogo image based on the custom property
+                        newLogo.image.src = custom ? back_logo_src : logo_src;
+
+                        // Wait for the newLogo image to load before pushing it to the logos array
+                        await new Promise((resolve, reject) => {
+                            newLogo.image.onload = resolve;
+                            newLogo.image.onerror = reject;
+                        });
+
                         logos.push(newLogo);
+                        
                     }
                     is_saved_found = true;
-
-                    
 
                     if( 
                         saved_positions.ml_logos_positions && 
@@ -156,6 +180,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 console.error('Error preloading logos:', error);
             });
     };
+
+    
+
+    
 
     function draw() {
         ctx.clearRect(0, 0, mergedCanvas.width, mergedCanvas.height);
@@ -272,10 +300,10 @@ document.addEventListener('DOMContentLoaded', function () {
         return 'default';;
     }
 
-    async function addLogoWithPositions(logoImage, userId = false) {
+    async function addLogoWithPositions(logoImage, userId = false, $from = '') {
         const selectedLogoType = logoTypesSelect.value;
         let selectedLogoPath = logoSelector.value;
-    
+
         // Use the original width and height of the logo
         const originalWidth = logoImage.width;
         const originalHeight = logoImage.height;
@@ -287,22 +315,37 @@ document.addEventListener('DOMContentLoaded', function () {
         let is_saved_found = false;
         const finalItem = get_position_values(userId, selectedLogoType);
 
-        
-    
+        let lighter_darker = 'lighter';
+        if( false !== userId ) {
+            let logoNumberValue = logoNumberBtn?.value ?? 'default';
+            if( logoNumberValue && logoNumberValue !== false ) {
+                if( logoNumberValue && 'second' === logoNumberValue ) {
+                    lighter_darker = 'darker';
+                }
+            }
+            console.log('logoNumberValue', logoNumberValue);
+        }
+
+        let selectedOption = logoSelector.options[logoSelector.selectedIndex];
+
+        const custom_logo_lighter = selectedOption.getAttribute('data-custom_logo_lighter');
+        const custom_logo_darker = selectedOption.getAttribute('data-custom_logo_darker');
+
         if (finalItem !== undefined && finalItem !== false) {
             for (const logoInfo of finalItem) {
                 const { x, y, width, height, angle, custom } = logoInfo;
                 const newHeight = aspect_height(originalWidth, originalHeight, width);
                 const newY = aspectY(newHeight, height, y);
     
-                // const logoImageSrc = custom ? custom_logo_src : logoImage.src;
-                const logoImageSrc = logoImage.src;
+                const logoImageSrc = custom ? custom_logo_src : logoImage.src;
                 await loadImage(logoImageSrc); // Await the loading of the logo image
 
                 console.log('logoInfo', logoInfo);
                 console.log('originalWidth', originalWidth);
                 console.log('originalHeight', originalHeight);
                 console.log('width', width);
+                
+                console.log('lighter_darker', lighter_darker);
                 console.log('src', logoImage.src);
     
                 const newLogo = {
@@ -315,9 +358,37 @@ document.addEventListener('DOMContentLoaded', function () {
                     image: new Image(),
                 };
 
-                console.log('newLogo', newLogo);
-    
                 newLogo.image.src = logoImageSrc;
+
+                if( $from !== '' && custom ) {
+
+                    let back_src = back_logo_src;
+                    if( selectedLogoType === 'horizontal' ) {
+                        back_src = back_horizontal_logo_src;
+                    }
+
+                    if( $from === 'logoSelector' || $from === 'logoNumberBtn' ) {
+                        if( lighter_darker && 'lighter' === lighter_darker && ( custom_logo_lighter && custom_logo_lighter !== undefined) ) {
+                            back_src = custom_logo_lighter;
+                        }
+                        if( lighter_darker && 'darker' === lighter_darker && ( custom_logo_darker && custom_logo_darker !== undefined) ) {
+                            back_src = custom_logo_darker;
+                        }
+                    }
+
+                    // Set the source of the newLogo image based on the custom property
+                    newLogo.image.src = custom ? back_src : logo_src;
+                }
+
+                console.log('newLogo', newLogo);
+
+                // Wait for the newLogo image to load before pushing it to the logos array
+                await new Promise((resolve, reject) => {
+                    newLogo.image.onload = resolve;
+                    newLogo.image.onerror = reject;
+                });
+
+                
                 logos.push(newLogo);
             }
     
@@ -372,9 +443,6 @@ document.addEventListener('DOMContentLoaded', function () {
             // logoNumberBtn.disabled = true;
         }
 
-        const customLogo = selectedOption.getAttribute('data-custom_logo');
-        console.log('customLogo', customLogo);
-
         let logoNumber = getLogoNumber(dataUserId);
         console.log("logoNumber", logoNumber);
         if( logoNumber && logoNumber !== false ) {
@@ -386,16 +454,6 @@ document.addEventListener('DOMContentLoaded', function () {
         } else {
             logoNumberBtn.value = 'default';
         }
-
-        // Check if if customer exists in allow customers_list
-        // Check if user has custom logo
-        // if( customers_list.includes(dataUserId) && customLogo && customLogo != undefined && customLogo != null ) {
-        //     addBackLogo.disabled = false;
-        //     custom_logo_src = customLogo;
-        // } else {
-        //     addBackLogo.disabled = true;
-        //     custom_logo_src = selectedLogoPath;
-        // }
 
         if( "trigger_types" === e.source ) {
             return false;
@@ -410,7 +468,7 @@ document.addEventListener('DOMContentLoaded', function () {
             logoImage.onload = () => {
                 clearCanvas();
 
-                addLogoWithPositions( logoImage, dataUserId );
+                addLogoWithPositions( logoImage, dataUserId, 'logoSelector' );
 
                 // Immediately draw the new logo
                 draw();
@@ -438,14 +496,17 @@ document.addEventListener('DOMContentLoaded', function () {
         switch (selectedLogoType) {
             case 'square':
                 original_logo_src = settings.logo['square'];
+                back_logo_src = settings.back_logo['square'];
                 break;
             case 'horizontal':
                 original_logo_src = settings.logo['horizontal'];
+                back_logo_src = settings.back_logo['horizontal'];
                 break;
             // Add more cases for other logo types as needed
             default:
                 // Handle the default case or set a default logo source
                 original_logo_src = settings.logo['square'];
+                back_logo_src = settings.back_logo['square'];
                 break;
         }
     
@@ -460,7 +521,7 @@ document.addEventListener('DOMContentLoaded', function () {
         logoImage.onload = () => {
             clearCanvas();
     
-            addLogoWithPositions( logoImage, false );
+            addLogoWithPositions( logoImage, false, 'logoTypesSelect' );
     
             // Immediately draw the new logo
             draw();
@@ -493,7 +554,7 @@ document.addEventListener('DOMContentLoaded', function () {
         logoImage.onload = () => {
             clearCanvas();
     
-            addLogoWithPositions( logoImage, userId );
+            addLogoWithPositions( logoImage, userId, 'logoNumberBtn' );
     
             // Immediately draw the new logo
             draw();
@@ -939,7 +1000,7 @@ document.addEventListener('DOMContentLoaded', function () {
         
         rotationInput.value = '0';
         
-        const selectedLogoPath = logoSelector.value || original_logo_src; // Use the selected logo path or the customlogo path
+        const selectedLogoPath = back_logo_src || logoSelector.value; // Use the selected logo path or the customlogo path
         const logoImage = new Image();
         logoImage.src = selectedLogoPath;
     

@@ -889,8 +889,8 @@ jQuery(document).ready(function ($) {
           $(".white-popup-block button.mfp-close").click();
         }, 1000);
 
-        console.log(data);
-        console.log('Item added to cart');
+        // console.log(data);
+        // console.log('Item added to cart');
       },
     }).then(function () {
       isLoading = false;

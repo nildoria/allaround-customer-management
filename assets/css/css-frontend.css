@@ -159,12 +159,13 @@ h3.miniStore-promo-title {
   display: flex;
   align-items: center;
   background-color: #fff;
+  overflow: hidden;
 }
 .mini-store-product-list .product-item img {
   margin-bottom: 0 !important;
-  height: 100%;
+  height: auto;
   width: 100%;
-  object-fit: cover;
+  /* object-fit: cover; */
   object-position: center;
 }
 .woocommerce
@@ -186,6 +187,19 @@ h3.miniStore-promo-title {
   line-height: 1.2;
   color: #2673e7;
   margin: 0 0 5px;
+}
+.woocommerce ul.order_details {
+    margin: 2em 0 2em;
+    list-style: none;
+}
+.woocommerce ul.order_details li.woocommerce-order-overview__email.email {
+    display: none;
+}
+.woocommerce-order {
+    padding: 15px 0 10px 0;
+}
+.woocommerce.alarn--popup-thankyou {
+    text-align: inherit;
 }
 .iconLibraryTooltip {
   position: relative;
@@ -705,6 +719,9 @@ span.alarnd__return_token_payout {
 .white-popup-block.alarnd--payout-modal.alarnd--info-modal {
   max-width: 650px;
 }
+.white-popup-block.alarnd--payout-modal.alarnd--thankyou-modal.alarnd--info-modal {
+  max-width: 720px;
+}
 
 .alarnd--popup-inline {
   margin-bottom: 25px;
@@ -941,7 +958,7 @@ ol.mlCustomDots a {
   flex-wrap: wrap;
   width: 100%;
   align-items: flex-start;
-  flex-direction: row-reverse;
+  flex-direction: column;
 }
 .alarn--pricing-column.alarn--pricing-column-desc p {
   font-size: 16px;
@@ -951,13 +968,24 @@ ol.mlCustomDots a {
   flex: 0 0 55%;
   box-sizing: border-box;
   padding: 0px;
+  max-width: 100%;
 }
 .pricingDescSteps {
-  flex: 0 0 45%;
+    flex: 0 0 45%;
+    display: flex;
+    flex-wrap: wrap;
+    margin-top: 25px;
+    align-items: center;
 }
 .alarn--pricing-column.alarn--pricing-column-chart > h5 {
   margin: 10px 0 10px;
   text-align: center;
+}
+[id^="alarnd__pricing_info-"] {
+  max-width: 750px !important;
+}
+.pricingDescSteps .modal-bottom-btn {
+    margin-top: 0px;
 }
 .alarn--price-chart {
   background-color: transparent;
@@ -1005,6 +1033,10 @@ span.price_step_qty {
 }
 .alarn--pricing-column.alarn--pricing-column-desc {
   text-align: right;
+  flex: 0 0 50%;
+}
+.alarn--pricing-column.alarn--pricing-column-chart {
+    flex: 0 0 50%;
 }
 .woocommerce-product-gallery.alarn--pricing-column {
   direction: ltr;
@@ -2063,6 +2095,7 @@ section.cart_loader_section .info__box {
   box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.12), 0 2px 4px 0 rgba(0, 0, 0, 0.08);
   flex-direction: row-reverse;
 }
+
 
 section.cart_loader_section .info__text_one {
   width: 100%;

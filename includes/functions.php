@@ -464,12 +464,12 @@ function ml_get_thumbnail( $thumbnail, $user_id, $product_id ) {
     $ext = $filetype['ext'];
 
     $upload_dir = wp_upload_dir();
-    $gen_thumbnail = $upload_dir['baseurl'] . DIRECTORY_SEPARATOR . AlRNDCM_UPLOAD_FOLDER . DIRECTORY_SEPARATOR  . $user_id . DIRECTORY_SEPARATOR  . 'resized_' . $product_id . '.'.$ext;
-    $gen_thumbnail = str_replace('\\', '/', $gen_thumbnail);
-    $basedir_url = $upload_dir['basedir'] . DIRECTORY_SEPARATOR . AlRNDCM_UPLOAD_FOLDER . DIRECTORY_SEPARATOR  . $user_id . DIRECTORY_SEPARATOR . 'resized_' . $product_id . '.'.$ext;
-    if( file_exists( $basedir_url ) ) {
-        return $gen_thumbnail;
-    }
+    // $gen_thumbnail = $upload_dir['baseurl'] . DIRECTORY_SEPARATOR . AlRNDCM_UPLOAD_FOLDER . DIRECTORY_SEPARATOR  . $user_id . DIRECTORY_SEPARATOR  . 'resized_' . $product_id . '.'.$ext;
+    // $gen_thumbnail = str_replace('\\', '/', $gen_thumbnail);
+    // $basedir_url = $upload_dir['basedir'] . DIRECTORY_SEPARATOR . AlRNDCM_UPLOAD_FOLDER . DIRECTORY_SEPARATOR  . $user_id . DIRECTORY_SEPARATOR . 'resized_' . $product_id . '.'.$ext;
+    // if( file_exists( $basedir_url ) ) {
+    //     return $gen_thumbnail;
+    // }
     $full_gen_thumbnail = $upload_dir['baseurl'] . DIRECTORY_SEPARATOR. AlRNDCM_UPLOAD_FOLDER . DIRECTORY_SEPARATOR . $user_id . DIRECTORY_SEPARATOR . $product_id . '.'.$ext;
     $full_gen_thumbnail = str_replace('\\', '/', $full_gen_thumbnail);
     $full_basedir_url = $upload_dir['basedir'] . DIRECTORY_SEPARATOR. AlRNDCM_UPLOAD_FOLDER . DIRECTORY_SEPARATOR . $user_id . DIRECTORY_SEPARATOR . $product_id . '.'.$ext;
@@ -487,9 +487,9 @@ function ml_get_gallery_thumbnail($key, $attachment_id, $user_id, $product_id, $
     $ext = $filetype['ext'];
 
     $upload_dir = wp_upload_dir();
-    $gen_thumbnail = $upload_dir['baseurl'] . DIRECTORY_SEPARATOR. AlRNDCM_UPLOAD_FOLDER . DIRECTORY_SEPARATOR . $user_id . DIRECTORY_SEPARATOR . 'resized_' . $product_id . '-' . $key . '-' . $attachment_id . '.'.$ext;
+    $gen_thumbnail = $upload_dir['baseurl'] . DIRECTORY_SEPARATOR. AlRNDCM_UPLOAD_FOLDER . DIRECTORY_SEPARATOR . $user_id . DIRECTORY_SEPARATOR . 'wc_thumb_' . $product_id . '-' . $key . '-' . $attachment_id . '.'.$ext;
     $gen_thumbnail = str_replace('\\', '/', $gen_thumbnail);
-    $basedir_url = $upload_dir['basedir'] . DIRECTORY_SEPARATOR. AlRNDCM_UPLOAD_FOLDER . DIRECTORY_SEPARATOR . $user_id . DIRECTORY_SEPARATOR . 'resized_' . $product_id . '-' . $key . '-' . $attachment_id . '.'.$ext;
+    $basedir_url = $upload_dir['basedir'] . DIRECTORY_SEPARATOR. AlRNDCM_UPLOAD_FOLDER . DIRECTORY_SEPARATOR . $user_id . DIRECTORY_SEPARATOR . 'wc_thumb_' . $product_id . '-' . $key . '-' . $attachment_id . '.'.$ext;
     if( false === $full && file_exists( $basedir_url ) ) {
         // error_log( "gen_thumbnail $gen_thumbnail" );
         return $gen_thumbnail;
@@ -519,7 +519,12 @@ function ml_gallery_carousels( $product_id, $user_id ) {
         echo ' <div class="woocommerce-product-gallery alarn--pricing-column">';
             echo '<div class="allaround--slick-carousel">';
                 foreach ($galleries as $key => $gallery) {
-                    $thumbnail = ml_get_gallery_thumbnail($key, $gallery['attachment_id'], $user_id, $product_id);
+                    //For Smaller Thumbnail
+                    // $thumbnail = ml_get_gallery_thumbnail($key, $gallery['attachment_id'], $user_id, $product_id);
+
+                    //For Original Size
+                    $thumbnail = ml_get_gallery_thumbnail($key, $gallery['attachment_id'], $user_id, $product_id, true);
+
                     $full_thumbnail = ml_get_gallery_thumbnail($key, $gallery['attachment_id'], $user_id, $product_id, true);
                     // $gallery_thumb = 
                     echo '<div><img src="' . esc_url( $thumbnail ) . '" class="gallery-item" data-mfp-src="' . esc_url( $full_thumbnail ) . '"/></div>';
@@ -876,7 +881,7 @@ function ml_get_metas($product_id) {
 
 function ml_register_custom_image_size() {
     // Register the custom image size
-    add_image_size('alarnd_main_thumbnail', 1000, 1000, false);
+    add_image_size('alarnd_main_thumbnail', 1500, 1500, false);
     add_image_size('alarnd_main_thumbnail_resize', 400, 400, false);
 
     // You can register more custom image sizes as needed
@@ -1694,8 +1699,15 @@ function ml_response($response) {
 
 function ml_create_order($data) {
 
+    global $woocommerce;
+    $cart = $woocommerce->cart;
+    $cart->calculate_totals();
+
+    $applied_coupons = WC()->cart->get_applied_coupons();
+
     $current_user = wp_get_current_user();
     $user_id = $current_user->ID;
+    $user_login = $current_user->user_login;
 
     $products = $data['products'];
     $customerInfo = $data['customerInfo'];
@@ -1703,6 +1715,7 @@ function ml_create_order($data) {
     $extraMeta = isset( $data['extraMeta'] ) ? $data['extraMeta'] : [];
     $response = isset( $data['response'] ) ? $data['response'] : [];
     $update = isset( $data['update'] ) ? true : false;
+    $fullname = isset( $customerInfo['name'] ) ? $customerInfo['name'] : '';
 
     // Assuming you have received payment response and details
     $order = wc_create_order();
@@ -1710,21 +1723,70 @@ function ml_create_order($data) {
     // Loop through the products and add them to the order
     foreach ($products as $product) {
         $product_id = $product['product_id'];
+
+        $_product = wc_get_product( $product_id );
+        $image_id = $_product->get_image_id();
+
         $quantity = $product['quantity'];
 
-        // Add each product to the order
-        $order->add_product(wc_get_product($product_id), $quantity);
+        $color = isset( $product['color'] ) ? $product['color'] : ''; // Assuming 'color' is part of your product data
+        $size = isset( $product['size'] ) ? $product['size'] : '';   // Assuming 'size' is part of your product data
+        $price = isset( $product['price'] ) ? $product['price'] : '';
+        $alarnd_color_key = isset( $product['alarnd_color_key'] ) ? $product['alarnd_color_key'] : '';
+        $alarnd_custom_color = isset( $product['alarnd_custom_color'] ) ? $product['alarnd_custom_color'] : '';
+        $alarnd_step_key = isset( $product['alarnd_step_key'] ) ? $product['alarnd_step_key'] : '';
+
+        $extra_meta = [];
+        if( ! empty( $color ) ) {
+            $extra_meta['color'] = $color;
+        }
+        if( ! empty( $size ) ) {
+            $extra_meta['size'] = $size;
+        }
+        if( ! empty( $price ) ) {
+            $extra_meta['price'] = $price;
+
+            $extra_meta['subtotal'] = $price*$quantity;
+            $extra_meta['total'] = $price*$quantity;
+        }
+
+        $item_id = $order->add_product($_product, $quantity, $extra_meta);
+
+        // Add color and size as order item meta
+        if( ! empty( $color ) ) {
+            wc_add_order_item_meta($item_id, __('Color', 'hello-elementor'), $color);
+        }
+
+        if( ! empty( $alarnd_custom_color ) ) {
+            wc_add_order_item_meta($item_id, __('Color', 'hello-elementor'), $alarnd_custom_color);
+        }
+
+        if( ! empty( $size ) ) {
+            wc_add_order_item_meta($item_id, __('Size', 'hello-elementor'), $size);
+        }
+      
+        if( ! empty( $image_id ) ) {
+            $gen_thumbnail = ml_get_wc_thumbnail_url( $image_id, $product_id, $user_id, $alarnd_color_key );
+            if( ! empty( $gen_thumbnail ) ) {
+                // Add custom thumbnail URL as post meta for the product
+                update_post_meta($product_id, '_generated_thumbnail_url', $gen_thumbnail);
+            }
+        }
+        
     }
 
     // Set billing and shipping addresses
-    $order->set_address($customerInfo);
+    $order->set_address($customerInfo, 'billing');
+    $order->set_address($customerInfo, 'shipping');
+
+    $order->set_customer_id( $user_id );
 
     // Set payment method (e.g., 'zcredit_checkout_payment' for zcredit)
     $order->set_payment_method('zcredit_checkout_payment');
 
     if( ! empty( $response ) && isset( $response['referenceID'] ) ) {
         $order->add_order_note( __( 'Z-Credit Payment Complete.', 'woocommerce_zcredit' ) );
-        $order->add_order_note( "Refence Number: #$referenceID for Z-Credit" );
+        $order->add_order_note( "Refence Number: #".$response['referenceID']." for Z-Credit" );
         $order->payment_complete();   
     }
 
@@ -1748,11 +1810,8 @@ function ml_create_order($data) {
             }
             
             if( isset( $extraMeta['city'] ) && ! empty( $extraMeta['city'] ) ) {
-                update_user_meta_if_different($user_id, 'billing_city', $Meta['city']);
+                update_user_meta_if_different($user_id, 'billing_city', $extraMeta['city']);
             }
-
-            $phoneNumber = ml_get_phone_no( $customerInfo['phone'] );
-            $countryCode = ml_get_country_code();
 
             if( ! empty( $cardNumber ) ) {
                 $last_four_digit = ml_get_last_four_digit($cardNumber);
@@ -1768,32 +1827,57 @@ function ml_create_order($data) {
             $phoneNumber = ml_get_phone_no( $customerInfo['phone'] );
             $countryCode = ml_get_country_code();
             
-
             // WcooCommerce user field update
-            update_user_meta_if_different($user_id, 'billing_address_1', $customerInfo['cardholderAdress']);
-            update_user_meta_if_different($user_id, 'billing_phone', $customerInfo['cardholderPhone']);
-
+            update_user_meta_if_different($user_id, 'billing_address_1', $customerInfo['address_1']);
             update_user_meta_if_different($user_id, 'billing_phone', $customerInfo['phone']);
+
             update_user_meta_if_different($user_id, 'xoo_ml_phone_code', $countryCode);
             update_user_meta_if_different($user_id, 'xoo_ml_phone_no', $phoneNumber);
 
             // Email address
-            update_user_email_if_different($user_id, $customerInfo['cardholderEmail']);
+            update_user_email_if_different($user_id, $customerInfo['email']);
             
             // Display Name
-            update_user_name_if_different($user_id, $customerInfo['cardholderName']);
+            update_user_name_if_different($user_id, $fullname);
         }
     }
-    
-    // Mark the order as paid (change this status to match your payment method)
-    $order->update_status('processing');
 
+    // Set the applied coupons to the order
+    foreach ($applied_coupons as $coupon_code) {
+        $order->apply_coupon($coupon_code);
+    }
+
+    $woocommerce->cart->calculate_totals();
+
+    $order->calculate_totals();
+    // $order_subtotal = $order->get_subtotal();
+    // $order->set_total( $order_subtotal );
+
+    // Mark the order as paid (change this status to match your payment method)
+    $order->set_status('wc-processing');
+    
     // Save the order
     $order->save();
 
-    return  $order->get_id();
+    return $order->get_id();
 }
 
+
+// Hook to replace order item thumbnail with custom thumbnail URL
+add_filter('woocommerce_admin_order_item_thumbnail', 'custom_order_item_thumbnail', 10, 3);
+
+function custom_order_item_thumbnail($thumbnail, $item_id, $item) {
+    // Get the product ID from the order item
+    $product_id = $item->get_product_id();
+
+    $custom_thumbnail_url = get_post_meta($product_id, '_generated_thumbnail_url', true);
+
+    if ($custom_thumbnail_url) {
+        $thumbnail = preg_replace('/src="([^"]*)"/', 'src="' . esc_url($custom_thumbnail_url) . '"', $thumbnail);
+    }
+
+    return $thumbnail;
+}
 
 function ministore_empty_cart_message($message) {
     if (WC()->cart->is_empty()) {
@@ -1924,9 +2008,9 @@ function ml_get_wc_thumbnail_url( $attachment_id, $product_id, $user_id, $alarnd
         $colors = get_field( 'color', $product_id );
         $attachment_id = isset( $colors[$alarnd_color_key]['thumbnail']['ID'] ) ? $colors[$alarnd_color_key]['thumbnail']['ID'] : '';
         if( ! empty( $attachment_id ) ) {
-            $gen_thumbnail = $upload_dir['baseurl'] . DIRECTORY_SEPARATOR. AlRNDCM_UPLOAD_FOLDER . DIRECTORY_SEPARATOR . $user_id . DIRECTORY_SEPARATOR . 'resized_' . $product_id . '-' . $alarnd_color_key . '-' . $attachment_id . '.'.$ext;
+            $gen_thumbnail = $upload_dir['baseurl'] . DIRECTORY_SEPARATOR. AlRNDCM_UPLOAD_FOLDER . DIRECTORY_SEPARATOR . $user_id . DIRECTORY_SEPARATOR . 'wc_thumb_' . $product_id . '-' . $alarnd_color_key . '-' . $attachment_id . '.'.$ext;
             $gen_thumbnail = str_replace('\\', '/', $gen_thumbnail);
-            $basedir_url = $upload_dir['basedir'] . DIRECTORY_SEPARATOR. AlRNDCM_UPLOAD_FOLDER . DIRECTORY_SEPARATOR . $user_id . DIRECTORY_SEPARATOR . 'resized_' . $product_id . '-' . $alarnd_color_key . '-' . $attachment_id . '.'.$ext;
+            $basedir_url = $upload_dir['basedir'] . DIRECTORY_SEPARATOR. AlRNDCM_UPLOAD_FOLDER . DIRECTORY_SEPARATOR . $user_id . DIRECTORY_SEPARATOR . 'wc_thumb_' . $product_id . '-' . $alarnd_color_key . '-' . $attachment_id . '.'.$ext;
 
             if( file_exists( $basedir_url ) ) {
                 return $gen_thumbnail;
@@ -2207,3 +2291,16 @@ function custom_remove_woocommerce_shipping_details() {
     }
 }
 add_action('admin_footer', 'custom_remove_woocommerce_shipping_details');
+
+
+add_filter('woocommerce_order_received_text', 'custom_order_received_text', 10, 2);
+
+function custom_order_received_text($text, $order) {
+    // Check if we are on the "Thank you" page
+    if (is_wc_endpoint_url('order-received') && isset($_GET['key'])) {
+        // Change the billing address title
+        $text = str_replace('Billing address', 'Address', $text);
+    }
+
+    return $text;
+}
