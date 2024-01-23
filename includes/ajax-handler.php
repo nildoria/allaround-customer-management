@@ -352,6 +352,7 @@ class ML_Ajax {
             $order = wc_get_order( $order_id );
             if( $order ) {
                 ob_start();
+                // wc_get_template( 'order/order-details.php', array( 'order_id' => $order_id ) );
                 wc_get_template( 'checkout/thankyou.php', array( 'order' => $order ) );
                 $thankyou_output = ob_get_clean();
             }
@@ -615,7 +616,7 @@ class ML_Ajax {
 
         $failed_popup = $this->popup_failed_markup();
         
-        if ( ! is_wp_error( $request ) && wp_remote_retrieve_response_code( $request ) == 200 && $message !== "Accepted" ) {	
+        if ( ! is_wp_error( $request ) && wp_remote_retrieve_response_code( $request ) == 200 && $message !== "Accepted" ) {
             
             // first create order
             $order_id = ml_create_order($order_data);

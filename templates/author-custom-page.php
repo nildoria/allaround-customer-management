@@ -213,7 +213,7 @@ $current_user_id = $get_current_puser->ID;
                     
                     // Product Thumbnail
                     echo '<div class="product-thumbnail">';
-                    echo '<img src="'.$thumbnail.'" loading="lazy" />';
+                    echo '<img src="'.$thumbnail.'" loading="lazy"/>';
                     echo '</div>';
                     
                     echo '<div class="product-item-details">';

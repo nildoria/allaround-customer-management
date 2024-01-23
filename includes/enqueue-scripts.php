@@ -5,6 +5,8 @@ function enqueue_aum_script() {
     // Enqueue the Magnific Popup styles
     wp_enqueue_style('magnific-popup-style', AlRNDCM_URL . 'assets/css/magnific-popup.css');
 
+    wp_enqueue_style('zoom', AlRNDCM_URL . 'assets/css/magnify.css');
+
     // Enqueue custom CSS for front-end
     wp_enqueue_style('css-frontend', AlRNDCM_URL . 'assets/css/css-frontend.css', array(), AlRNDCM_VERSION );
 
@@ -47,6 +49,8 @@ function enqueue_aum_script() {
     }
 
     wp_enqueue_script('validate', AlRNDCM_URL . 'assets/js/jquery.validate.min.js', array('jquery'), XOO_ML_VERSION, true);
+
+    wp_enqueue_script('magnifyzoom', AlRNDCM_URL . 'assets/js/jquery.magnify.js', array('jquery'), AlRNDCM_VERSION, true);
 
 
     // Dequeue the default WooCommerce script

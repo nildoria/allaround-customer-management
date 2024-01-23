@@ -192,7 +192,7 @@ h3.miniStore-promo-title {
     margin: 2em 0 2em;
     list-style: none;
 }
-.woocommerce ul.order_details li.woocommerce-order-overview__email.email {
+.woocommerce ul.order_details li.woocommerce-order-overview__email.email, .woocommerce ul.order_details li.woocommerce-order-overview__payment-method.method {
     display: none;
 }
 .woocommerce-order {
@@ -958,34 +958,27 @@ ol.mlCustomDots a {
   flex-wrap: wrap;
   width: 100%;
   align-items: flex-start;
-  flex-direction: column;
+  flex-direction: row-reverse;
 }
 .alarn--pricing-column.alarn--pricing-column-desc p {
   font-size: 16px;
 }
+
 /* Apply styles to .alarn--pricing-column */
 .alarn--pricing-column {
   flex: 0 0 55%;
   box-sizing: border-box;
   padding: 0px;
-  max-width: 100%;
 }
 .pricingDescSteps {
-    flex: 0 0 45%;
-    display: flex;
-    flex-wrap: wrap;
-    margin-top: 25px;
-    align-items: center;
+  flex: 0 0 45%;
 }
 .alarn--pricing-column.alarn--pricing-column-chart > h5 {
   margin: 10px 0 10px;
   text-align: center;
 }
-[id^="alarnd__pricing_info-"] {
-  max-width: 750px !important;
-}
-.pricingDescSteps .modal-bottom-btn {
-    margin-top: 0px;
+.woocommerce.alarn--popup-thankyou .col2-set .col-1 {
+    width: 100%;
 }
 .alarn--price-chart {
   background-color: transparent;
@@ -1033,10 +1026,6 @@ span.price_step_qty {
 }
 .alarn--pricing-column.alarn--pricing-column-desc {
   text-align: right;
-  flex: 0 0 50%;
-}
-.alarn--pricing-column.alarn--pricing-column-chart {
-    flex: 0 0 50%;
 }
 .woocommerce-product-gallery.alarn--pricing-column {
   direction: ltr;
@@ -1048,7 +1037,6 @@ span.price_step_qty {
 }
 .woocommerce-product-gallery.alarn--pricing-column .slick-slide {
   float: left !important;
-  pointer-events: none;
   padding-bottom: 0;
 }
 .mfp-image-holder .mfp-close,

@@ -527,7 +527,7 @@ function ml_gallery_carousels( $product_id, $user_id ) {
 
                     $full_thumbnail = ml_get_gallery_thumbnail($key, $gallery['attachment_id'], $user_id, $product_id, true);
                     // $gallery_thumb = 
-                    echo '<div><img src="' . esc_url( $thumbnail ) . '" class="gallery-item" data-mfp-src="' . esc_url( $full_thumbnail ) . '"/></div>';
+                    echo '<div><img src="' . esc_url( $thumbnail ) . '" class="gallery-item zoom" data-mfp-src="' . esc_url( $full_thumbnail ) . '" data-magnify-src="' . esc_url( $full_thumbnail ) . '"/></div>';
                 }
             echo '</div>';
             echo '<ol class="mlCustomDots">';
@@ -539,7 +539,7 @@ function ml_gallery_carousels( $product_id, $user_id ) {
     } elseif( ! empty( $thumbnail ) ) {
         // Product Thumbnail
         echo '<div class="product-thumbnail alarn--pricing-column">';
-        echo '<img src="'.$thumbnail.'" loading="lazy" />';
+        echo '<img src="'.$thumbnail.'" data-magnify-src="' . esc_url( $thumbnail ) . '"  class="zoom"/>';
         echo '</div>';
     }
 }
@@ -1697,6 +1697,52 @@ function ml_response($response) {
     return $result;
 }
 
+/**
+ * Get shipping info by using chosen method from cart
+ *
+ * @param string $type
+ * @return string
+ */
+function ml_get_shipping_data($type = '') {
+    $current_shipping_method = WC()->session->get( 'chosen_shipping_methods' );
+    if( ! is_array($current_shipping_method) ) {
+        return '';
+    }
+
+    if( $type === 'method' ) {
+        return reset($current_shipping_method);
+    }
+
+    $packages = WC()->shipping()->get_packages();
+
+    // Loop through each package
+    foreach ($packages as $package_key => $package) {
+        // Get the shipping rates for the package
+        $rates = $package['rates'];
+
+        // Loop through each shipping rate
+        foreach ($rates as $rate_key => $rate) {
+            // Get the shipping cost for the rate
+            if ($current_shipping_method[0] == $rate->id) {
+                $shipping_cost = $rate->cost;
+                $shipping_label = $rate->label;
+
+                if( $type === 'cost' ) {
+                    return $shipping_cost;
+                }
+
+                return $shipping_label;
+            }
+        }
+    }
+}
+
+/**
+ * Create WooCommerce order programmatically 
+ *
+ * @param array $data
+ * @return int
+ */
 function ml_create_order($data) {
 
     global $woocommerce;
@@ -1772,7 +1818,6 @@ function ml_create_order($data) {
                 update_post_meta($product_id, '_generated_thumbnail_url', $gen_thumbnail);
             }
         }
-        
     }
 
     // Set billing and shipping addresses
@@ -1783,6 +1828,29 @@ function ml_create_order($data) {
 
     // Set payment method (e.g., 'zcredit_checkout_payment' for zcredit)
     $order->set_payment_method('zcredit_checkout_payment');
+    $order->set_payment_method_title('Z-Credit Payment');
+
+    // Get the chosen shipping method
+    $chosen_shipping_method = ml_get_shipping_data('method');
+
+    // Set shipping method
+    if (!empty($chosen_shipping_method)) {
+
+        $shipping_cost = ml_get_shipping_data('cost');
+        $shipping_title = ml_get_shipping_data();
+
+        // Create a new shipping item
+        $shipping_item = new WC_Order_Item_Shipping();
+        $shipping_item->set_method_title($shipping_title); // Replace with the shipping method title
+        $shipping_item->set_method_id($chosen_shipping_method);
+        $shipping_item->set_total($shipping_cost);
+
+        // Add the shipping item to the order
+        $order->add_item($shipping_item);
+
+        // Recalculate totals and save the order
+        $order->calculate_totals();
+    }
 
     if( ! empty( $response ) && isset( $response['referenceID'] ) ) {
         $order->add_order_note( __( 'Z-Credit Payment Complete.', 'woocommerce_zcredit' ) );
@@ -1850,8 +1918,6 @@ function ml_create_order($data) {
     $woocommerce->cart->calculate_totals();
 
     $order->calculate_totals();
-    // $order_subtotal = $order->get_subtotal();
-    // $order->set_total( $order_subtotal );
 
     // Mark the order as paid (change this status to match your payment method)
     $order->set_status('wc-processing');
@@ -2291,16 +2357,3 @@ function custom_remove_woocommerce_shipping_details() {
     }
 }
 add_action('admin_footer', 'custom_remove_woocommerce_shipping_details');
-
-
-add_filter('woocommerce_order_received_text', 'custom_order_received_text', 10, 2);
-
-function custom_order_received_text($text, $order) {
-    // Check if we are on the "Thank you" page
-    if (is_wc_endpoint_url('order-received') && isset($_GET['key'])) {
-        // Change the billing address title
-        $text = str_replace('Billing address', 'Address', $text);
-    }
-
-    return $text;
-}

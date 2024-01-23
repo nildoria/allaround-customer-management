@@ -1270,6 +1270,14 @@ jQuery(document).ready(function ($) {
             isApplicable = true;
             currentInstance.close();
           });
+
+          // if ($('.allaround--slick-carousel').length > 0) {
+          // const zoomElements = $('.allaround--slick-carousel .zoom');
+
+          //   zoomElements.magnify();
+          // }
+          $('.zoom').magnify();
+
         },
         afterClose: function () {
           const product_id = this.st.el.data("product_id");
