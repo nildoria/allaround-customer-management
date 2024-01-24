@@ -163,9 +163,9 @@ h3.miniStore-promo-title {
 }
 .mini-store-product-list .product-item img {
   margin-bottom: 0 !important;
-  height: auto;
+  height: 100%;
   width: 100%;
-  /* object-fit: cover; */
+  object-fit: cover;
   object-position: center;
 }
 .woocommerce
@@ -189,17 +189,24 @@ h3.miniStore-promo-title {
   margin: 0 0 5px;
 }
 .woocommerce ul.order_details {
-    margin: 2em 0 2em;
-    list-style: none;
+  margin: 2em 0 2em;
+  list-style: none;
 }
-.woocommerce ul.order_details li.woocommerce-order-overview__email.email, .woocommerce ul.order_details li.woocommerce-order-overview__payment-method.method {
-    display: none;
+.woocommerce ul.order_details li.woocommerce-order-overview__email.email,
+.woocommerce
+  ul.order_details
+  li.woocommerce-order-overview__payment-method.method {
+  display: none;
 }
 .woocommerce-order {
-    padding: 15px 0 10px 0;
+  padding: 15px 0 10px 0;
 }
 .woocommerce.alarn--popup-thankyou {
-    text-align: inherit;
+  text-align: inherit;
+}
+.woocommerce table.shop_table td.woocommerce-table__product-name.product-name {
+    cursor: none;
+    pointer-events: none;
 }
 .iconLibraryTooltip {
   position: relative;
@@ -978,7 +985,7 @@ ol.mlCustomDots a {
   text-align: center;
 }
 .woocommerce.alarn--popup-thankyou .col2-set .col-1 {
-    width: 100%;
+  width: 100%;
 }
 .alarn--price-chart {
   background-color: transparent;
@@ -1305,22 +1312,25 @@ body.woocommerce-page.woocommerce-account
   justify-content: center;
 }
 
-body.state-loaded>.ekit-template-content-footer {
-    display: none;
+body.state-loaded > .ekit-template-content-footer {
+  display: none;
 }
 body.state-loaded .ekit-template-content-header {
-    display: none;
+  display: none;
 }
-body.state-loaded>.ekit-template-content-header {
-    display: block;
+body.state-loaded > .ekit-template-content-header {
+  display: block;
 }
 
 body.state-loaded .alarnd--single-content.default-page-content {
-	padding-top: 0px;
-    padding-bottom: 0px;
+  padding-top: 0px;
+  padding-bottom: 0px;
 }
-a.load--username, a.contact--page-slug, a.services--page-slug, a.aboutus--page-slug {
-    display: none !important;
+a.load--username,
+a.contact--page-slug,
+a.services--page-slug,
+a.aboutus--page-slug {
+  display: none !important;
 }
 /* New addition */
 form.allaround--card-form .form-input {
@@ -1893,9 +1903,11 @@ body.rtl .alarnd--payout-col.alrnd_wooz_col {
   top: auto;
 }
 .alarnd--payout-main.woocommerce-pay_active .your-order-total-container {
-    display: none;
+  display: none;
 }
-.alarnd--payout-main.woocommerce-pay_active form#cardDetailsForm .your-order-total-container {
+.alarnd--payout-main.woocommerce-pay_active
+  form#cardDetailsForm
+  .your-order-total-container {
   display: block;
 }
 button.button.alarnd--regular-button[disabled],
@@ -2084,7 +2096,6 @@ section.cart_loader_section .info__box {
   flex-direction: row-reverse;
 }
 
-
 section.cart_loader_section .info__text_one {
   width: 100%;
   height: 15px;
@@ -2157,7 +2168,7 @@ section.cart_loader_section .cartLoader_button .image {
   margin-right: -10px;
 }
 p.return-to-shop {
-    display: none;
+  display: none;
 }
 @keyframes shine {
   from {
@@ -2172,29 +2183,29 @@ p.return-to-shop {
   display: none;
 }
 body.elementor-default main#main {
-	margin-right: auto;
-	margin-left: auto;
-	width: 100%;
+  margin-right: auto;
+  margin-left: auto;
+  width: 100%;
 }
 @media (min-width: 576px) {
-	body.elementor-default main#main {
-		max-width: 500px;
-	}
+  body.elementor-default main#main {
+    max-width: 500px;
+  }
 }
 @media (min-width: 768px) {
-	body.elementor-default main#main {
-		max-width: 600px;
-	}
+  body.elementor-default main#main {
+    max-width: 600px;
+  }
 }
 @media (min-width: 992px) {
-	body.elementor-default main#main {
-		max-width: 800px;
-	}
+  body.elementor-default main#main {
+    max-width: 800px;
+  }
 }
 @media (min-width: 1200px) {
-	body.elementor-default main#main {
-		max-width: 1000px;
-	}
+  body.elementor-default main#main {
+    max-width: 1000px;
+  }
 }
 /*For pad/Tablet Layout*/
 @media (max-width: 991px) {
@@ -2275,7 +2286,7 @@ body.elementor-default main#main {
   }
   .alarnd--select-options {
     max-height: 298px;
-}
+  }
 }
 /*For 320-384px up Mobile Layout*/
 @media (max-width: 479px) {

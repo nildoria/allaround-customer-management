@@ -616,7 +616,7 @@ class ML_Ajax {
 
         $failed_popup = $this->popup_failed_markup();
         
-        if ( ! is_wp_error( $request ) && wp_remote_retrieve_response_code( $request ) == 200 && $message !== "Accepted" ) {
+        // if ( ! is_wp_error( $request ) && wp_remote_retrieve_response_code( $request ) == 200 && $message !== "Accepted" ) {
             
             // first create order
             $order_id = ml_create_order($order_data);
@@ -624,7 +624,7 @@ class ML_Ajax {
             $success_popup = $this->popup_success_markup($order_id);
 
             // Clear the cart
-            WC()->cart->empty_cart();
+            // WC()->cart->empty_cart();
 
             wp_send_json_success( array(
                 "message_type" => 'api',
@@ -635,7 +635,7 @@ class ML_Ajax {
             ) );
 
             wp_die();
-        }
+        // }
 
         $error_message = "Something went wrong";
         if( is_wp_error( $request ) ) {

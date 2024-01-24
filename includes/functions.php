@@ -1925,6 +1925,11 @@ function ml_create_order($data) {
     // Save the order
     $order->save();
 
+    // Trigger order notification emails
+    wc_mail('new_order', __('New Order', 'woocommerce'), '', '', array('order' => $order));
+
+    wc_mail('customer_processing_order', __('Processing Order', 'woocommerce'), '', '', array('order' => $order));
+
     return $order->get_id();
 }
 
