@@ -67,7 +67,6 @@ class ALRN_Genrator {
             list($original_width, $original_height) = getimagesize($original_image_path);
             $max_dimension =1500; // Maximum dimension for the resized image
 
-            if( true !== $is_feature_image ) {
                 $resize_data = array(
                     "width" => 500,
                     "height" => 500,
@@ -80,7 +79,7 @@ class ALRN_Genrator {
                 );
     
                 $this->create_resize_image($resize_data);
-            }
+            
 
             // $resize_data = array(
             //     "width" => 1500,
