@@ -424,8 +424,8 @@ jQuery(document).ready(function ($) {
         console.log("is_cart_empty", is_cart_empty());
         if( ! is_cart_empty() ) {
           $("button.alarnd--payout-trigger").prop("disabled", false);
-          $("button.ml_save_customer_info").prop("disabled", false);
         }
+          $("button.ml_save_customer_info").prop("disabled", false);
       } else {
         $("button.alarnd--payout-trigger").prop("disabled", true);
         $("button.ml_save_customer_info").prop("disabled", true);
@@ -1553,6 +1553,7 @@ jQuery(document).ready(function ($) {
 
     if ($("#ml--product_id-" + productId).length !== 0) {
       $.magnificPopup.open({
+        alignTop : true,
         items: {
           src: "#ml--product_id-" + productId,
           type: "inline",
@@ -1675,86 +1676,176 @@ jQuery(document).ready(function ($) {
     }
   );
 
-  if ($('body').hasClass('author')) {
-      // Get the target URL from the element with the class "load--username-slug"
-      var targetUrl = $('.aboutus--page-slug').attr('href');
-      var targetUrl2 = $('.services--page-slug').attr('href');
-      var targetUrl3 = $('.contact--page-slug').attr('href');
+  
+// Get all menu items with class .innerPageRoute
+var menuItems = $('.innerPageRoute');
 
-      var authorTargetUrl = $('.load--username').attr('href');
-      // Set the href value of the anchor tag within .load-with-username
-      $('.about-page a').attr('href', targetUrl);
-      $('.services-page a').attr('href', targetUrl2);
-      $('.contact-page a').attr('href', targetUrl3);
-      $('#alrnd-minisite-logo a').attr('href', authorTargetUrl);
+// Add click event listener to each menu item
+menuItems.on('click', function (event) {
+    // Prevent the default behavior of the link
+    event.preventDefault();
+
+    // Remove "open" class from .elementskit-menu-toggler
+    $('.elementskit-menu-toggler').removeClass('open');
+
+    // Show the loader
+    $('#loader').fadeIn();
+
+    // Remove active class from all menu items
+    menuItems.removeClass('active');
+
+    // Add active class to the clicked menu item
+    $(this).addClass('active');
+
+    // Get the target section ID from the href attribute of the child <a> element
+    var targetSectionId = $(this).find('a').attr('href').substring(1);
+
+    setTimeout(function () {
+        // Hide #primary and all sections
+        $('#primary').css('display', 'none');
+        $('.miniPageSection').css('display', 'none');
+
+        // Show the targeted section
+        $('#' + targetSectionId).css('display', 'block');
+
+        // Scroll to #miniSiteHeader
+        $("html, body").animate({
+            scrollTop: $('#miniSiteHeader').offset().top
+        }, 0); // Instantly scroll, adjust as needed
+
+    }, 400);
+
+    setTimeout(function () {
+        $('#loader').fadeOut();
+    }, 800);
+});
+
+$('.innerPageRoute.home-page').addClass('active');
+
+$('.alarnd__cart_menu_item').on('click', function (event) {
+    // Prevent any default behavior
+    event.preventDefault();
+    if ($('#primary').css('display') === 'none') {
+
+        // Show the loader
+        $('#loader').fadeIn();
+
+        setTimeout(function () {
+            // Show #primary and scroll to #woocommerce_cart
+            $('#primary').css('display', 'block');
+            $("html, body").animate({
+                scrollTop: $('#woocommerce_cart').offset().top
+            }, 600); // Instantly scroll, adjust as needed
+            // Hide other sections if needed
+
+            // Remove active class from menu items
+            menuItems.removeClass('active');
+
+            $('#loader').fadeOut();
+        }, 600);
+    }
+});
+
+
+
+  // var authorTargetUrl = sessionStorage.getItem('authorTargetUrl');
+
+  // if ($('body').hasClass('author')) {
+  //     // Get the target URL from the element with the class "load--username-slug"
+  //     var targetUrl = $('.aboutus--page-slug').attr('href');
+  //     var targetUrl2 = $('.services--page-slug').attr('href');
+  //     var targetUrl3 = $('.contact--page-slug').attr('href');
+
+  //     var authorTargetUrl = $('.load--username').attr('href');
+  //     // Set the href value of the anchor tag within .load-with-username
+  //     $('.about-page a').attr('href', targetUrl);
+  //     $('.services-page a').attr('href', targetUrl2);
+  //     $('.contact-page a').attr('href', targetUrl3);
+  //     $('#alrnd-minisite-logo a').attr('href', authorTargetUrl);
+  //     $('.my-home-page a').attr('href', authorTargetUrl);
+
+  //     sessionStorage.setItem('authorTargetUrl', authorTargetUrl);
       
-  }
-  // Intercept clicks on links with the class "load-with-username"
-  $('.load-with-username a').on('click', function(e) {
-      e.preventDefault();
+  //  }
+  // // Intercept clicks on links with the class "load-with-username"
+  // $('.load-with-username a').on('click', function(e) {
+  //     e.preventDefault();
 
-      // Get the target URL from the link
-      var targetUrl = $(this).attr('href');
+  //     // Get the target URL from the link
+  //     var targetUrl = $(this).attr('href');
 
-      // Load content using AJAX
-      $.ajax({
-          url: targetUrl,
-          type: 'GET',
-          success: function(response) {
-              // Hide the #primary container
-              $('#primary').hide();
+  //     // Load content using AJAX
+  //     $.ajax({
+  //         url: targetUrl,
+  //         type: 'GET',
+  //         success: function(response) {
+  //             // Hide the #primary container
+  //             $('#primary').hide();
 
-              // Replace the content of the container with the loaded content
-              $('#primary').html(response);
+  //             // Replace the content of the container with the loaded content
+  //             $('#primary').html(response);
 
-              // Show the #primary container after the content is loaded
-              $('#primary').show();
+  //             // Show the #primary container after the content is loaded
+  //             $('#primary').show();
 
-              // Add the 'state-loaded' class to the body
-              $('body').addClass('state-loaded');
+  //             // Add the 'state-loaded' class to the body
+  //             $('body').addClass('state-loaded');
 
-              // Update the browser URL without triggering a full page reload
-              history.pushState({}, null, targetUrl);
-          }
-      });
-  });
+  //             // Update the browser URL without triggering a full page reload
+  //             history.pushState({}, null, targetUrl);
+  //         }
+  //     });
+  // });
 
-  // Restore the initial content when navigating back
-  window.onpopstate = function(event) {
-      // Show the #primary container
-      $('body').show();
+  // // Restore the initial content when navigating back
+  // window.onpopstate = function(event) {
+  //   // Show the #primary container
+  //   $('body').show();
 
-      // Remove the 'state-loaded' class from the body
-      $('body').removeClass('state-loaded');
-  };
+  //   // Remove the 'state-loaded' class from the body
+  //   // $('body').removeClass('state-loaded');
+
+  //   // Load content associated with authorTargetUrl
+  //   $.ajax({
+  //       url: authorTargetUrl,
+  //       type: 'GET',
+  //       success: function(response) {
+  //           // Replace the content of the container with the loaded content
+  //           $('#primary').html(response);
+
+  //           // Update the browser URL without triggering a full page reload
+  //           history.pushState({}, null, authorTargetUrl);
+  //       }
+  //   });
+  // };
 
 
   // Hook into the wc-ajax=get_refreshed_fragments event
-  $(document.body).on('wc_fragments_refreshed', function() {
-      // Check if the cart has any items
-      var cartHasItems = $('.woocommerce-cart-form').length !== 0;
+  // $(document.body).on('wc_fragments_refreshed', function() {
+  //     // Check if the cart has any items
+  //     var cartHasItems = $('.woocommerce-cart-form').length !== 0;
 
-      // console.log("helliodf");
-      // console.log(cartHasItems);
+  //     // console.log("helliodf");
+  //     // console.log(cartHasItems);
 
-      // Get the element you want to hide or show
-      var elementToToggle = $('#ministore--custom-checkout-section'),
-            customerDetails = $("#customerDetails"),
-            cardDetailsForm = $('#cardDetailsForm');
+  //     // Get the element you want to hide or show
+  //     var elementToToggle = $('#ministore--custom-checkout-section'),
+  //           customerDetails = $("#customerDetails"),
+  //           cardDetailsForm = $('#cardDetailsForm');
 
-      // Toggle the visibility based on cart items
-      if (cartHasItems) {
-          // elementToToggle.show();
-          if (customerDetails.valid() && cardDetailsForm.valid()) {
-            $("button.allaround_card_details_submit").prop("disabled", false);
-          }
-          if (customerDetails.valid()) {
-            $("button.alarnd--payout-trigger").prop("disabled", false);
-          }
-      } else {
-        $("button.alarnd--payout-trigger").prop("disabled", true);
-        $("button.allaround_card_details_submit").prop("disabled", true);
-      }
-  });
+  //     // Toggle the visibility based on cart items
+  //     if (cartHasItems) {
+  //         // elementToToggle.show();
+  //         if (customerDetails.valid() && cardDetailsForm.valid()) {
+  //           $("button.allaround_card_details_submit").prop("disabled", false);
+  //         }
+  //         if (customerDetails.valid()) {
+  //           $("button.alarnd--payout-trigger").prop("disabled", false);
+  //         }
+  //     } else {
+  //       $("button.alarnd--payout-trigger").prop("disabled", true);
+  //       $("button.allaround_card_details_submit").prop("disabled", true);
+  //     }
+  // });
 
 });

@@ -48,10 +48,10 @@ function enqueue_aum_script() {
         
     }
 
-    wp_enqueue_script('validate', AlRNDCM_URL . 'assets/js/jquery.validate.min.js', array('jquery'), XOO_ML_VERSION, true);
-
     wp_enqueue_script('magnifyzoom', AlRNDCM_URL . 'assets/js/jquery.magnify.js', array('jquery'), AlRNDCM_VERSION, true);
-    wp_enqueue_script('magnifyzoom-mobile', AlRNDCM_URL . 'assets/js/jquery.magnify-mobile.js', array('jquery'), AlRNDCM_VERSION, true);
+    // wp_enqueue_script('magnifyzoom-mobile', AlRNDCM_URL . 'assets/js/jquery.magnify-mobile.js', array('jquery'), AlRNDCM_VERSION, true);
+
+    wp_enqueue_script('validate', AlRNDCM_URL . 'assets/js/jquery.validate.min.js', array('jquery'), XOO_ML_VERSION, true);
 
 
     // Dequeue the default WooCommerce script
@@ -80,7 +80,7 @@ function enqueue_aum_script() {
 add_action('wp_enqueue_scripts', 'enqueue_aum_script', 99);
 
 
-function enqueue_frontend_css() {
+// function enqueue_frontend_css() {
     
-}
-add_action('wp_enqueue_scripts', 'enqueue_frontend_css');
+// }
+// add_action('wp_enqueue_scripts', 'enqueue_frontend_css');

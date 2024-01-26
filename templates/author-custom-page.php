@@ -386,6 +386,11 @@ $current_user_id = $get_current_puser->ID;
         <?php } ?> <!-- $is_login_form_show end -->
     </main><!-- #main -->
 </div><!-- #primary -->
+<div id="loader">
+    <div class="loader-cont">
+        <div>Loading...</div>
+    </div>
+</div>
 
 <?php
 get_footer(); // Include footer template

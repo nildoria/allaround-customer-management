@@ -42,6 +42,39 @@ h6 {
 input[type="number"] {
   -moz-appearance: textfield; /* Firefox */
 }
+/* Inner Page Try Section */
+#primary {
+    display: block;
+}
+section#miniContactPage, section#miniAboutPage {
+    display: none;
+}
+.loader-cont {
+    display: flex;
+    height: 100%;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+}
+#loader {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 1);
+    display: none;
+    z-index: 9999;
+}
+ul#menu-main-menu li {
+    border-bottom: 1px solid transparent;
+}
+ul#menu-main-menu li a:focus {
+    color: #fff;
+}
+ul#menu-main-menu li.active {
+    border-bottom: 1px solid #fff;
+}
 .elementor-section .elementor-container {
   display: flex;
 }
@@ -2225,6 +2258,9 @@ body.elementor-default main#main {
     .alarnd--details-previewer
     > h3 {
     margin-bottom: 25px;
+  }
+  .elementskit-menu-hamburger {
+    border: 0px solid rgba(0,0,0,0) !important;
   }
 }
 
