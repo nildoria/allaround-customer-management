@@ -453,6 +453,10 @@ jQuery(document).ready(function ($) {
     // $(document).on("input", "#cardDetailsForm input", toggleSubmitButtonCard);
   }
 
+  $(document.body).on('updated_shipping_method', function () {
+      $(document.body).trigger('wc_fragment_refresh');
+  });
+
   // Use JavaScript to strip non-numeric characters
   $(document).on("input", "#cardNumber", function () {
     this.value = this.value.replace(/\D/g, "");

@@ -1751,8 +1751,22 @@ function ml_create_order($data) {
 
     $applied_coupons = WC()->cart->get_applied_coupons();
 
-    $current_user = wp_get_current_user();
-    $user_id = $current_user->ID;
+    $user_id = isset( $data['user_id'] ) && ! empty( $data['user_id'] ) ? (int) $data['user_id'] : '';
+    if( ! empty( $user_id ) ) {
+        $current_user = get_user_by( 'ID', $user_id );
+    }
+
+    if( is_user_logged_in() ) {
+        $current_user = wp_get_current_user();
+    }
+
+    if( empty( $current_user) ) {
+        error_log( "current user not found inside ml_create_order" );
+        // throw new Exception( 'Current user not found' );
+        return false;
+    }
+	
+	$user_id = $current_user->ID;
     $user_login = $current_user->user_login;
 
     $products = $data['products'];
@@ -1926,9 +1940,11 @@ function ml_create_order($data) {
     $order->save();
 
     // Trigger order notification emails
-    wc_mail('new_order', __('New Order', 'woocommerce'), '', '', array('order' => $order));
-
-    wc_mail('customer_processing_order', __('Processing Order', 'woocommerce'), '', '', array('order' => $order));
+    //$new_order_email = new WC_Email_New_Order();
+    //$new_order_email->trigger($order_id);
+    
+    //$processing_mail = new WC_Email_Customer_Processing_Order();
+    //$processing_mail->trigger($order_id);
 
     return $order->get_id();
 }
@@ -2184,8 +2200,46 @@ function ml_discount_obj_valid($obj) {
 function ml_modify_price_html($price, $product) {
 
     $discount_steps = get_field( 'discount_steps', $product->get_id() );
+    $custom_quanity_enable = get_field( 'enable_custom_quantity', $product->get_id() );
+    $quantity_steps = get_field( 'quantity_steps', $product->get_id() );
     $regular_price = (int) get_post_meta($product->get_id(), '_regular_price', true);
     // error_log( print_r( $discount_steps, true ) );
+
+    if( 
+        ! empty( $custom_quanity_enable ) && 
+        ! empty( $quantity_steps )
+     ) {
+
+        $the_last_qty_steps = end($quantity_steps);
+        if( 
+            empty( $regular_price ) ||
+            ! isset( $the_last_qty_steps['amount'] ) ||
+            empty( $the_last_qty_steps['amount'] )
+        ) {
+            return $price;
+        }
+
+        $min_price = $the_last_qty_steps['amount'];
+        $max_price = $quantity_steps['0']['amount'];
+
+        if ( $min_price && $max_price ) {
+
+            $min_html = wc_price($min_price);
+            $max_html = wc_price($max_price);
+
+            if( $min_price < 1 ) {
+                $min_html = wc_price($min_price, array('decimals' => 1));
+            }
+            
+            if( $max_price < 1 ) {
+                $max_html = wc_price($max_price, array('decimals' => 1));
+            }
+
+            return $min_html . ' - ' . $max_html;
+        }
+
+        return $price;
+     }
 
     if( 
         empty( $discount_steps ) ||
@@ -2215,7 +2269,18 @@ function ml_modify_price_html($price, $product) {
     }
 
     if ( $min_price && $max_price ) {
-        return wc_price($min_price) . ' - ' . wc_price($max_price);
+        $min_html = wc_price($min_price);
+        $max_html = wc_price($max_price);
+
+        if( $min_price < 1 ) {
+            $min_html = wc_price($min_price, array('decimals' => 1));
+        }
+        
+        if( $max_price < 1 ) {
+            $max_html = wc_price($max_price, array('decimals' => 1));
+        }
+
+        return $min_html . ' - ' . $max_html;
     }
     
     // For other products, use the default price display

@@ -611,7 +611,8 @@ class ML_Ajax {
             "cardNumber" => '',
             "response" => $response_obj,
             "extraMeta" => $extraMeta,
-            "update" => true
+            "update" => true,
+			"user_id" => $current_user_id
         );
 
         $failed_popup = $this->popup_failed_markup();
@@ -865,6 +866,7 @@ class ML_Ajax {
             "response" => $response_obj,
             "extraMeta" => $extraMeta,
             "update" => $update_order,
+			"user_id" => $current_user_id
         );
 
         $failed_popup = $this->popup_failed_markup();
@@ -1143,21 +1145,40 @@ class ML_Ajax {
             $quantity = isset( $_POST['quantity'] ) && ! empty( $_POST['quantity'] ) ? intval( $_POST['quantity'] ) : '';
 
             $passed_validation = apply_filters( 'woocommerce_add_to_cart_validation', true, $product_id, $quantity );
-            
-            error_log( print_r($_POST, true) );
 
+            // Check if product is already in the cart
+            $cart_item_key = '';
+            $cart_item_qty = '';
 
-            if ( $passed_validation && WC()->cart->add_to_cart( $product_id, $quantity, '', '', $cart_item_data ) ) {
-                do_action( 'woocommerce_ajax_added_to_cart', $product_id );
-
-                // Return fragments
-                WC_AJAX::get_refreshed_fragments();
-            } {
-                wp_send_json( array(
-                    "success" => true,
-                    "message" => "Something wen't wrong when trying to add product #$product_id"
-                ) );
+            // Check if product is already in the cart
+            foreach ( WC()->cart->get_cart() as $key => $cart_item) {
+                if ($cart_item['product_id'] == $product_id) {
+                    $cart_item_key = $key;
+                    $cart_item_qty = $cart_item['quantity'];
+                    break;
+                }
             }
+            
+            // error_log( print_r($_POST, true) );
+
+            if ($cart_item_key) {
+                // Product already exists in the cart, increase quantity
+                WC()->cart->set_quantity($cart_item_key, (int) $cart_item_qty + (int) $quantity);
+                WC_AJAX::get_refreshed_fragments();
+            } else {
+                if ( $passed_validation && WC()->cart->add_to_cart( $product_id, $quantity, '', '', $cart_item_data ) ) {
+                    do_action( 'woocommerce_ajax_added_to_cart', $product_id );
+    
+                    // Return fragments
+                    WC_AJAX::get_refreshed_fragments();
+                } {
+                    wp_send_json( array(
+                        "success" => true,
+                        "message" => "Something wen't wrong when trying to add product #$product_id"
+                    ) );
+                }
+            }
+
 
         } elseif( 
             $ml_type === 'group' &&
