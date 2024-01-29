@@ -1751,22 +1751,8 @@ function ml_create_order($data) {
 
     $applied_coupons = WC()->cart->get_applied_coupons();
 
-    $user_id = isset( $data['user_id'] ) && ! empty( $data['user_id'] ) ? (int) $data['user_id'] : '';
-    if( ! empty( $user_id ) ) {
-        $current_user = get_user_by( 'ID', $user_id );
-    }
-
-    if( is_user_logged_in() ) {
-        $current_user = wp_get_current_user();
-    }
-
-    if( empty( $current_user) ) {
-        error_log( "current user not found inside ml_create_order" );
-        // throw new Exception( 'Current user not found' );
-        return false;
-    }
-	
-	$user_id = $current_user->ID;
+    $current_user = wp_get_current_user();
+    $user_id = $current_user->ID;
     $user_login = $current_user->user_login;
 
     $products = $data['products'];
@@ -1939,14 +1925,12 @@ function ml_create_order($data) {
     // Save the order
     $order->save();
 
-    // Trigger order notification emails
-    //$new_order_email = new WC_Email_New_Order();
-    //$new_order_email->trigger($order_id);
-    
-    //$processing_mail = new WC_Email_Customer_Processing_Order();
-    //$processing_mail->trigger($order_id);
+    $order_id = $order->get_id();
 
-    return $order->get_id();
+    WC()->mailer()->get_emails()['WC_Email_Customer_Processing_Order']->trigger( $order_id );
+    WC()->mailer()->get_emails()['WC_Email_New_Order']->trigger( $order_id );
+
+    return $order_id;
 }
 
 
