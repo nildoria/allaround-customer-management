@@ -21,7 +21,7 @@ jQuery(document).ready(function ($) {
   }
 
   setProductDetailsHeight();
-
+	
 
   function ajaxResponsePrint(response, messagWrap) {
     console.log(response);
@@ -354,8 +354,13 @@ jQuery(document).ready(function ($) {
 
         var getData = $(form).serializeArray(),
           messagWrap = $(form).find(".form-message"),
+
+          customerDetails = $('form#customerDetails'),
+          detailsData = customerDetails.serializeArray(),
           user_id = $('#main').data('user_id'),
           button = $(form).find(".allaround_card_details_submit");
+
+          getData = getData.concat(detailsData);
 
         getData.push(
           {
@@ -1712,6 +1717,10 @@ menuItems.on('click', function (event) {
         // Show the targeted section
         $('#' + targetSectionId).css('display', 'block');
 
+        // Trigger a click event on the first child anchor inside .elementor-gallery__titles-container
+        $('.elementor-gallery__titles-container a:first-child').click();
+        $('.product-filter button.filter-button:first-child').click();
+
         // Scroll to #miniSiteHeader
         $("html, body").animate({
             scrollTop: $('#miniSiteHeader').offset().top
@@ -1750,7 +1759,9 @@ $('.alarnd__cart_menu_item').on('click', function (event) {
     }
 });
 
-
+$(window).on('load', function () {
+    $('.product-filter button.filter-button:first-child').click();
+});
 
   // var authorTargetUrl = sessionStorage.getItem('authorTargetUrl');
 

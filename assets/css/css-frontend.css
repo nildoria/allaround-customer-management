@@ -46,7 +46,7 @@ input[type="number"] {
 #primary {
     display: block;
 }
-section#miniContactPage, section#miniAboutPage {
+#miniContactPage, #miniAboutPage, #miniServicesPage {
     display: none;
 }
 .loader-cont {
@@ -187,7 +187,7 @@ h3.miniStore-promo-title {
   padding: 10px 10px 25px 10px;
 }
 .mini-store-product-list .product-item .product-thumbnail {
-  height: 200px;
+  /* height: 200px; */
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -632,7 +632,9 @@ button.button.alarnd--regular-button {
   background-color: #66de93 !important;
   border-color: #66de93 !important;
 }
-
+.alrnd--shipping_address_tokenized {
+  z-index: 2;
+}
 .alarnd--woocommerce-checkout-page.allrnd--tokenized_checkout {
   display: none;
   transition: all 0.4s ease;

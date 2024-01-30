@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: AllAround Mini Store\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-01-07 17:21+0000\n"
-"PO-Revision-Date: 2024-01-18 19:14+0000\n"
+"PO-Revision-Date: 2024-01-18 18:46+0000\n"
 "Last-Translator: admin\n"
 "Language-Team: עִבְרִית\n"
 "Language: he_IL\n"
@@ -61,7 +61,7 @@ msgstr "מספר כרטיס אשראי"
 
 #: includes/ajax-handler.php:512
 msgid "Cart is empty."
-msgstr "עגלת הקניות ריקה."
+msgstr ""
 
 #: includes/functions.php:1498 includes/functions.php:1568
 msgid "City"
@@ -189,7 +189,7 @@ msgstr "חובה"
 #: includes/ajax-handler.php:155 includes/ajax-handler.php:556
 #: includes/ajax-handler.php:757
 msgid "Required field are empty. Please fill all the field."
-msgstr "אנא מלאו את כל שדות החובה."
+msgstr ""
 
 #: includes/functions.php:1582
 msgid "Return"
@@ -238,7 +238,7 @@ msgstr ""
 
 #: includes/functions.php:1519
 msgid "התקדם לנקודת הביקורת"
-msgstr "שליחת הזמנה ותשלום"
+msgstr "לשליחת הזמנה ותשלום"
 
 #: includes/ajax-handler.php:1027 includes/functions.php:1210
 #: includes/functions.php:1298

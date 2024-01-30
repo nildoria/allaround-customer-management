@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: AllAround Mini Store\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-01-07 17:21+0000\n"
-"PO-Revision-Date: 2024-01-18 19:14+0000\n"
+"PO-Revision-Date: 2024-01-18 19:09+0000\n"
 "Last-Translator: admin\n"
 "Language-Team: עִבְרִית\n"
 "Language: he_IL\n"
@@ -238,7 +238,7 @@ msgstr ""
 
 #: includes/functions.php:1519
 msgid "התקדם לנקודת הביקורת"
-msgstr "שליחת הזמנה ותשלום"
+msgstr "לשליחת הזמנה ותשלום"
 
 #: includes/ajax-handler.php:1027 includes/functions.php:1210
 #: includes/functions.php:1298

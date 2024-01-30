@@ -1312,6 +1312,8 @@ function allaround_card_form($user_id = '') {
     $city = get_user_meta( $current_user_id, 'billing_city', true );
     $billing_address = get_user_meta( $current_user_id, 'billing_address_1', true );
 
+    $token = get_field('token', "user_{$current_user_id}");
+
     $name = isset( $the_user->display_name ) && ! empty( $the_user->display_name ) ? $the_user->display_name : $current_user_id;
     $email = $the_user->user_email;
     $lock_profile = get_field('lock_profile', 'user_' . $current_user_id);
@@ -1331,7 +1333,7 @@ function allaround_card_form($user_id = '') {
     }
 
     ?>
-    <?php if( !is_user_logged_in() ) : ?>
+    <?php if( !is_user_logged_in() || empty( $token ) ) : ?>
     <div class="alrnd--shipping_address_tokenized mini_non_loggedIn">
         <?php if( $is_disabled === false ) : ?>
         <div id="alarnd__details_preview">
@@ -1353,8 +1355,8 @@ function allaround_card_form($user_id = '') {
                 </div>
             </div>
         </div>
-        <?php echo allaround_customer_form($is_disabled); ?>
         <?php endif; ?>
+        <?php echo allaround_customer_form($is_disabled); ?>
     </div>
     <?php endif; ?>
 
@@ -1363,7 +1365,7 @@ function allaround_card_form($user_id = '') {
         <div class="allaround_carf_form-fields">
             <div class="allaround_carf_form-cardDetail">
 
-                <?php if( !is_user_logged_in() ) : ?>
+                <?php if( !is_user_logged_in() || empty( $token ) ) : ?>
                 <h2><?php esc_html_e( 'מעובד לקופה', 'hello-elementor' ); ?></h2>
                 <?php endif; ?>
 
@@ -1398,7 +1400,7 @@ function allaround_card_form($user_id = '') {
                     </div>
                 </div>
                 
-                <?php if( !is_user_logged_in() ) : ?>
+                <?php if( !is_user_logged_in() || empty( $token ) ) : ?>
                 <!-- Card Image Demo -->
                 <div class="payment-info-display nonAuthorized-infoDisplay">
                     <div class="payment-title">
@@ -1505,56 +1507,9 @@ function allaround_card_form($user_id = '') {
                 <!-- Card Image Demo END -->
                 <?php endif; ?>
             </div>
-
-            <div class="allaround_carf_form-userDetail">
-                <h3><?php esc_html_e("כתובת למשלוח", "hello-elementor" ); ?></h3>
-                <div class="form-row flex-row">
-                    <div class="form-row">
-                        <div class="form-label"><?php esc_html_e("Name", "hello-elementor" ); ?></div>
-                        <div class="form-input">
-                            <input type="text" id="cardholderName" maxlength="20" name="cardholderName" placeholder="<?php esc_attr_e("required", "hello-elementor" ); ?>" value="<?php echo $lock_profile ? '' : esc_attr( $name ); ?>" inputmode="numeric" required>
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-label"><?php esc_html_e("Invoice Name", "hello-elementor" ); ?></div>
-                        <div class="form-input">
-                            <input type="text" id="cardholderInvoiceName" maxlength="20" name="cardholderInvoiceName" placeholder="<?php esc_attr_e("required", "hello-elementor" ); ?>" value="<?php echo $lock_profile ? '' : esc_attr( $invoice ); ?>">
-                        </div>
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-label"><?php esc_html_e("Email", "hello-elementor" ); ?></div>
-                    <div class="form-input">
-                        <input type="text" id="cardholderEmail" name="cardholderEmail" placeholder="<?php esc_attr_e("required", "hello-elementor" ); ?>" value="<?php echo $lock_profile ? '' : esc_attr( $email ); ?>" required>
-                    </div>
-                </div>
-
-                <div class="form-row flex-row">
-                    <div class="form-row">
-                        <div class="form-label"><?php esc_html_e("Phone", "hello-elementor" ); ?></div>
-                        <div class="form-input">
-                            <input type="text" id="cardholderPhone" name="cardholderPhone" placeholder="<?php esc_attr_e("required", "hello-elementor" ); ?>" value="<?php echo $lock_profile ? '' : esc_attr( $phone ); ?>" required>
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-label"><?php esc_html_e("City", "hello-elementor" ); ?></div>
-                        <div class="form-input">
-                            <input type="text" id="cardholderCity" name="cardholderCity" placeholder="<?php esc_attr_e("required", "hello-elementor" ); ?>" value="<?php echo $lock_profile ? '' : esc_attr( $city ); ?>" required>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-label"><?php esc_html_e("Address", "hello-elementor" ); ?></div>
-                    <div class="form-input">
-                        <input type="text" id="cardholderAdress" name="cardholderAdress" placeholder="<?php esc_attr_e("required", "hello-elementor" ); ?>" value="<?php echo $lock_profile ? '' : esc_attr( $billing_address ); ?>" required>
-                    </div>
-                </div>
-
-            </div>
                 
         </div>
-        <div class="form-row">
+        <div class="form-row form-row-special">
             <div class="your-order-total-container"><?php esc_html_e("Total Amount", "hello-elementor" ); ?>: <?php printf( WC()->cart->get_total() ); ?></div>
             <div class="form-label"></div>
             <div class="form-input form-submit-container">
@@ -1751,7 +1706,21 @@ function ml_create_order($data) {
 
     $applied_coupons = WC()->cart->get_applied_coupons();
 
-    $current_user = wp_get_current_user();
+    $user_id = isset( $data['user_id'] ) && ! empty( $data['user_id'] ) ? (int) $data['user_id'] : '';
+    if( ! empty( $user_id ) ) {
+        $current_user = get_user_by( 'ID', $user_id );
+    }
+
+    if( is_user_logged_in() ) {
+        $current_user = wp_get_current_user();
+    }
+
+    if( empty( $current_user) ) {
+        error_log( "current user not found inside ml_create_order" );
+        // throw new Exception( 'Current user not found' );
+        return false;
+    }
+
     $user_id = $current_user->ID;
     $user_login = $current_user->user_login;
 
@@ -1761,7 +1730,10 @@ function ml_create_order($data) {
     $extraMeta = isset( $data['extraMeta'] ) ? $data['extraMeta'] : [];
     $response = isset( $data['response'] ) ? $data['response'] : [];
     $update = isset( $data['update'] ) ? true : false;
+    $token_update = isset( $data['token_update'] ) ? true : false;
     $fullname = isset( $customerInfo['name'] ) ? $customerInfo['name'] : '';
+
+    // error_log( print_r( $data, true ) );
 
     // Assuming you have received payment response and details
     $order = wc_create_order();
@@ -1852,35 +1824,54 @@ function ml_create_order($data) {
         $order->calculate_totals();
     }
 
-    if( ! empty( $response ) && isset( $response['referenceID'] ) ) {
-        $order->add_order_note( __( 'Z-Credit Payment Complete.', 'woocommerce_zcredit' ) );
-        $order->add_order_note( "Refence Number: #".$response['referenceID']." for Z-Credit" );
-        $order->payment_complete();   
-    }
-
-    if( ! empty( $response ) && isset( $response['referenceID'] ) ) {
-
-        if( isset( $response['token'] ) && ! empty( $response['token'] ) ) {
-            update_post_meta( $order->get_id(), 'zc_payment_token', $response['token'] );
-            update_post_meta( $order->get_id(), 'zc_transaction_id', $response['referenceID'] );
+    if( true === $update ) {
+        if( ! empty( $response ) && isset( $response['referenceID'] ) ) {
+            $order->add_order_note( __( 'Z-Credit Payment Complete.', 'woocommerce_zcredit' ) );
+            $order->add_order_note( "Refence Number: #".$response['referenceID']." for Z-Credit" );
+            $order->payment_complete();   
+        }
+    
+        if( $customerInfo && ! empty( $customerInfo ) ) {
+            $phoneNumber = ml_get_phone_no( $customerInfo['phone'] );
+            $countryCode = ml_get_country_code();
+            
+            // WcooCommerce user field update
+            update_user_meta_if_different($user_id, 'billing_address_1', $customerInfo['address_1']);
+            update_user_meta_if_different($user_id, 'billing_phone', $customerInfo['phone']);
+        
+            update_user_meta_if_different($user_id, 'xoo_ml_phone_code', $countryCode);
+            update_user_meta_if_different($user_id, 'xoo_ml_phone_no', $phoneNumber);
+    
+            // Email address
+            update_user_email_if_different($user_id, $customerInfo['email']);
+            
+            // Display Name
+            update_user_name_if_different($user_id, $fullname);
+        }
+    
+        if( $extraMeta && ! empty( $extraMeta ) ) {
+            if( isset( $extraMeta['invoice'] ) && ! empty( $extraMeta['invoice'] ) ) {
+                update_acf_usermeta($user_id, 'invoice', $extraMeta['invoice']);
+            }
+            if( isset( $extraMeta['city'] ) && ! empty( $extraMeta['city'] ) ) {
+                update_user_meta_if_different($user_id, 'billing_city', $extraMeta['city']);
+            }
         }
         
-        if( true === $update ) {
+        if( true === $token_update && ! empty( $response ) && isset( $response['referenceID'] ) ) {
             //TODO - update token and customer info if new or change input.
 
+            if( isset( $response['token'] ) && ! empty( $response['token'] ) ) {
+                update_post_meta( $order->get_id(), 'zc_payment_token', $response['token'] );
+                update_post_meta( $order->get_id(), 'zc_transaction_id', $response['referenceID'] );
+                update_acf_usermeta( $user_id, 'token', $response['token'] );
+            }
+    
             if( isset( $response['token'] ) && ! empty( $response['token'] ) ) {
                 // ACF field update
                 update_acf_usermeta( $user_id, 'token', $response['token'] );
             }
-
-            if( isset( $extraMeta['invoice'] ) && ! empty( $extraMeta['invoice'] ) ) {
-                update_acf_usermeta($user_id, 'invoice', $extraMeta['invoice']);
-            }
-            
-            if( isset( $extraMeta['city'] ) && ! empty( $extraMeta['city'] ) ) {
-                update_user_meta_if_different($user_id, 'billing_city', $extraMeta['city']);
-            }
-
+    
             if( ! empty( $cardNumber ) ) {
                 $last_four_digit = ml_get_last_four_digit($cardNumber);
                 $card_type = ml_get_card_type($cardNumber);
@@ -1891,22 +1882,6 @@ function ml_create_order($data) {
     
                 update_acf_usermeta( $user_id, 'card_info', $card_info);
             }
-
-            $phoneNumber = ml_get_phone_no( $customerInfo['phone'] );
-            $countryCode = ml_get_country_code();
-            
-            // WcooCommerce user field update
-            update_user_meta_if_different($user_id, 'billing_address_1', $customerInfo['address_1']);
-            update_user_meta_if_different($user_id, 'billing_phone', $customerInfo['phone']);
-
-            update_user_meta_if_different($user_id, 'xoo_ml_phone_code', $countryCode);
-            update_user_meta_if_different($user_id, 'xoo_ml_phone_no', $phoneNumber);
-
-            // Email address
-            update_user_email_if_different($user_id, $customerInfo['email']);
-            
-            // Display Name
-            update_user_name_if_different($user_id, $fullname);
         }
     }
 
@@ -2411,3 +2386,20 @@ function custom_remove_woocommerce_shipping_details() {
     }
 }
 add_action('admin_footer', 'custom_remove_woocommerce_shipping_details');
+
+// Add custom JavaScript to update the cart quantity when the quantity field changes
+function custom_update_cart_quantity_script() {
+    ?>
+    <script>
+        jQuery(document).ready(function ($) {
+            // Listen for changes on the quantity input field
+            $('div.woocommerce').on('change', 'input.qty', function () {
+                // Trigger an event to update the cart
+                $(document.body).trigger('update_cart');
+            });
+        });
+    </script>
+    <?php
+}
+
+add_action('wp_footer', 'custom_update_cart_quantity_script');

@@ -615,9 +615,11 @@ class ML_Ajax {
 			"user_id" => $current_user_id
         );
 
+        // error_log( print_r( $order_data, true ) );
+
         $failed_popup = $this->popup_failed_markup();
         
-        // if ( ! is_wp_error( $request ) && wp_remote_retrieve_response_code( $request ) == 200 && $message !== "Accepted" ) {
+        if ( ! is_wp_error( $request ) && wp_remote_retrieve_response_code( $request ) == 200 && $message !== "Accepted" ) {
             
             // first create order
             $order_id = ml_create_order($order_data);
@@ -625,7 +627,7 @@ class ML_Ajax {
             $success_popup = $this->popup_success_markup($order_id);
 
             // Clear the cart
-            // WC()->cart->empty_cart();
+            WC()->cart->empty_cart();
 
             wp_send_json_success( array(
                 "message_type" => 'api',
@@ -636,7 +638,7 @@ class ML_Ajax {
             ) );
 
             wp_die();
-        // }
+        }
 
         $error_message = "Something went wrong";
         if( is_wp_error( $request ) ) {
@@ -681,12 +683,13 @@ class ML_Ajax {
         }
         
         $user_id = isset( $_POST['user_id'] ) && ! empty( $_POST['user_id'] ) ? intval( $_POST['user_id'] ) : '';
-        $cardholderName = isset( $_POST['cardholderName'] ) && ! empty( $_POST['cardholderName'] ) ? sanitize_text_field( $_POST['cardholderName'] ) : '';
-        $cardholderPhone = isset( $_POST['cardholderPhone'] ) && ! empty( $_POST['cardholderPhone'] ) ? sanitize_text_field( $_POST['cardholderPhone'] ) : '';
-        $cardholderCity = isset( $_POST['cardholderCity'] ) && ! empty( $_POST['cardholderCity'] ) ? sanitize_text_field( $_POST['cardholderCity'] ) : '';
-        $cardholderInvoiceName = isset( $_POST['cardholderInvoiceName'] ) && ! empty( $_POST['cardholderInvoiceName'] ) ? sanitize_text_field( $_POST['cardholderInvoiceName'] ) : '';
-        $cardholderAdress = isset( $_POST['cardholderAdress'] ) && ! empty( $_POST['cardholderAdress'] ) ? sanitize_text_field( $_POST['cardholderAdress'] ) : '';
-        $cardholderEmail = isset( $_POST['cardholderEmail'] ) && ! empty( $_POST['cardholderEmail'] ) ? sanitize_text_field( $_POST['cardholderEmail'] ) : '';
+        $cardholderName = isset( $_POST['userName'] ) && ! empty( $_POST['userName'] ) ? sanitize_text_field( $_POST['userName'] ) : '';
+        $cardholderPhone = isset( $_POST['userPhone'] ) && ! empty( $_POST['userPhone'] ) ? sanitize_text_field( $_POST['userPhone'] ) : '';
+        $cardholderAdress = isset( $_POST['userAdress'] ) && ! empty( $_POST['userAdress'] ) ? sanitize_text_field( $_POST['userAdress'] ) : '';
+        $cardholderEmail = isset( $_POST['userEmail'] ) && ! empty( $_POST['userEmail'] ) ? sanitize_text_field( $_POST['userEmail'] ) : '';
+        $cardholderCity = isset( $_POST['userCity'] ) && ! empty( $_POST['userCity'] ) ? sanitize_text_field( $_POST['userCity'] ) : '';
+        $cardholderInvoiceName = isset( $_POST['userInvoiceName'] ) && ! empty( $_POST['userInvoiceName'] ) ? sanitize_text_field( $_POST['userInvoiceName'] ) : '';
+
         $cardNumber = isset( $_POST['cardNumber'] ) && ! empty( $_POST['cardNumber'] ) ? sanitize_text_field( $_POST['cardNumber'] ) : '';
         $expirationDate = isset( $_POST['expirationDate'] ) && ! empty( $_POST['expirationDate'] ) ? sanitize_text_field( $_POST['expirationDate'] ) : '';
         $cvvCode = isset( $_POST['cvvCode'] ) && ! empty( $_POST['cvvCode'] ) ? sanitize_text_field( $_POST['cvvCode'] ) : '';
@@ -702,9 +705,9 @@ class ML_Ajax {
             empty( $cardholderPhone ) ||
             empty( $cardholderAdress ) ||
             empty( $cardholderEmail ) ||
+            empty( $cardholderCity ) ||
             empty( $cardNumber ) ||
             empty( $expirationDate ) ||
-            empty( $cardholderCity ) ||
             empty( $cvvCode )
         ) {
             wp_send_json_error( array(
@@ -801,7 +804,6 @@ class ML_Ajax {
 
         $body = apply_filters( 'allaround_card_api_body', $body, $current_user_id );
 
-
         $args = array(
             'method'      => 'POST',
             'timeout'     => 15,
@@ -824,7 +826,7 @@ class ML_Ajax {
         // decode response into array
         $response_obj = ml_response($message);
         
-        // error_log( print_r( $response_obj, true ) );
+        error_log( print_r( $response_obj, true ) );
         
         // order data
         $first_name = empty( $current_user->first_name ) && empty( $current_user->last_name ) ? $cardholderName : $current_user->first_name;
@@ -871,7 +873,8 @@ class ML_Ajax {
 
         $failed_popup = $this->popup_failed_markup();
 
-        if ( ! is_wp_error( $request ) && wp_remote_retrieve_response_code( $request ) == 200 && $message !== "Accepted" ) {	
+        if ( ! is_wp_error( $request ) && wp_remote_retrieve_response_code( $request ) == 200 && $message !== "Accepted" ) {
+		//if ( ! is_wp_error( $request ) && $message !== "Accepted" ) {
             
             // first create order
             $order_id = ml_create_order($order_data);   
