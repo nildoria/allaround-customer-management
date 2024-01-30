@@ -705,7 +705,13 @@ span.alarnd--user_address_edit.ml_normal_loading {
 .alarnd--colors-wrapper {
   padding: 10px 0 5px;
 }
-
+.alarnd--colors-wrap {
+    display: inline-flex;
+    gap: 9px;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+}
 .alanrd--product-added-message {
   position: absolute;
   bottom: 15px;
@@ -2318,6 +2324,7 @@ body.elementor-default main#main {
     max-height: 99%;
     overflow-y: scroll;
     overflow-x: hidden;
+    top: 5%;
   }
   .alarnd--slect-opt-modal .alarnd--price-by-shirt {
     width: calc(100% - 160px);

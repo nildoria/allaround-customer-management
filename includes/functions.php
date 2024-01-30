@@ -225,10 +225,10 @@ function ml_redirect_to_home() {
         }
     } 
     
-    if( ! is_user_logged_in() && ( is_home() || is_front_page() ) ) {
-        wp_redirect( home_url('my-account') );
-        exit;
-    }
+    // if( ! is_user_logged_in() && ( is_home() || is_front_page() ) ) {
+    //     wp_redirect( home_url('my-account') );
+    //     exit;
+    // }
 
     // if( is_author() && ! is_user_logged_in() ) {
     //     $current_author = get_query_var('author_name');
@@ -1902,8 +1902,10 @@ function ml_create_order($data) {
 
     $order_id = $order->get_id();
 
-    WC()->mailer()->get_emails()['WC_Email_Customer_Processing_Order']->trigger( $order_id );
-    WC()->mailer()->get_emails()['WC_Email_New_Order']->trigger( $order_id );
+
+    // Trigger emails Manually
+    // WC()->mailer()->get_emails()['WC_Email_Customer_Processing_Order']->trigger( $order_id );
+    // WC()->mailer()->get_emails()['WC_Email_New_Order']->trigger( $order_id );
 
     return $order_id;
 }

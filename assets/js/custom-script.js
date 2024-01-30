@@ -241,6 +241,24 @@ jQuery(document).ready(function ($) {
     $('#customerDetails').find('.ml_error_label').remove();
   }
 
+  $('.allaround_card_details_submit').on('click', function () {
+      // Loop through each input field inside #customerDetails
+      $('#customerDetails input').each(function () {
+          var input = $(this);
+
+          // Check if the input field is empty
+          if (input.val().trim() === '') {
+              // Add the .error class to the input field
+              input.addClass('error');
+          } else {
+              // Remove the .error class if the input field is not empty
+              input.removeClass('error');
+          }
+      });
+
+  });
+
+
   function initilize_validate() {
     $("#customerDetails").validate({
       rules: {
@@ -1223,8 +1241,13 @@ jQuery(document).ready(function ($) {
   function initi_prive_view_modal() {
     var isApplicable = null;
 
+    function isMobile() {
+      return window.innerWidth <= 767; 
+    }
+
     $(".alarnd_view_pricing_cb").magnificPopup({
       type: "inline",
+      alignTop : isMobile(),
       midClick: true,
       removalDelay: 300,
       mainClass: "mfp-fade",
@@ -1558,11 +1581,13 @@ jQuery(document).ready(function ($) {
   $(document).on("click", ".ml_trigger_details", function () {
     var $self = $(this),
       productId = $self.data("product-id");
-      
+      function isMobile() {
+        return window.innerWidth <= 767;
+      }
 
     if ($("#ml--product_id-" + productId).length !== 0) {
       $.magnificPopup.open({
-        alignTop : true,
+        alignTop : isMobile(),
         items: {
           src: "#ml--product_id-" + productId,
           type: "inline",
@@ -1605,6 +1630,7 @@ jQuery(document).ready(function ($) {
           $self.removeClass("ml_loading");
           // Open directly via API
           $.magnificPopup.open({
+            alignTop: isMobile(),
             items: {
               src: response,
               type: "inline",
@@ -1722,9 +1748,9 @@ menuItems.on('click', function (event) {
         $('.product-filter button.filter-button:first-child').click();
 
         // Scroll to #miniSiteHeader
-        $("html, body").animate({
-            scrollTop: $('#miniSiteHeader').offset().top
-        }, 0); // Instantly scroll, adjust as needed
+        //$("html, body").animate({
+        //    scrollTop: $('#miniSiteHeader').offset().top
+        //}, 0); // Instantly scroll, adjust as needed
 
     }, 400);
 
@@ -1746,18 +1772,22 @@ $('.alarnd__cart_menu_item').on('click', function (event) {
         setTimeout(function () {
             // Show #primary and scroll to #woocommerce_cart
             $('#primary').css('display', 'block');
-            $("html, body").animate({
-                scrollTop: $('#woocommerce_cart').offset().top
-            }, 600); // Instantly scroll, adjust as needed
-            // Hide other sections if needed
-
+			
             // Remove active class from menu items
             menuItems.removeClass('active');
+    		$('.product-filter button.filter-button:first-child').click();
 
             $('#loader').fadeOut();
-        }, 600);
+        }, 500);
+		
+		setTimeout(function () {
+            $("html, body").animate({
+                scrollTop: $('#woocommerce_cart').offset().top
+            }, 300);
+		}, 600);
     }
 });
+
 
 $(window).on('load', function () {
     $('.product-filter button.filter-button:first-child').click();
