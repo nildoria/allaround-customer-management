@@ -1711,87 +1711,36 @@ jQuery(document).ready(function ($) {
     }
   );
 
-  
-// Get all menu items with class .innerPageRoute
-var menuItems = $('.innerPageRoute');
 
-// Add click event listener to each menu item
-menuItems.on('click', function (event) {
-    // Prevent the default behavior of the link
-    event.preventDefault();
+  // Get all menu items with class .innerPageRoute
+  var menuItems = $('.innerPageRoute');
 
-    // Remove "open" class from .elementskit-menu-toggler
-    $('.elementskit-menu-toggler').removeClass('open');
+  $('.alarnd__cart_menu_item').on('click', function (event) {
+      // Prevent any default behavior
+      event.preventDefault();
+      if ($('#primary').css('display') === 'none') {
 
-    // Show the loader
-    $('#loader').fadeIn();
+          // Show the loader
+          $('#loader').fadeIn();
 
-    // Remove active class from all menu items
-    menuItems.removeClass('active');
+          setTimeout(function () {
+              // Show #primary and scroll to #woocommerce_cart
+              $('#primary').css('display', 'block');
+        
+              // Remove active class from menu items
+              menuItems.removeClass('active');
+          $('.product-filter button.filter-button:first-child').click();
 
-    // Add active class to the clicked menu item
-    $(this).addClass('active');
-
-    // Get the target section ID from the href attribute of the child <a> element
-    var targetSectionId = $(this).find('a').attr('href').substring(1);
-
-    setTimeout(function () {
-        // Hide #primary and all sections
-        $('#primary').css('display', 'none');
-        $('.miniPageSection').css('display', 'none');
-
-        // Show the targeted section
-        $('#' + targetSectionId).css('display', 'block');
-
-        // Trigger a click event on the first child anchor inside .elementor-gallery__titles-container
-        $('.elementor-gallery__titles-container a:first-child').click();
-        $('.product-filter button.filter-button:first-child').click();
-
-        // Scroll to #miniSiteHeader
-        //$("html, body").animate({
-        //    scrollTop: $('#miniSiteHeader').offset().top
-        //}, 0); // Instantly scroll, adjust as needed
-
-    }, 400);
-
-    setTimeout(function () {
-        $('#loader').fadeOut();
-    }, 800);
-});
-
-$('.innerPageRoute.home-page').addClass('active');
-
-$('.alarnd__cart_menu_item').on('click', function (event) {
-    // Prevent any default behavior
-    event.preventDefault();
-    if ($('#primary').css('display') === 'none') {
-
-        // Show the loader
-        $('#loader').fadeIn();
-
-        setTimeout(function () {
-            // Show #primary and scroll to #woocommerce_cart
-            $('#primary').css('display', 'block');
-			
-            // Remove active class from menu items
-            menuItems.removeClass('active');
-    		$('.product-filter button.filter-button:first-child').click();
-
-            $('#loader').fadeOut();
-        }, 500);
-		
-		setTimeout(function () {
-            $("html, body").animate({
-                scrollTop: $('#woocommerce_cart').offset().top
-            }, 300);
-		}, 600);
-    }
-});
-
-
-$(window).on('load', function () {
-    $('.product-filter button.filter-button:first-child').click();
-});
+              $('#loader').fadeOut();
+          }, 500);
+      
+      setTimeout(function () {
+              $("html, body").animate({
+                  scrollTop: $('#woocommerce_cart').offset().top
+              }, 300);
+      }, 600);
+      }
+  });
 
   // var authorTargetUrl = sessionStorage.getItem('authorTargetUrl');
 

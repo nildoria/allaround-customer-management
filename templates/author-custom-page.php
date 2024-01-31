@@ -97,9 +97,9 @@ $current_user_id = $get_current_puser->ID;
                         <div class="miniStore-promo-icon">
                             <img src="<?php echo (AlRNDCM_URL); ?>/assets/images/device-mini.svg" class="miniStore-promo-icon-img" loading="lazy" alt="Promo Icon" />
                         </div>
-                        <h3 class="miniStore-promo-title">משלוחים מהירים</h3>
+                        <h3 class="miniStore-promo-title">כאן בשבילך</h3>
                         <div class="miniStore-promo-text">
-                            <p>משלוח מהיר לכל הארץ ע"י שליח בעלות של 29 ש"ח או איסוף עצמי בתאום מראש מגבעתיים.</p>
+                            <p>לכל שאלה, התלבטות או התייעצות, נשמח לעזור בכל דבר. זמינים במגוון דרכים: טלפון, אימייל וכמובן גם בווטסאפ.</p>
                         </div>
                     </div>
                     <div class="miniStore-promo-item">
@@ -108,16 +108,16 @@ $current_user_id = $get_current_puser->ID;
                         </div>
                         <h3 class="miniStore-promo-title">משלוחים מהירים</h3>
                         <div class="miniStore-promo-text">
-                            <p>משלוח מהיר לכל הארץ ע"י שליח בעלות של 29 ש"ח או איסוף עצמי בתאום מראש מגבעתיים.</p>
+                            <p>בין 2-5 ימי עסקים וההזמנה אצלכם! ובנוסף, משלוח חינם ע"י שליח עד הבית בכל הזמנה מעל 500 ש"ח</p>
                         </div>
                     </div>
                     <div class="miniStore-promo-item">
                         <div class="miniStore-promo-icon">
                             <img src="<?php echo (AlRNDCM_URL); ?>/assets/images/hand-mini.svg" class="miniStore-promo-icon-img" loading="lazy" alt="Promo Icon" />
                         </div>
-                        <h3 class="miniStore-promo-title">משלוחים מהירים</h3>
+                        <h3 class="miniStore-promo-title">פשוט ומהיר</h3>
                         <div class="miniStore-promo-text">
-                            <p>משלוח מהיר לכל הארץ ע"י שליח בעלות של 29 ש"ח או איסוף עצמי בתאום מראש מגבעתיים.</p>
+                            <p>יצרנו מערכת אישית בשבילך שבכמה קליקים פשוטים תוכלו לבצע הזמנה ולשדרג את העסק שלכם, ממש בכמה דקות</p>
                         </div>
                     </div>
                 </div>

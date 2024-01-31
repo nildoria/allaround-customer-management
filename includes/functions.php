@@ -28,11 +28,8 @@ add_filter( 'login_redirect', 'ml_login_redirect', 10, 3 );
 // Redirect customers to the homepage after login
 function custom_login_redirect($redirect, $user) {
     if (isset($user->roles) && is_array($user->roles)) {
-        // Check for admins
-        if (in_array('administrator', $user->roles)) {
-            // Redirect administrators to the default place
-            return admin_url();
-        } else {
+        // Check for customer
+        if (in_array('customer', $user->roles)) {
             // Redirect other users to home_url/username
             return home_url('/' . $user->user_login);
         }
@@ -977,30 +974,6 @@ function isColorLightOrDark($hexColor) {
         return 'light';
     }
 }
-
-
-function ml_debug_test() {
-   
-
-    $galleries = get_color_thumbnails( 3321 );
-
-    echo '<pre>';
-    print_r( $galleries );
-    echo '</pre>';
-}
-// add_action( 'init', 'ml_debug_test' );
-
-
-
-// Redirect Admin to Dashboard if Already Logged in
-function redirect_admin_to_dashboard() {
-    if (is_front_page() && is_user_logged_in() && current_user_can('administrator')) {
-        wp_redirect(admin_url());
-        exit;
-    }
-}
-
-add_action('template_redirect', 'redirect_admin_to_dashboard');
 
 
 // Set the Display Name to FirstName + Last Name

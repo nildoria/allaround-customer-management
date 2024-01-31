@@ -234,6 +234,12 @@ h3.miniStore-promo-title {
 .woocommerce-order {
   padding: 15px 0 10px 0;
 }
+.woocommerce-thankyou-order-received {
+    text-align: right;
+}
+.elementor-accordion {
+    text-align: right;
+}
 .woocommerce.alarn--popup-thankyou {
   text-align: inherit;
 }
