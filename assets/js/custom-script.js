@@ -228,7 +228,6 @@ jQuery(document).ready(function ($) {
   // Run the function on window load and window resize
   $(window).on("load resize", function () {
     initOrDestroySlick();
-    setProductDetailsHeight();
   });
 
   $(document).on(
@@ -938,11 +937,10 @@ jQuery(document).ready(function ($) {
     current.addClass("ml_loading");
 
     console.log("page_num", page_num);
-    console.log($(".alarnd--loadmore-trigger").data("page_num"));
 
     $.ajax({
       type: "POST",
-      dataType: "html",
+      dataType: "json",
       url: ajax_object.ajax_url,
       data: {
         action: "ml_pagination",
@@ -954,16 +952,24 @@ jQuery(document).ready(function ($) {
         section.removeClass("loading");
         current.removeClass("ml_loading");
 
-        if (response.length === 0) {
+        if (response.items.length === 0) {
           current.slideUp();
         } else {
-          wrapper.append(response);
+          wrapper.append(response.items);
 
-          var $items = $(response);
+          var $items = $(response.items);
           wrapper.isotope("appended", $items);
           wrapper.isotope("reloadItems");
 
           current.data("page_num", page_num + 1);
+
+          // Access the totalPages value from the response
+          var totalPages = (response.totalPages - 1);
+
+          // Check if there are no more pages
+          if (page_num >= totalPages) {
+            current.fadeOut();
+          }
         }
       },
       complete: function () {
@@ -975,6 +981,7 @@ jQuery(document).ready(function ($) {
       },
     });
   });
+
 
   $(document).on("submit", "form.variations_form", function (e) {
     e.preventDefault();
@@ -1741,6 +1748,12 @@ jQuery(document).ready(function ($) {
       }, 600);
       }
   });
+
+  $(document).on("click", ".alarnd--continue-btn", function(e) {
+    e.preventDefault();
+    $(this).closest('.mfp-container').find('.mfp-close').click();
+  });
+
 
   // var authorTargetUrl = sessionStorage.getItem('authorTargetUrl');
 

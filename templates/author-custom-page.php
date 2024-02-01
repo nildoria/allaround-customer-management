@@ -328,7 +328,6 @@ $current_user_id = $get_current_puser->ID;
                                         </div>
                                     </div>
                                     <?php endif; ?>
-
                                     <div class="modal-bottom-btn">
                                         <button type="button" class="alarnd_trigger_details_modal ml_add_loading" data-product_id="<?php echo $product->get_id(); ?>"><?php esc_html_e( 'הוסיפו לעגלה', 'hello-elementor' ); ?></button>
                                     </div>
@@ -344,7 +343,9 @@ $current_user_id = $get_current_puser->ID;
             echo '</ul>';
             ?>
             <div class="allaround--loadmore-wrap">
+                <?php if ($itemsToDisplay >= $itemsPerPage) : ?>
                 <button type="button" class="alarnd--regular-button alarnd--loadmore-trigger ml_add_loading button" data-page_num="1"><?php esc_html_e("Load More", "hello-elementor"); ?></button>
+                <?php endif; ?>
             </div>
             <?php
             echo '</div>'; // End mini-store-product-list woocommerce
@@ -388,7 +389,7 @@ $current_user_id = $get_current_puser->ID;
 </div><!-- #primary -->
 <div id="loader">
     <div class="loader-cont">
-        <div>Loading...</div>
+        <div><?php esc_html__('Loading...', 'hello-elementor') ?></div>
     </div>
 </div>
 

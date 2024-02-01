@@ -1905,15 +1905,46 @@ function ministore_empty_cart_message($message) {
         $message = '<div class="custom-empty-cart-message">';
         $image_url = plugins_url('../assets/images/cart-large-minimalistic-svg.svg', __FILE__);
         $message .= '<img src="' . esc_url($image_url) . '" alt="Empty Cart Icon">';
-        $message .= '<h3>העגלה ריקה</h3>';
+        $message .= '<h3>' . esc_html__('העגלה ריקה', 'hello-elementor') . '</h3>';
         $message .= '</div>';
     }
+
     echo '<div class="cart-collaterals minstr-empt-cart-collatrl">';
-    echo '<span class="shipping-title">משלוח</span>';
-    echo '<ul id="shipping_method" class="woocommerce-shipping-methods">';
-    echo '<li><input type="radio" name="shipping_method[0]" data-index="0" id="shipping_method_0_free_shipping5" value="free_shipping:5" class="shipping_method" checked="checked"><label for="shipping_method_0_free_shipping5">איסוף עצמי מקק"ל 37, גבעתיים (1-3 ימי עסקים) - חינם!</label></li>';
-    echo '<li><input type="radio" name="shipping_method[0]" data-index="0" id="shipping_method_0_free_shipping6" value="free_shipping:6" class="shipping_method"><label for="shipping_method_0_free_shipping6">משלוח חינם ע"י שליח לכל הארץ בקניה מעל 500 ש"ח!</label></li>';
-    echo '</ul>';
+    echo '<span class="shipping-title">' . esc_html__('משלוח', 'hello-elementor') . '</span>';
+
+    if (WC()->cart->is_empty()) {
+        // Get available shipping zones
+        $shipping_zones = WC_Shipping_Zones::get_zones();
+
+        foreach ($shipping_zones as $shipping_zone) {
+            $shipping_zone_methods = $shipping_zone['shipping_methods'];
+
+            echo '<ul id="shipping_method" class="woocommerce-shipping-methods">';
+
+            $count = 0; // Counter to track the number of displayed shipping methods
+
+            foreach ($shipping_zone_methods as $index => $shipping_method) {
+                $input_id = 'shipping_method_' . $index . '_' . sanitize_title($shipping_method->id);
+                $input_value = esc_attr($shipping_method->id);
+                $input_name = 'shipping_method[0]';
+
+                if ($count < 2) {
+                    $selected = ($count === 0) ? 'checked="checked"' : '';
+                    echo '<li>';
+                    echo '<input type="radio" name="' . esc_attr($input_name) . '" data-index="' . esc_attr($index) . '" id="' . esc_attr($input_id) . '" value="' . esc_attr($input_value) . '" class="shipping_method" ' . $selected . '>';
+                    echo '<label for="' . esc_attr($input_id) . '">';
+                    echo esc_html($shipping_method->title);
+                    echo '</label>';
+                    echo '</li>';
+
+                    $count++;
+                }
+            }
+
+            echo '</ul>';
+        }
+    }
+
     do_action('woocommerce_cart_collaterals');
     echo '</div>';
     return $message;

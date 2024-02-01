@@ -78,8 +78,11 @@ class ML_Ajax {
         $start = ($currentpage - 1) * $itemsPerPage;
         $end = $start + $itemsPerPage;
         $itemsToDisplay = array_slice($items, $start, $itemsPerPage);
-
+        // Check if there are more items to load
+        $has_more_items = count($items) > $end;
         ob_start();
+        
+
         foreach ($itemsToDisplay as $prod_object) {
             if( ! isset( $prod_object['value'] ) || empty( $prod_object['value'] ) )
                 continue;
@@ -248,8 +251,15 @@ class ML_Ajax {
                 echo '</li>'; // End product-item
             }
         }
-        echo ob_get_clean();
+
+        $response_data = array(
+            'items' => ob_get_clean(),
+            'totalPages' => $totalPages,
+        );
+
+        echo json_encode($response_data);
         wp_die();
+
     }
 
     public function confirm_payout() {
@@ -263,7 +273,7 @@ class ML_Ajax {
                         <h2>תודה שהוספת את "<?php the_title(); ?>" להזמנה שלך!</h2>
                         <h3>דגם יישלח עם שאר המוצרים המותאמים אישית שהזמנת.</h3>
                         <p>אתה עדיין יכול להוסיף את שאר <br>המוצרים בעמוד זה וליהנות ממבצעים מעולים :)</p>
-                        <a href="<?php echo esc_url( home_url('/') ); ?>" class="alarnd--submit-btn alarnd--continue-btn">המשך בקניות</a>
+                        <a href="#" class="alarnd--submit-btn alarnd--continue-btn">המשך בקניות</a>
                     </div>
                 </div>
 
@@ -273,7 +283,7 @@ class ML_Ajax {
                         <h2><?php esc_html_e("Order Didn't go through", "hello-elementor"); ?></h2>
                         <h3>לצערנו העסקה לא אושרה.</h3>
                         <p>נטפל בבעיה וניצור איתך קשר בהקדם :)</p>
-                        <a href="<?php echo esc_url( home_url('/') ); ?>" class="alarnd--submit-btn alarnd--continue-btn"><?php esc_html_e('Continue Shopping', 'hello-elementor'); ?></a>
+                        <a href="#" class="alarnd--submit-btn alarnd--continue-btn"><?php esc_html_e('Try Again', 'hello-elementor'); ?></a>
                         <div class="form-message"></div>
                     </div>
                 </div>
@@ -305,7 +315,7 @@ class ML_Ajax {
                         <h2>תודה שהוספת את "<?php the_title(); ?>" להזמנה שלך!</h2>
                         <h3>דגם יישלח עם שאר המוצרים המותאמים אישית שהזמנת.</h3>
                         <p>אתה עדיין יכול להוסיף את שאר <br>המוצרים בעמוד זה וליהנות ממבצעים מעולים :)</p>
-                        <a href="<?php echo esc_url( home_url('/') ); ?>" class="alarnd--submit-btn alarnd--continue-btn">המשך בקניות</a>
+                        <a href="#" class="alarnd--submit-btn alarnd--continue-btn">המשך בקניות</a>
                     </div>
                 </div>
 
@@ -315,7 +325,7 @@ class ML_Ajax {
                         <h2><?php esc_html_e("Order Didn't go through", "hello-elementor"); ?></h2>
                         <h3>לצערנו העסקה לא אושרה.</h3>
                         <p>נטפל בבעיה וניצור איתך קשר בהקדם :)</p>
-                        <a href="<?php echo esc_url( home_url('/') ); ?>" class="alarnd--submit-btn alarnd--continue-btn"><?php esc_html_e('Continue Shopping', 'hello-elementor'); ?></a>
+                        <a href="#" class="alarnd--submit-btn alarnd--continue-btn"><?php esc_html_e('Try Again', 'hello-elementor'); ?></a>
                         <div class="form-message"></div>
                     </div>
                 </div>
@@ -370,7 +380,7 @@ class ML_Ajax {
                             <h2>תודה שהוספת את להזמנה שלך!</h2>
                             <h3>דגם יישלח עם שאר המוצרים המותאמים אישית שהזמנת.</h3>
                             <p>אתה עדיין יכול להוסיף את שאר <br>המוצרים בעמוד זה וליהנות ממבצעים מעולים :)</p>
-                            <a href="'.esc_url( home_url("/") ).'" class="alarnd--submit-btn alarnd--continue-btn">המשך בקניות</a>';
+                            <a href="#" class="alarnd--submit-btn alarnd--continue-btn">המשך בקניות</a>';
                         }
                         
                     $success_popup .= '</div>
@@ -389,7 +399,7 @@ class ML_Ajax {
                         <h2>'. esc_html__("Order Didn\"t go through", "hello-elementor") . '</h2>
                         <h3>לצערנו העסקה לא אושרה.</h3>
                         <p>נטפל בבעיה וניצור איתך קשר בהקדם :)</p>
-                        <a href="'.esc_url( home_url("/") ).'" class="alarnd--submit-btn alarnd--continue-btn">'.esc_html__("Continue Shopping", "hello-elementor").'</a>
+                        <a href="#" class="alarnd--submit-btn alarnd--continue-btn">'.esc_html__("Try Again", "hello-elementor").'</a>
                         <div class="form-message"></div>
                     </div>
                 </div>

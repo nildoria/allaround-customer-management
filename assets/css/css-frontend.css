@@ -187,7 +187,7 @@ h3.miniStore-promo-title {
   padding: 10px 10px 25px 10px;
 }
 .mini-store-product-list .product-item .product-thumbnail {
-  /* height: 200px; */
+  height: 200px;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -196,7 +196,7 @@ h3.miniStore-promo-title {
 }
 .mini-store-product-list .product-item img {
   margin-bottom: 0 !important;
-  height: 100%;
+  /* height: 100%; */
   width: 100%;
   object-fit: cover;
   object-position: center;
