@@ -395,6 +395,9 @@ button.slick-prev.slick-arrow {
 .slick-slider .slick-list {
   direction: ltr;
 }
+[dir="rtl"] .slick-slider .slick-track, [dir="rtl"] .slick-slider .slick-list {
+    direction: inherit;
+}
 
 /* Media Query
 ==========================================*/

@@ -144,7 +144,7 @@ class ML_Ajax {
                 </div>
                 <?php else :?>
                     <div class="no_color_text">
-                        <span>זמין בצבע אחד</span>
+                        <span>זמין בצבע אחד כבתמונה</span>
                     </div>
                 <?php 
                 endif;
@@ -1434,7 +1434,7 @@ class ML_Ajax {
                         <div class="alarnd--single-cart-row alarnd--single-cart-price">
                             
                         <?php
-                        echo '<a href="#" class="alarnd_view_pricing_cb_button" data-product_id="'. $product->get_id() .'">כמות, מחיר ומבחר</a>';
+                        echo '<a href="#" class="alarnd_view_pricing_cb_button" data-product_id="'. $product->get_id() .'">לפרטים על המוצר</a>';
                         ?>
                             <div class="alarnd--price-by-shirt">
                                 <p class="alarnd--group-price"><?php echo wc_price($product->get_regular_price(), array('decimals' => 0)); ?> / <?php echo $first_line_keyword; ?></p>

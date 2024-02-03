@@ -46,11 +46,11 @@ $current_user_id = $get_current_puser->ID;
             echo '</div>';
         } else {
 
+        $default_header_content = get_field('default_header_content', 'option');
         $profile_picture_id = get_field('profile_picture_id', "user_{$current_user_id}");
         $user_header_title = get_field('user_header_title', "user_{$current_user_id}");
         $user_header_content = get_field('user_header_content', "user_{$current_user_id}");
         $profile_picture_url = wp_get_attachment_image_url($profile_picture_id, 'medium');
-        $about_page_slug = 'about';
 
        
         $tick = '<img src="'.AlRNDCM_URL.'assets/images/verified.png" class="verified_tick" loading="lazy" /> ';
@@ -63,7 +63,8 @@ $current_user_id = $get_current_puser->ID;
 
             echo '<input type="hidden" id="ml_username_hidden" value="'.$current_author.'" />';
             
-            echo '<p>' . (($user_header_content) ? esc_html($user_header_content) : 'עיצבנו ויצרנו חנות אישית משלך, שבה תוכל להזמין בקלות לצרכי החברה שלך.') . '</p>';
+            echo '<p>' . (($user_header_content) ? esc_html($user_header_content) : (!empty($default_header_content) ? esc_html($default_header_content) : ' ')) . '</p>';
+
             // Logout button
             echo '</div>';
             echo '<div class="profile-picture-column">';
@@ -236,7 +237,7 @@ $current_user_id = $get_current_puser->ID;
                     </div>
                     <?php else :?>
                         <div class="no_color_text">
-                            <span>זמין בצבע אחד</span>
+                            <span>זמין בצבע אחד כבתמונה</span>
                         </div>
                     <?php 
                     endif;
@@ -247,7 +248,7 @@ $current_user_id = $get_current_puser->ID;
                     // Buttons
                     echo '<div class="product-buttons">';
                     if( ! empty( $discount_steps ) || ! empty( $pricing_description ) || ! empty( $customQuantity_steps ) ) {
-                        echo '<a href="#alarnd__pricing_info-'. $product->get_id() .'" class="view-details-button alarnd_view_pricing_cb" data-product_id="'. $product->get_id() .'">כמות, מחיר ומבחר</a>';
+                        echo '<a href="#alarnd__pricing_info-'. $product->get_id() .'" class="view-details-button alarnd_view_pricing_cb" data-product_id="'. $product->get_id() .'">לפרטים על המוצר</a>';
                     } else {
                         echo '<span class="view_details_not_available"></span>';
                     }

@@ -1013,23 +1013,28 @@ ol.mlCustomDots a {
   width: 100%;
   align-items: flex-start;
   flex-direction: row-reverse;
+  justify-content: space-between;
 }
 .alarn--pricing-column.alarn--pricing-column-desc p {
   font-size: 16px;
 }
-
+.mfp-container div[id^=alarnd__pricing_info] {
+  width: 850px;
+}
 /* Apply styles to .alarn--pricing-column */
 .alarn--pricing-column {
-  flex: 0 0 55%;
+  flex: 0 0 62%;
   box-sizing: border-box;
   padding: 0px;
 }
 .pricingDescSteps {
-  flex: 0 0 45%;
+  flex: 0 0 38%;
+  padding-left: 35px;
 }
-.alarn--pricing-column.alarn--pricing-column-chart > h5 {
+
+.alarn--pricing-column.alarn--pricing-column-chart  .alarn--price-chart h5 {
   margin: 10px 0 10px;
-  text-align: center;
+  align-self: center;
 }
 .woocommerce.alarn--popup-thankyou .col2-set .col-1 {
   width: 100%;
@@ -1040,7 +1045,7 @@ ol.mlCustomDots a {
   padding: 0px;
   justify-content: center;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
 }
 .alarnd--price-chart-price {
   display: flex;
@@ -1121,11 +1126,17 @@ button.mfp-arrow.mfp-prevent-close:active {
   -ms-border-radius: 11px;
   -o-border-radius: 11px;
   width: auto;
-  padding: 15px 25px;
+  padding: 15px 10px;
   text-decoration: none;
-  min-width: 260px;
+  min-width: 162px;
 }
-
+.alarnd_view_pricing_cb_button {
+    flex: 0 0 30%;
+}
+.alarnd--single-cart-row.alarnd--single-cart-price button {
+    width: auto !important;
+    flex: 0 0 30%;
+}
 .alarnd_trigger_details_modal:hover,
 .alarnd_trigger_details_modal:focus,
 .alarnd_trigger_details_modal:active,
@@ -2276,6 +2287,38 @@ body.elementor-default main#main {
   .elementskit-menu-hamburger {
     border: 0px solid rgba(0,0,0,0) !important;
   }
+  .woocommerce
+    table.shop_table_responsive
+    tr.woocommerce-cart-form__cart-item.cart_item
+    td.product-thumbnail {
+    width: 150px;
+    padding: 5px 15px !important;
+  }
+  .woocommerce
+    table.shop_table_responsive
+    tr.woocommerce-cart-form__cart-item.cart_item
+    td.product-name {
+    width: calc(100% - 150px);
+  }
+  .woocommerce
+  table.shop_table.shop_table_responsive.cart.woocommerce-cart-form__contents
+  tr {
+    float: right;
+    width: 100%;
+  }
+  table.shop_table.shop_table_responsive.cart.woocommerce-cart-form__contents thead {
+    opacity: 0;
+    height: 20px;
+    display: inline-block;
+    width: 100%;
+  }
+  .woocommerce
+  table.shop_table.shop_table_responsive.cart.woocommerce-cart-form__contents
+  tr
+  > td.actions {
+    width: 100%;
+    display: block;
+  }
 }
 
 /*For Wide Mobile Layout*/
@@ -2287,6 +2330,10 @@ body.elementor-default main#main {
     gap: 10px;
     line-height: 30px;
   }
+  table.shop_table.shop_table_responsive.cart.woocommerce-cart-form__contents thead {
+    height: 0px;
+    display: none;
+}
   .alarnd--custom-checkout-section {
     padding: 45px 0;
   }
@@ -2300,7 +2347,7 @@ body.elementor-default main#main {
     margin-bottom: 15px;
   }
   .mini-store-product-list .product-item .product-thumbnail {
-    height: 230px;
+    height: auto;
   }
   .aum_auth_page .author-header {
     flex-direction: column-reverse;
@@ -2380,22 +2427,10 @@ body.elementor-default main#main {
     padding-top: 5px;
   }
   .woocommerce
-    table.shop_table_responsive
-    tr.woocommerce-cart-form__cart-item.cart_item
-    td.product-thumbnail {
-    width: 120px;
-  }
-  .woocommerce
     table.shop_table
     td.product-thumbnail
     img.attachment-woocommerce_thumbnail {
     height: 80px;
-  }
-  .woocommerce
-    table.shop_table_responsive
-    tr.woocommerce-cart-form__cart-item.cart_item
-    td.product-name {
-    width: calc(100% - 120px);
   }
   .woocommerce
     table.shop_table_responsive
@@ -2425,6 +2460,7 @@ body.elementor-default main#main {
   .pricingDescSteps {
     display: flex;
     flex-wrap: wrap;
+    padding-left: 0;
   }
   .alarn--pricing-column.alarn--pricing-column-desc {
     flex: 0 0 100%;
@@ -2533,4 +2569,10 @@ body.elementor-default main#main {
     transform: translate3d(1px, 0px, 0) rotate(-90deg) !important;
     bottom: -14px !important;
   }
+}
+/* Media query for viewport heights less than 700px */
+@media (max-height: 699px) {
+.mfp-wrap.mfp-ready .mfp-content {
+  top: 0%;
+}
 }

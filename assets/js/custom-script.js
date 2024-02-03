@@ -214,6 +214,7 @@ jQuery(document).ready(function ($) {
         if (!$promoItems.hasClass("slick-initialized")) {
           $promoItems.slick({
             dots: true,
+            rtl: true,
           });
         }
       } else {
@@ -1498,9 +1499,6 @@ jQuery(document).ready(function ($) {
       $('.ml_trigger_details[data-product-id="' + product_id + '"]').trigger(
         "click"
       );
-      setTimeout(() => {
-        adjustTextColor(".alarnd--opt-color span");
-      }, 1000);
     }
 
     return false;
@@ -1664,6 +1662,9 @@ jQuery(document).ready(function ($) {
               },
             },
           });
+          
+          adjustTextColor(".alarnd--opt-color span");
+          apearelsModalSize(productId);
         },
       });
     }
