@@ -166,7 +166,7 @@ h3.miniStore-promo-title {
   justify-content: center;
   flex-wrap: wrap;
 }
-.aum_auth_page .product-filter button.filter-button {
+.aum_auth_page .product-filter button.filter_item {
   border: 0px solid transparent;
   color: #1a1a1a;
   font-size: 16px;
@@ -174,10 +174,11 @@ h3.miniStore-promo-title {
   border-bottom: 3px solid transparent;
   border-radius: 0px;
 }
-.aum_auth_page .product-filter button.filter-button:hover,
-.aum_auth_page .product-filter button.filter-button:active,
-.aum_auth_page .product-filter button.filter-button:focus-visible,
-.aum_auth_page .product-filter button.filter-button:focus {
+.aum_auth_page .product-filter button.filter_item:hover,
+.aum_auth_page .product-filter button.filter_item:active,
+.aum_auth_page .product-filter button.filter_item.filter_active,
+.aum_auth_page .product-filter button.filter_item:focus-visible,
+.aum_auth_page .product-filter button.filter_item:focus {
   color: #0baaf7;
   background-color: transparent;
   border-bottom: 3px solid #0baaf7;

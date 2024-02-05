@@ -155,10 +155,12 @@ $current_user_id = $get_current_puser->ID;
             }
 
             // Display category filters
-            echo '<button class="filter-button" data-filter="*">'.esc_html__("All", "hello-elementor").'</button>';
+            
+            echo '<button class="filter_active filter_item" data-category="all">'.esc_html__("All", "hello-elementor").'</button>';
             foreach ($product_categories as $category) {
-                echo '<button class="filter-button" data-filter=".category-' . $category->term_id . '">' . esc_html($category->name) . '</button>';
+                echo '<button class="filter_item" data-filter=".category-' . $category->term_id . '" data-category="' . $category->term_id . '">' . esc_html($category->name) . '</button>';
             }
+
             
             echo '</div>';
 

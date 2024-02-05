@@ -88,24 +88,24 @@ jQuery(document).ready(function ($) {
     }
   }
 
-  var isotope_initalize = function () {
-    /**
-     * isotope Filtering.
-     */
-    var $grid = $("#allaround_products_list").isotope({
-      itemSelector: ".product-item",
-      layoutMode: "fitRows",
-      originLeft: false,
-    });
+  // var isotope_initalize = function () {
+  //   /**
+  //    * isotope Filtering.
+  //    */
+  //   var $grid = $("#allaround_products_list").isotope({
+  //     itemSelector: ".product-item",
+  //     layoutMode: "fitRows",
+  //     originLeft: false,
+  //   });
 
-    $(document).on("click", ".product-filter .filter-button", function () {
-      var filterValue = $(this).attr("data-filter");
-      $grid.isotope({ filter: filterValue });
-    });
-  };
+  //   $(document).on("click", ".product-filter .filter-button", function () {
+  //     var filterValue = $(this).attr("data-filter");
+  //     $grid.isotope({ filter: filterValue });
+  //   });
+  // };
 
-  isotope_initalize();
-  $(window).resize(isotope_initalize);
+  // isotope_initalize();
+  // $(window).resize(isotope_initalize);
 
   // overwrite woocommerce scroll to notices
   // $.scroll_to_notices = function (scrollElement) {
@@ -931,13 +931,16 @@ jQuery(document).ready(function ($) {
     var current = $(this),
       page_num = current.data("page_num"),
       section = $(".allaround--products-section"),
+      filter_item = $(".filter_active").data('category'),
       wrapper = $("#allaround_products_list"),
       user_id = wrapper.data("user_id");
+      
+      console.log("Clicked 'Load More' for category:", filter_item);
+      console.log(page_num);
 
     section.addClass("loading");
     current.addClass("ml_loading");
 
-    console.log("page_num", page_num);
 
     $.ajax({
       type: "POST",
@@ -947,6 +950,7 @@ jQuery(document).ready(function ($) {
         action: "ml_pagination",
         page_num: page_num,
         user_id: user_id,
+        filter_item: filter_item,
         nonce: ajax_object.nonce,
       },
       success: function (response) {
@@ -958,9 +962,9 @@ jQuery(document).ready(function ($) {
         } else {
           wrapper.append(response.items);
 
-          var $items = $(response.items);
-          wrapper.isotope("appended", $items);
-          wrapper.isotope("reloadItems");
+          // var $items = $(response.items);
+          // wrapper.isotope("appended", $items);
+          // wrapper.isotope("reloadItems");
 
           current.data("page_num", page_num + 1);
 
@@ -977,10 +981,68 @@ jQuery(document).ready(function ($) {
         section.removeClass("loading");
         current.removeClass("ml_loading");
         initi_prive_view_modal();
-        isotope_initalize();
+        // isotope_initalize();
         setProductDetailsHeight();
       },
+      error: function(xhr, status, error) {
+        console.error("AJAX Error:", error);
+      }
     });
+
+  });
+
+
+  function loadProducts(categoryId) {
+    var wrapper = $("#allaround_products_list"),
+        userId = wrapper.data("user_id"),
+        loadButton = $('.alarnd--loadmore-trigger');
+
+    // add disable attribute to load button
+    loadButton.addClass("ml_loading").prop("disabled", true);
+
+    $.ajax({
+      url: ajax_object.ajax_url,
+      type: 'POST',
+      dataType: "json",
+      data: {
+        action: 'load_products_by_category',
+        category_id: categoryId,
+        user_id: userId,
+        nonce: ajax_object.nonce,
+      },
+      success: function(response) {
+        $('#allaround_products_list').empty().append(response.items);
+        // Handle pagination or other UI updates as needed
+        loadButton.removeClass("ml_loading").prop("disabled", false).slideDown();
+        
+        setProductDetailsHeight();
+      },
+      error: function (xhr, status, error) {
+          console.error('AJAX Error:', error);
+      },
+    });
+  }
+
+  $('.filter_item').on('click', function() {
+      var categoryId = $(this).data('category');
+
+      if( $(this).hasClass('filter_active') ) {
+        return false;
+      }
+
+      $(this).addClass('filter_active').siblings().removeClass('filter_active');
+
+      $('.alarnd--loadmore-trigger').data('page_num', 1).change();
+      
+      loadProducts(categoryId);
+  });
+
+
+
+  $('#userPhone').on('input', function() {
+    var cleanedValue = $(this).val().replace(/[^0-9]/g, '');
+    cleanedValue = cleanedValue.substring(0, 10);
+    $(this).val(cleanedValue);
   });
 
 

@@ -782,57 +782,68 @@ function ml_refactor_selects( $selections ) {
  * @param int $user_id
  * @return array
  */
-function ml_get_user_products( $user_id ) {
+function ml_get_user_products($user_id, $filter_item = '') {
     $default_products = get_field('default_products', 'option');
     $selected_product_ids = get_field('selected_products', "user_{$user_id}");
     $disable_product = get_field('disable_product', "user_{$user_id}");
 
-    if( empty( $default_products ) && empty( $selected_product_ids ) )
+    if (empty($default_products) && empty($selected_product_ids)) {
         return [];
+    }
 
-    // Initialize an associative array to store unique values
     $uniqueValues = [];
 
-    // Merge default_products into the results array while skipping duplicates
     $results = [];
-    if( ! empty( $default_products ) ) {
+    if (!empty($default_products)) {
         foreach ($default_products as $item) {
             if (!isset($uniqueValues[$item['value']]) && hasValidThumbnail($item['value'])) {
-                $results[] = $item;
-                $uniqueValues[$item['value']] = true;
+                if ($filter_item === '' || productBelongsToCategory($item['value'], $filter_item)) {
+                    $results[] = $item;
+                    $uniqueValues[$item['value']] = true;
+                }
             }
         }
     }
 
-    // Merge selected_product_ids into the results array while skipping duplicates
-    if( ! empty( $selected_product_ids ) ) {
-        $is_refactor_need = ml_need_refactor( $selected_product_ids );
-        if( false === $is_refactor_need ) {
-            $selected_product_ids = ml_refactor_selects( $selected_product_ids );
+    if (!empty($selected_product_ids)) {
+        $is_refactor_need = ml_need_refactor($selected_product_ids);
+        if (false === $is_refactor_need) {
+            $selected_product_ids = ml_refactor_selects($selected_product_ids);
         }
 
         foreach ($selected_product_ids as $item) {
             if (!isset($uniqueValues[$item['value']]) && hasValidThumbnail($item['value'])) {
-                $results[] = $item;
-                $uniqueValues[$item['value']] = true;
+                if ($filter_item === '' || productBelongsToCategory($item['value'], $filter_item)) {
+                    $results[] = $item;
+                    $uniqueValues[$item['value']] = true;
+                }
             }
         }
     }
 
-    if( ! empty( $disable_product ) ) {
-        // Extract values from the second array
+    if (!empty($disable_product)) {
         $disable_product_values = array_column($disable_product, 'value');
 
-        // Filter the results array
         $filtered_array = array_filter($results, function ($item) use ($disable_product_values) {
             return !in_array($item['value'], $disable_product_values);
         });
 
         return $filtered_array;
     }
-    
+
     return $results;
 }
+
+function productBelongsToCategory($product_id, $category_id) {
+    $terms = wp_get_post_terms($product_id, 'product_cat');
+    foreach ($terms as $term) {
+        if ($term->term_id == $category_id) {
+            return true;
+        }
+    }
+    return false;
+}
+
 
 // Function to check if a post has a valid thumbnail
 function hasValidThumbnail($postId) {
@@ -1531,7 +1542,7 @@ function allaround_customer_form($is_disabled = false) {
             <div class="form-row">
                 <div class="form-label"><?php esc_html_e("Phone", "hello-elementor" ); ?></div>
                 <div class="form-input">
-                    <input type="text" id="userPhone" name="userPhone" placeholder="<?php esc_attr_e("required", "hello-elementor" ); ?>" value="<?php echo esc_attr( $phone ); ?>" inputmode="numeric" required>
+                    <input type="text" id="userPhone" name="userPhone" placeholder="<?php esc_attr_e("required", "hello-elementor" ); ?>" value="<?php echo esc_attr( $phone ); ?>" required>
                 </div>
             </div>
             <div class="form-row">
@@ -2409,3 +2420,17 @@ function custom_update_cart_quantity_script() {
 }
 
 add_action('wp_footer', 'custom_update_cart_quantity_script');
+
+
+add_action('admin_footer', 'modify_user_notification_checkbox');
+function modify_user_notification_checkbox() {
+    $currentScreen = get_current_screen();
+    if ('user' === $currentScreen->id) {
+        ?>
+        <script type="text/javascript">
+            document.getElementById("send_user_notification").checked = false;
+            jQuery('#send_user_notification').closest('tr').hide();
+        </script>
+        <?php
+    }
+}
