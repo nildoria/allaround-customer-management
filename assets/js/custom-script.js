@@ -932,7 +932,7 @@ jQuery(document).ready(function ($) {
       page_num = current.data("page_num"),
       section = $(".allaround--products-section"),
       filter_item = $(".filter_active").data('category'),
-      wrapper = $("#allaround_products_list"),
+      wrapper = $("#allaround_products_list-"+filter_item),
       user_id = wrapper.data("user_id");
       
       console.log("Clicked 'Load More' for category:", filter_item);
@@ -992,50 +992,57 @@ jQuery(document).ready(function ($) {
   });
 
 
-  function loadProducts(categoryId) {
-    var wrapper = $("#allaround_products_list"),
-        userId = wrapper.data("user_id"),
-        loadButton = $('.alarnd--loadmore-trigger');
+  // function loadProducts(categoryId) {
+  //   var wrapper = $("#allaround_products_list"),
+  //       userId = wrapper.data("user_id"),
+  //       loadButton = $('.alarnd--loadmore-trigger');
 
-    // add disable attribute to load button
-    loadButton.addClass("ml_loading").prop("disabled", true);
+  //   // add disable attribute to load button
+  //   loadButton.addClass("ml_loading").prop("disabled", true);
 
-    $.ajax({
-      url: ajax_object.ajax_url,
-      type: 'POST',
-      dataType: "json",
-      data: {
-        action: 'load_products_by_category',
-        category_id: categoryId,
-        user_id: userId,
-        nonce: ajax_object.nonce,
-      },
-      success: function(response) {
-        $('#allaround_products_list').empty().append(response.items);
-        // Handle pagination or other UI updates as needed
-        loadButton.removeClass("ml_loading").prop("disabled", false).slideDown();
+  //   $.ajax({
+  //     url: ajax_object.ajax_url,
+  //     type: 'POST',
+  //     dataType: "json",
+  //     data: {
+  //       action: 'load_products_by_category',
+  //       category_id: categoryId,
+  //       user_id: userId,
+  //       nonce: ajax_object.nonce,
+  //     },
+  //     success: function(response) {
+  //       $('#allaround_products_list').empty().append(response.items);
+  //       // Handle pagination or other UI updates as needed
+  //       loadButton.removeClass("ml_loading").prop("disabled", false).slideDown();
         
-        setProductDetailsHeight();
-      },
-      error: function (xhr, status, error) {
-          console.error('AJAX Error:', error);
-      },
-    });
-  }
+  //       setProductDetailsHeight();
+  //     },
+  //     error: function (xhr, status, error) {
+  //         console.error('AJAX Error:', error);
+  //     },
+  //   });
+  // }
 
-  $('.filter_item').on('click', function() {
-      var categoryId = $(this).data('category');
+$('.filter_item').on('click', function() {
+    var categoryId = $(this).data('category');
 
-      if( $(this).hasClass('filter_active') ) {
+    if ($(this).hasClass('filter_active')) {
         return false;
-      }
+    }
 
-      $(this).addClass('filter_active').siblings().removeClass('filter_active');
+    $('.filter_wrap-' + categoryId).addClass('loading');
 
-      $('.alarnd--loadmore-trigger').data('page_num', 1).change();
+    $(this).addClass('filter_active').siblings().removeClass('filter_active');
+
+    // Toggle the filter_wrap-active class
+    $('.filter_wrap-' + categoryId).addClass('filter_wrap-active').siblings('.filter_wrap-item').removeClass('filter_wrap-active');
+
+    setTimeout(function() {
       
-      loadProducts(categoryId);
-  });
+      $('.filter_wrap-' + categoryId).removeClass('loading');
+
+    }, 500);
+});
 
 
 

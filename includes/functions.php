@@ -2434,3 +2434,230 @@ function modify_user_notification_checkbox() {
         <?php
     }
 }
+
+
+function ml_get_filter_content( $current_user_id, $filter = '' ) {
+
+    $id = empty( $filter ) || 'all' === $filter ? "filter_wrap-all" : "filter_wrap-$filter";
+    $active_class = empty( $filter ) || 'all' === $filter ? "filter_wrap-active" : "";
+
+     // Get selected product IDs for the user
+     $selected_product_ids = ml_get_user_products($current_user_id);
+        
+     $filtered_product_ids = array();
+     // Filter products by the selected category
+     if( 'all' === $filter || empty( $filter ) ) {
+         foreach ($selected_product_ids as $product) {
+             $product_id = $product['value'];
+             $terms = wp_get_post_terms($product_id, 'product_cat');
+     
+             $filtered_product_ids[] = $product;
+         }
+     }
+
+     if( 'all' !== $filter && ! empty( $filter ) ) {
+        foreach ($selected_product_ids as $product) {
+            $product_id = $product['value'];
+            $terms = wp_get_post_terms($product_id, 'product_cat');
+    
+            foreach ($terms as $term) {
+                if ($term->term_id == $filter) {
+                    $filtered_product_ids[] = $product;
+                    break;
+                }
+            }
+        }
+    }
+
+    echo '<div id="'.$id.'" class="woocommerce filter_wrap-item '.$id.' '.$active_class.'">';
+
+        $items = $filtered_product_ids;
+        $itemsPerPage = ml_products_per_page();
+        $totalItems = count($items);
+        $totalPages = ceil($totalItems / $itemsPerPage);
+        $currentpage = isset($_GET['list']) ? (int)$_GET['list'] : 1;
+
+        $start = ($currentpage - 1) * $itemsPerPage;
+        $end = $start + $itemsPerPage;
+        $itemsToDisplay = array_slice($items, $start, $itemsPerPage);
+        $big = 999999999; // need an unlikely integer
+
+        echo '<ul id="allaround_products_list-'.$filter.'" data-user_id="'.esc_attr( $current_user_id ).'" class="mini-store-product-list product-list-container products columns-3">';
+        foreach ($itemsToDisplay as $prod_object) {
+            if( ! isset( $prod_object['value'] ) || empty( $prod_object['value'] ) )
+                continue;
+
+            $product_id = $prod_object['value'];
+
+            // check if post has thumbnail otherwise skip
+            $product = wc_get_product($product_id);
+
+            $group_enable = get_field( 'group_enable', $product->get_id() );
+            $colors = get_field( 'color', $product->get_id() );
+            $custom_quanity = get_field( 'enable_custom_quantity', $product->get_id() );
+            $sizes = get_field( 'size', $product->get_id() );
+            $pricing_description = get_field( 'pricing_description', $product->get_id() );
+            $discount_steps = get_field( 'discount_steps', $product->get_id() );
+            $discount_steps = ml_filter_disount_steps($discount_steps);
+
+            $customQuantity_steps = get_field( 'quantity_steps', $product->get_id() );
+            $customQuantity_steps = ml_filter_disount_steps($customQuantity_steps);
+
+            $thumbnail = wp_get_attachment_image_src($product->get_image_id(), 'alarnd_main_thumbnail');
+            if( ! $thumbnail )
+                continue;
+
+            $thumbnail = ml_get_thumbnail($thumbnail, $current_user_id, $product_id );
+
+            if ($product) {
+                $terms = wp_get_post_terms($product_id, 'product_cat');
+
+                echo '<li class="product-item product ';
+                
+                foreach ($terms as $term) {
+                    echo 'category-' . $term->term_id . ' ';
+                }
+                echo '" data-product_type="'.esc_attr($product->get_type()).'" data-product-id="' . esc_attr($product->get_id()) . '">';
+                
+                // Product Thumbnail
+                echo '<div class="product-thumbnail">';
+                echo '<img src="'.$thumbnail.'" loading="lazy"/>';
+                echo '</div>';
+                
+                echo '<div class="product-item-details">';
+                // Product Title
+                if( ! empty( $discount_steps ) || ! empty( $pricing_description ) ) {
+                    echo '<h3 class="product-title">' . esc_html($product->get_name()) . '</h3>';
+                } else {
+                    echo '<h3 class="product-title">' . esc_html($product->get_name()) . '</h3>';
+                }
+
+                if( ! empty( $colors ) && ! empty( $group_enable ) && empty( $custom_quanity ) ) : ?>
+                <div class="alarnd--colors-wrapper">
+                    <div class="alarnd--colors-wrap">
+                        <?php foreach( $colors as $key => $color ) : ?>
+                            <input type="radio" name="alarnd__color" id="alarnd__color_<?php echo esc_html( $color['title'] ); ?>" value="<?php echo esc_html( $color['title'] ); ?>">
+                            <label for="alarnd__color_<?php echo esc_html( $color['title'] ); ?>" class="alarnd--single-color" data-key="<?php $key; ?>" data-name="<?php echo esc_html( $color['title'] ); ?>" style="background-color: <?php echo $color['color_hex_code']; ?>">
+                            </label>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+                <?php else :?>
+                    <div class="no_color_text">
+                        <span>זמין בצבע אחד כבתמונה</span>
+                    </div>
+                <?php 
+                endif;
+                // Price
+
+                echo '<p class="mini_productCard_price">' . $product->get_price_html() . '</p>';
+                
+                // Buttons
+                echo '<div class="product-buttons">';
+                if( ! empty( $discount_steps ) || ! empty( $pricing_description ) || ! empty( $customQuantity_steps ) ) {
+                    echo '<a href="#alarnd__pricing_info-'. $product->get_id() .'" class="view-details-button alarnd_view_pricing_cb" data-product_id="'. $product->get_id() .'">לפרטים על המוצר</a>';
+                } else {
+                    echo '<span class="view_details_not_available"></span>';
+                }
+                echo '<button class="quick-view-button ml_add_loading ml_trigger_details button" data-product-id="' . esc_attr($product->get_id()) . '">'.esc_html( $product->single_add_to_cart_text() ).'</button>';
+                echo '</div>';
+                echo '</div>';
+
+                if( ! empty( $discount_steps ) || ! empty( $pricing_description ) || ! empty( $customQuantity_steps ) ) : ?>
+                    <div id="alarnd__pricing_info-<?php echo $product->get_id(); ?>" data-product_id="<?php echo $product->get_id(); ?>" class="mfp-hide white-popup-block alarnd--info-modal">
+                        <div class="alarnd--modal-inner alarnd--modal-chart-info">
+                            <h2><?php echo get_the_title( $product->get_id() ); ?></h2>
+
+                            <div class="alarnd--pricing-wrapper-new">
+                                <?php echo ml_gallery_carousels($product->get_id(), $current_user_id); ?>
+
+                                <div class="pricingDescSteps">
+                                <?php if( ! empty( $pricing_description ) ) : ?>
+                                <div class="alarn--pricing-column alarn--pricing-column-desc">
+                                    <?php echo allround_get_meta( $pricing_description ); ?>
+                                </div>
+                                <?php endif; ?>
+                                <?php if( ! empty( $discount_steps ) && ! empty( $group_enable ) ) : ?>
+                                <div class="alarn--pricing-column alarn--pricing-column-chart">
+                                    <div class="alarn--price-chart">
+                                        <h5>תמחור כמות</h5>
+                                        <div class="alarnd--price-chart-price <?php echo count($discount_steps) > 4 ? 'alarnd--plus4item-box' : ''; ?>">
+                                            <?php 
+                                            $index = 0;
+                                            foreach( $discount_steps as $step ) :
+                                            $prev = ($index == 0) ? false : $discount_steps[$index-1];                            
+                                            $qty = ml_get_price_range($step['quantity'], $step['amount'], $prev);
+
+                                            ?>
+                                            <div class="alarnd--price-chart-item">
+                                                <span class="price_step_price"><?php echo $step['amount'] == 0 ? wc_price($product->get_regular_price(), array('decimals' => 0)) : wc_price($step['amount'], array('decimals' => 0)); ?></span>
+                                                <span class="price_step_qty">כמות: <span><?php echo esc_html( $qty); ?></span></span>
+                                            </div>
+                                            <?php $index++; endforeach; ?>
+                                        </div>
+                                        
+                                    </div>
+                                </div>
+                                <?php endif; ?>
+                                
+                                <?php if( ! empty( $customQuantity_steps ) && ! empty( $custom_quanity ) ) : ?>
+                                <div class="alarn--pricing-column alarn--pricing-column-chart">
+                                    <div class="alarn--price-chart">
+                                        <h5>תמחור כמות</h5>
+                                        <div class="alarnd--price-chart-price <?php echo count($customQuantity_steps) > 4 ? 'alarnd--plus4item-box' : ''; ?>">
+                                            <?php 
+                                            foreach ($customQuantity_steps as $key => $step) :
+
+                                            $startRange = $step['quantity'];
+                                            $endRange = isset($customQuantity_steps[$key + 1]) ? $customQuantity_steps[$key + 1]['quantity'] - 1 : null;
+                                            
+                                            $range_title = '';
+                                            if ($endRange === null) {
+                                                $range_title = "$startRange+";
+                                            } elseif ($startRange == $endRange) {
+                                                $range_title = "$startRange";
+                                            } else {
+                                                $range_title = "$startRange-$endRange";
+                                            }
+
+                                            ?>
+                                            <div class="alarnd--price-chart-item yyy">
+                                                <span class="price_step_price">
+                                                    <?php
+                                                    $price = $step['amount'] == 0 ? wc_price($product->get_regular_price()) : wc_price($step['amount']);
+                                                    echo preg_replace('/\.00/', '', $price); // Remove trailing .00
+                                                    ?>
+                                                </span>
+                                                <span class="price_step_qty">כמות: <span><?php echo esc_html( $range_title); ?></span></span>
+                                            </div>
+                                            <?php endforeach; ?>
+                                        </div>
+                                        
+                                    </div>
+                                </div>
+                                <?php endif; ?>
+                                <div class="modal-bottom-btn">
+                                    <button type="button" class="alarnd_trigger_details_modal ml_add_loading" data-product_id="<?php echo $product->get_id(); ?>"><?php esc_html_e( 'הוסיפו לעגלה', 'hello-elementor' ); ?></button>
+                                </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                <?php endif;
+                
+                echo '</li>'; // End product-item
+            }
+        }
+        echo '</ul>';
+
+        if( $totalItems >= $itemsPerPage ) :
+        ?>
+        <div class="allaround--loadmore-wrap">
+            <?php if ($itemsToDisplay >= $itemsPerPage) : ?>
+            <button type="button" class="alarnd--regular-button alarnd--loadmore-trigger ml_add_loading button" data-page_num="1"><?php esc_html_e("Load More", "hello-elementor"); ?></button>
+            <?php endif; ?>
+        </div>
+        <?php
+        endif;
+        echo '</div>'; // End mini-store-product-list woocommerce
+}
