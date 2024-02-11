@@ -29,44 +29,60 @@ class ALRN_Genrator {
     }
     
     // Callback function to save the image
-    function save_image_callback($request) {
-        $image_data = $request->get_param('imageData'); // Retrieve image data from the request
-        $filename = $request->get_param('filename'); // Retrieve image data from the request
-        $is_feature_image = $request->get_param('is_feature_image'); // Retrieve image data from the request
-        $user_id = $request->get_param('user_id'); // Retrieve image data from the request
-
-        $is_feature_image = ! empty($is_feature_image) ? boolval($is_feature_image) : '';
+    public function save_image_callback($request) {
+        $batch = $request->get_param('batch');
     
-        // Ensure the user_id is numeric and not empty
-        if (empty($user_id)) {
-            return new WP_Error('invalid_user_id', 'Invalid user_id', array('status' => 400));
+        if (empty($batch) || !is_array($batch)) {
+            return new WP_Error('invalid_batch', 'Invalid batch data', array('status' => 400));
         }
     
-        // Sanitize the filename to prevent directory traversal
-        $filename = sanitize_file_name($filename);
+        $success_count = 0;
     
-        // Create the user-specific directory if it doesn't exist
-        $user_directory = AlRNDCM_UPLOAD_DIR . '/' . $user_id;
-        if (!is_dir($user_directory)) {
-            mkdir($user_directory, 0755); // Create the directory recursively
-        }
-    
-        // Construct the full path to save the original image
-        $original_image_path = $user_directory . '/' . $filename;
-    
-        // Decode and save the image data to a file (original size)
-        $decoded_image_data = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $image_data));
-        file_put_contents($original_image_path, $decoded_image_data);
-    
-        // Load the original image using GD library
-        $original_image = imagecreatefromstring($decoded_image_data);
-    
-        // Check if image creation was successful
-        if ($original_image !== false) {
-            // Calculate the new dimensions while preserving the aspect ratio
-            list($original_width, $original_height) = getimagesize($original_image_path);
-            $max_dimension =1500; // Maximum dimension for the resized image
+        foreach ($batch as $image_data) {
 
+            
+            
+            // if( 0 < $success_count ) {
+            //     continue;
+            // }
+
+            error_log( print_r( $success_count, true ) );
+
+            $filename          = $image_data['filename'];
+            $is_feature_image  = $image_data['is_feature_image'];
+            $user_id           = $image_data['user_id'];
+            $image_data        = $image_data['dataURL'];
+    
+            // Ensure the user_id is numeric and not empty
+            if (empty($user_id) || !is_numeric($user_id)) {
+                continue; // Skip the current iteration and move to the next one
+            }
+    
+            // Sanitize the filename to prevent directory traversal
+            $filename = sanitize_file_name($filename);
+    
+            // Create the user-specific directory if it doesn't exist
+            $user_directory = AlRNDCM_UPLOAD_DIR . '/' . $user_id;
+            if (!is_dir($user_directory)) {
+                mkdir($user_directory, 0755, true); // Create the directory recursively
+            }
+    
+            // Construct the full path to save the original image
+            $original_image_path = $user_directory . '/' . $filename;
+    
+            // Decode and save the image data to a file (original size)
+            $decoded_image_data = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $image_data));
+            file_put_contents($original_image_path, $decoded_image_data);
+
+            // Load the original image using GD library
+            $original_image = imagecreatefromstring($decoded_image_data);
+    
+            // Check if image creation was successful
+            if ($original_image !== false) {
+                // Calculate the new dimensions while preserving the aspect ratio
+                list($original_width, $original_height) = getimagesize($original_image_path);
+                $max_dimension = 1500; // Maximum dimension for the resized image
+    
                 $resize_data = array(
                     "width" => 500,
                     "height" => 500,
@@ -79,28 +95,18 @@ class ALRN_Genrator {
                 );
     
                 $this->create_resize_image($resize_data);
-            
+            }
 
-            // $resize_data = array(
-            //     "width" => 1500,
-            //     "original_height" => $original_height,
-            //     "original_width" => $original_width,
-            //     "original_image" => $original_image,
-            //     "filename" => $filename,
-            //     "user_directory" => $user_directory,
-            //     "name" => "resized_"
-            // );
-
-            // $this->create_resize_image($resize_data);
+            $success_count++;
+        }
     
-            // Free up memory
-            imagedestroy($original_image);
-    
-            return rest_ensure_response('Original and resized images saved successfully');
+        if ($success_count > 0) {
+            return rest_ensure_response("{$success_count} image(s) saved successfully");
         } else {
             return new WP_Error('image_processing_error', 'Error processing the image', array('status' => 500));
         }
     }
+    
     
     function create_resize_image($data) {
         $max_dimension_width = $data['width'];
@@ -335,7 +341,7 @@ class ALRN_Genrator {
 
             // echo '<pre>';
             // echo "<h2>$user_id</h2>";
-            // print_r( $logo_positions );
+            // print_r( $default_logo_shape );
             // echo '</pre>';
 
             $user_data = array(

@@ -63,4 +63,56 @@
     margin-top: 25px;
 }
 
-
+#your-profile, #createuser {
+    display: flex;
+    flex-direction: column;
+}
+#createuser table.form-table {
+    order: 3;
+}
+#createuser .form-table[role="presentation"] {
+    order: 1;
+}
+#createuser table#fieldset-billing {
+    order: 2;
+}
+#createuser p.submit {
+    order: 10;
+}
+#createuser .form-table[role="presentation"] tbody {
+    display: flex;
+    flex-direction: column;
+}
+#createuser .form-table[role="presentation"] tbody tr:nth-child(3) {
+    order: 9;
+}
+#createuser .form-table[role="presentation"] tbody tr:nth-child(4) {
+    order: 10;
+}
+#your-profile table.form-table:nth-of-type(2) {
+    order: -10;
+}
+#your-profile table.form-table:nth-of-type(3) {
+    /* order: -9; */
+}
+#your-profile table.form-table:nth-of-type(7) {
+    order: -6;
+}
+#your-profile h2:nth-of-type(3) {
+    order: -8;
+}
+#your-profile h2:nth-of-type(2) {
+    order: -11;
+}
+#your-profile h2:nth-of-type(6) {
+    order: -5;
+}
+#your-profile table:nth-child(2) {
+    opacity: 0.5;
+}
+#your-profile table:nth-child(3) {
+    /* order: 0; */
+}
+#your-profile table#fieldset-billing {
+    order: -7;
+}

@@ -186,6 +186,7 @@ h3.miniStore-promo-title {
 }
 .aum_auth_page .product-item-details {
   padding: 10px 10px 25px 10px;
+  max-height: 280px;
 }
 .mini-store-product-list .product-item .product-thumbnail {
   height: 200px;

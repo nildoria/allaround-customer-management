@@ -706,6 +706,8 @@ function update_user_email_if_different($user_id, $new_email) {
     $current_email = get_userdata($user_id)->user_email;
     if ($new_email && $new_email !== $current_email) {
         wp_update_user(array('ID' => $user_id, 'user_email' => $new_email));
+        // Update the 'dummy_email' field to false
+        update_field('dummy_email', false, 'user_' . $user_id);
     }
 }
 function update_user_name_if_different($user_id, $name) {
@@ -1074,6 +1076,7 @@ function alarnd_single_checkout($user_id = false) {
     $token = get_field('token', "user_{$current_user_id}");
     $phone = ml_get_user_phone($current_user_id);
 
+    $dummy_email = get_field('dummy_email', "user_{$current_user_id}");
     $card_info = get_field('card_info', "user_{$current_user_id}");
     $invoice = get_field('invoice', "user_{$current_user_id}");
     $city = get_user_meta( $current_user_id, 'billing_city', true );
@@ -1295,6 +1298,7 @@ function allaround_card_form($user_id = '') {
     $invoice = get_field('invoice', "user_{$current_user_id}");
     $city = get_user_meta( $current_user_id, 'billing_city', true );
     $billing_address = get_user_meta( $current_user_id, 'billing_address_1', true );
+    $dummy_email = get_field('dummy_email', "user_{$current_user_id}");
 
     $token = get_field('token', "user_{$current_user_id}");
 
@@ -1311,7 +1315,8 @@ function allaround_card_form($user_id = '') {
         empty( $city ) ||
         empty( $name ) ||
         empty( $email ) ||
-        ($lock_profile === true)
+        ($lock_profile === true) ||
+        ($dummy_email === true)
     ) {
         $is_disabled = true;
     }
@@ -1329,7 +1334,7 @@ function allaround_card_form($user_id = '') {
                     <div class="alarnd--user-address-wrap">
                         <?php echo ! empty( $name ) ? '<p>'. esc_html( $name ) .'</p>' : ''; ?>
                         <?php echo ! empty( $phone ) ? '<p>'. esc_html( $phone ) .'</p>' : ''; ?>
-                        <?php echo ! empty( $email ) ? '<p>'. esc_html( $email ) .'</p>' : ''; ?>
+                        <?php echo ! empty( $email ) && !$dummy_email ? '<p>'. esc_html( $email ) .'</p>' : ''; ?>
                         <p>
                         <?php echo ! empty( $billing_address ) ? '<span>'. esc_html( $billing_address ) .', </span>' : ''; ?>
                         <?php echo ! empty( $city ) ? '<span>'. esc_html( $city ) .'</span>' : ''; ?>
@@ -1511,6 +1516,7 @@ function allaround_customer_form($is_disabled = false) {
 
     $the_user = get_user_by( 'id', $current_user_id );
     $phone = ml_get_user_phone($current_user_id);
+    $dummy_email = get_field('dummy_email', 'user_' . $current_user_id);
     $user_billing_info = get_field('user_billing_info', "user_{$current_user_id}");
     $invoice = get_field('invoice', "user_{$current_user_id}");
     $city = get_user_meta( $current_user_id, 'billing_city', true );
@@ -1535,7 +1541,7 @@ function allaround_customer_form($is_disabled = false) {
         <div class="form-row">
             <div class="form-label"><?php esc_html_e("Email", "hello-elementor" ); ?></div>
             <div class="form-input">
-                <input type="text" id="userEmail" name="userEmail" placeholder="<?php esc_attr_e("required", "hello-elementor" ); ?>" value="<?php echo esc_attr( $the_user->user_email ); ?>" required>
+                <input type="text" id="userEmail" name="userEmail" placeholder="<?php esc_attr_e("required", "hello-elementor" ); ?>" value="<?php echo $dummy_email ? "" : esc_attr($the_user->user_email); ?>" required>
             </div>
         </div>
         <div class="form-row flex-row">
@@ -2381,6 +2387,11 @@ function custom_remove_woocommerce_shipping_details() {
             jQuery(document).ready(function($) {
                 // Hide the WooCommerce shipping details fields
                 $('#fieldset-shipping').hide();
+                $('.user-nickname-wrap').hide();
+                $('.user-display-name-wrap').hide();
+                $('.user-first-name-wrap').hide();
+                $('.user-last-name-wrap').hide();
+                $('.user-role-wrap').hide();
                 $('#billing_company').closest('tr').hide();
                 $('#billing_address_2').closest('tr').hide();
                 $('#billing_postcode').closest('tr').hide();
@@ -2390,11 +2401,16 @@ function custom_remove_woocommerce_shipping_details() {
                 $('#billing_email').closest('tr').hide();
                 $('.user-description-wrap').closest('table').hide();
                 $('.user-admin-color-wrap').closest('table').hide();
+                $('#password').closest('table').hide();
+                $('#elementor_pro_notes_enable_permissions').closest('table').hide();
+                $('#e-notes').hide();
                 $('.user-url-wrap').hide();
                 $('#application-passwords-section').hide();
                 $('h2:contains("Customer shipping address")').hide();
                 $('h2:contains("About the user")').hide();
                 $('h2:contains("Personal Options")').hide();
+                $('h2:contains("Account Management")').hide();
+                $('h2:contains("Customer billing address")').hide();
                 $('label[for="billing_address_1"]').text('Address');
                 $('select[name="xoo-ml-user-reg-phone-cc"]').hide();
             });
@@ -2430,6 +2446,8 @@ function modify_user_notification_checkbox() {
         <script type="text/javascript">
             document.getElementById("send_user_notification").checked = false;
             jQuery('#send_user_notification').closest('tr').hide();
+            jQuery('#url').closest('tr').hide();
+            jQuery('.user-language-wrap').hide();
         </script>
         <?php
     }
