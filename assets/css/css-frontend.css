@@ -2074,10 +2074,22 @@ section.allaround--products-section.loading .alarnd--overlay {
   padding-bottom: 50px;
   text-align: center;
 }
-
+.woocommerce .mini-store-product-list li.loadmore-loaded.product-item {
+    display: none;
+}
+.allaround--loadmore-wrap
+  button.alarnd--reveal-more {
+  padding: 20px 60px;
+  position: relative;
+  z-index: 2;
+  /* display: none; */
+}
 .allaround--loadmore-wrap
   button.alarnd--regular-button.alarnd--loadmore-trigger {
   padding: 20px 60px;
+  position: absolute;
+  z-index: 0;
+  /* opacity: 0; */
 }
 img.verified_tick {
   height: 30px;

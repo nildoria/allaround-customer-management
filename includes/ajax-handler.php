@@ -87,6 +87,10 @@ class ML_Ajax {
         // Check if there are more items to load
         $has_more_items = count($items) > $end;
         ob_start();
+
+            // echo '<pre>';
+            // print_r( $itemsPerPage );
+            // echo '</pre>';
         
 
         foreach ($itemsToDisplay as $prod_object) {
@@ -118,7 +122,7 @@ class ML_Ajax {
             if ($product) {
                 $terms = wp_get_post_terms($product_id, 'product_cat');
 
-                echo '<li class="product-item product ';
+                echo '<li class="loadmore-loaded product-item product ';
                 
                 foreach ($terms as $term) {
                     echo 'category-' . $term->term_id . ' ';
@@ -126,7 +130,7 @@ class ML_Ajax {
                 echo '" data-product-id="' . esc_attr($product->get_id()) . '">';
                 
                 // Product Thumbnail
-                echo '<div class="product-thumbnail">';
+                echo '<div style="background-image:url(https://placeholder.pics/svg/307x200/FFFFFF-FFFFFF/636363-FFFFFF/ALLAROUND)" class="product-thumbnail">';
                 echo '<img src="'.$thumbnail.'" loading="lazy" />';
                 echo '</div>';
                 
@@ -348,7 +352,7 @@ class ML_Ajax {
             if ($product) {
                 $terms = wp_get_post_terms($product_id, 'product_cat');
 
-                echo '<li class="product-item product ';
+                echo '<li class="loadmore-loaded product-item product ';
                 
                 foreach ($terms as $term) {
                     echo 'category-' . $term->term_id . ' ';

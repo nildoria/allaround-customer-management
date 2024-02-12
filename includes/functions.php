@@ -1521,6 +1521,9 @@ function allaround_customer_form($is_disabled = false) {
     $invoice = get_field('invoice', "user_{$current_user_id}");
     $city = get_user_meta( $current_user_id, 'billing_city', true );
     $billing_address = get_user_meta( $current_user_id, 'billing_address_1', true );
+    $first_name = get_user_meta($current_user_id, 'billing_first_name', true);
+    $last_name = get_user_meta($current_user_id, 'billing_last_name', true);
+    $user_display_name = trim("{$first_name} {$last_name}");
     ?>
     <form action="" id="customerDetails" class="allaround--card-form<?php echo $is_disabled === false ? ' hidden_form' : ''; ?>">
         <h3><?php esc_html_e("כתובת למשלוח", "hello-elementor" ); ?></h3>
@@ -1528,7 +1531,7 @@ function allaround_customer_form($is_disabled = false) {
             <div class="form-row">
                 <div class="form-label"><?php esc_html_e("Name", "hello-elementor" ); ?></div>
                 <div class="form-input">
-                    <input type="text" id="userName" name="userName" placeholder="<?php esc_attr_e("required", "hello-elementor" ); ?>" value="<?php echo esc_attr( $the_user->display_name ); ?>" required>
+                    <input type="text" id="userName" name="userName" placeholder="<?php esc_attr_e("required", "hello-elementor" ); ?>" value="<?php echo $user_display_name ? esc_attr($user_display_name) : '' ?>" required>
                 </div>
             </div>
             <div class="form-row">
@@ -2671,9 +2674,8 @@ function ml_get_filter_content( $current_user_id, $filter = '' ) {
         if( $totalItems >= $itemsPerPage ) :
         ?>
         <div class="allaround--loadmore-wrap">
-            <?php if ($itemsToDisplay >= $itemsPerPage) : ?>
-            <button type="button" class="alarnd--regular-button alarnd--loadmore-trigger ml_add_loading button" data-page_num="1"><?php esc_html_e("Load More", "hello-elementor"); ?></button>
-            <?php endif; ?>
+            <button type="button" class="alarnd--regular-button alarnd--loadmore-trigger ml_loading ml_add_loading button" data-page_num="1"><?php esc_html_e("Load More", "hello-elementor"); ?></button>
+            <button type="button" class="alarnd--regular-button alarnd--reveal-more ml_add_loading button" ><?php esc_html_e("מוצרים נוספים...", "hello-elementor"); ?></button>
         </div>
         <?php
         endif;

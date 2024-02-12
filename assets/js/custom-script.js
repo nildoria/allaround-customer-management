@@ -991,74 +991,80 @@ jQuery(document).ready(function ($) {
 
   // });
 
+  var categoryId = $(".filter_active").data('category');
+  setTimeout(function() {
+    triggerLoadMore(categoryId);
+  }, 100);
+
   var loading = false;
 
-  $(window).scroll(function() {
-    var triggerOffset = 500; 
-    var scrollPosition = $(window).scrollTop() + $(window).height();
-    var listSectionOffset = $(".allaround--products-filter-container").offset().top + $(".allaround--products-filter-container").height();
-
+  function triggerLoadMore(categoryId) {
     var filter_item = $(".filter_active").data('category'),
-        filter_wrap = $("#filter_wrap-"+filter_item),
-        current = filter_wrap.find('.alarnd--loadmore-trigger');
-    
-    if (scrollPosition > listSectionOffset - triggerOffset) {
-      if (!loading && current.is(":visible")) {
-        loading = true;
+      filter_wrap = $("#filter_wrap-"+filter_item),
+      current = filter_wrap.find('.alarnd--loadmore-trigger');
 
-        var page_num = current.data("page_num"),
-          section = $(".allaround--products-section"),
-          wrapper = $("#allaround_products_list-"+filter_item),
-          user_id = wrapper.data("user_id");
+    if (!loading && current.is(":visible")) {
+      loading = true;
 
-        // section.addClass("loading");
-        current.addClass("ml_loading");
+      var page_num = current.data("page_num"),
+        section = $(".allaround--products-section"),
+        wrapper = $("#allaround_products_list-"+filter_item),
+        user_id = wrapper.data("user_id");
 
-        $.ajax({
-          type: "POST",
-          dataType: "json",
-          url: ajax_object.ajax_url,
-          data: {
-            action: "ml_pagination",
-            page_num: page_num,
-            user_id: user_id,
-            filter_item: filter_item,
-            nonce: ajax_object.nonce,
-          },
-          success: function (response) {
-            // section.removeClass("loading");
-            current.removeClass("ml_loading");
+      // section.addClass("loading");
+      // current.addClass("ml_loading");
 
-            if (response.items.length === 0) {
-              current.slideUp();
+      $.ajax({
+        type: "POST",
+        dataType: "json",
+        url: ajax_object.ajax_url,
+        data: {
+          action: "ml_pagination",
+          page_num: page_num,
+          user_id: user_id,
+          filter_item: filter_item,
+          nonce: ajax_object.nonce,
+        },
+        success: function (response) {
+          // section.removeClass("loading");
+          // current.removeClass("ml_loading");
+
+          if (response.items.length === 0) {
+            current.slideUp();
+          } else {
+            wrapper.append(response.items);
+
+            current.data("page_num", page_num + 1);
+
+            var totalPages = (response.totalPages - 1);
+
+            if (page_num >= totalPages) {
+              current.fadeOut();
+              // current.removeClass("ml_loading alarnd--loadmore-trigger").addClass("alarnd--reveal-more");
+
             } else {
-              wrapper.append(response.items);
-
-              current.data("page_num", page_num + 1);
-
-              var totalPages = (response.totalPages - 1);
-
-              if (page_num >= totalPages) {
-                current.fadeOut();
-              } else {
-                current.show();  // Show the load more button
-              }
+              current.show();
+              setTimeout(function() {
+                triggerLoadMore(categoryId);
+              }, 200);
             }
-          },
-          complete: function () {
-            loading = false;
-            // section.removeClass("loading");
-            current.removeClass("ml_loading");
-            initi_prive_view_modal();
-            setProductDetailsHeight();
-          },
-          error: function(xhr, status, error) {
-            console.error("AJAX Error:", error);
+          revealLoadedProducts(page_num, totalPages);
           }
-        });
-      }
+        },
+        complete: function () {
+          loading = false;
+          // section.removeClass("loading");
+          // current.removeClass("ml_loading");
+          initi_prive_view_modal();
+          setProductDetailsHeight();
+          // revealLoadedProducts(page_num, totalPages);
+        },
+        error: function(xhr, status, error) {
+          console.error("AJAX Error:", error);
+        }
+      });
     }
-  });
+  }
 
 
   $('.filter_item').on('click', function() {
@@ -1075,12 +1081,24 @@ jQuery(document).ready(function ($) {
     // Toggle the filter_wrap-active class
     $('.filter_wrap-' + categoryId).addClass('filter_wrap-active').siblings('.filter_wrap-item').removeClass('filter_wrap-active');
 
+    triggerLoadMore(categoryId);
+
     setTimeout(function() {
       
       $('.filter_wrap-' + categoryId).removeClass('loading');
 
     }, 500);
   });
+
+  function revealLoadedProducts(page_num, totalPages) {
+    $('.alarnd--reveal-more').on('click', function() {
+      var closestUl = $(this).closest('.filter_wrap-active');
+      closestUl.find('li.loadmore-loaded').removeClass('loadmore-loaded');
+      if (page_num >= totalPages) {
+        $(this).fadeOut();
+      }
+    });
+  }
 
 
 
@@ -1263,7 +1281,7 @@ jQuery(document).ready(function ($) {
                   $(this).remove();
               });
             }, 5000);
-          }, 2500);
+          }, 3500);
       }
   });
 
