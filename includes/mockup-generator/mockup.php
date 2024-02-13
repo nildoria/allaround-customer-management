@@ -341,7 +341,7 @@ class ALRN_Genrator {
 
             // echo '<pre>';
             // echo "<h2>$user_id</h2>";
-            // print_r( $default_logo_shape );
+            // print_r( $logo_positions );
             // echo '</pre>';
 
             $user_data = array(

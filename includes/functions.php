@@ -928,8 +928,12 @@ function get_color_thumbnails( $product_id, $thumb_size = 'alarnd_main_thumbnail
             $thumbnail = isset($color['thumbnail']) && ! empty( $color['thumbnail'] ) ? $color['thumbnail'] : '';
             if( ! empty( $thumbnail ) && isset( $thumbnail['ID'] ) ) {
                 $url = wp_get_attachment_image_src($thumbnail['ID'], $thumb_size);
+
+                $get_lightdark = isColorLightOrDark($color['color_hex_code']);
+                $lightdark = isset( $color['lightdark'] ) && in_array( $color['lightdark'], array('Lighter', 'Darker') ) ? $color['lightdark'] : $get_lightdark;
+
                 $galleries[] = array(
-                    'type' => isColorLightOrDark($color['color_hex_code']),
+                    'type' => $lightdark,
                     'attachment_id' => $thumbnail['ID'],
                     'color_hex' => $color['color_hex_code'],
                     'thumbnail' => $url[0]
@@ -2681,3 +2685,85 @@ function ml_get_filter_content( $current_user_id, $filter = '' ) {
         endif;
         echo '</div>'; // End mini-store-product-list woocommerce
 }
+
+
+/**
+ * Function to handle the quantity callback for Woocommerce cart items.
+ *
+ * @param datatype $product_quantity description
+ * @param datatype $cart_item_key description
+ * @param datatype $cart_item description
+ * @return datatype
+ */
+function woocommerce_cart_item_quantity_cb( $product_quantity, $cart_item_key, $cart_item ) {
+    if( ! isset( $cart_item['product_id'] ) )
+        return $product_quantity;
+
+    $product_id = $cart_item['product_id'];
+
+    $product = wc_get_product( $product_id );
+
+    $group_enable = get_field( 'group_enable', $product->get_id() );
+    $custom_quanity = get_field( 'enable_custom_quantity', $product->get_id() );
+
+
+    $steps = get_field( 'quantity_steps', $product->get_id() );
+
+    $qty = $product->get_min_purchase_quantity();
+
+    if( ! empty( $custom_quanity ) && ! empty( $steps ) && isset( $steps[0]['quantity'] ) ) {
+        $qty = $steps[0]['quantity'];
+    }
+
+    if ( 
+        "simple" === $product->get_type() && 
+        ! empty( $custom_quanity ) && 
+        ! empty( $steps ) )
+    {
+        $product_quantity = woocommerce_quantity_input(
+            array(
+                'input_name'   => "cart[{$cart_item_key}][qty]",
+                'input_value'  => $cart_item['quantity'],
+                'max_value'    => '50000',
+                'min_value'    => $qty,
+                'product_name' => $product->get_name(),
+            ),
+            $product,
+            false
+        );
+
+        // error_log( print_r( $qty, true ) );
+        // error_log( print_r( $product_quantity, true ) );
+    }
+
+    return $product_quantity;
+
+}
+add_filter( 'woocommerce_cart_item_quantity', 'woocommerce_cart_item_quantity_cb', 10, 3 );
+
+/**
+ * Filters the quantity input classes.
+ *
+ * @param array $classes The input classes.
+ * @param WC_Product $product Product instance.
+ * @return array The modified input classes.
+ */
+function woocommerce_quantity_input_classes_cb( $classes, $product ) {
+
+    $group_enable = get_field( 'group_enable', $product->get_id() );
+    $custom_quanity = get_field( 'enable_custom_quantity', $product->get_id() );
+
+    $steps = get_field( 'quantity_steps', $product->get_id() );
+
+    if ( 
+        "simple" === $product->get_type() && 
+        ! empty( $custom_quanity ) && 
+        ! empty( $steps ) )
+    {
+        $classes[] = 'allaround_check_min_qty';
+    }
+
+    return $classes;
+
+}
+add_filter( 'woocommerce_quantity_input_classes', 'woocommerce_quantity_input_classes_cb', 10, 2 );

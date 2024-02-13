@@ -1167,6 +1167,22 @@ button.mfp-arrow.mfp-prevent-close:active {
   justify-content: center;
 }
 
+.product-quantity .tooltip_error {
+  right: initial;
+  left: 0;
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+body.rtl .product-quantity .tooltip_error {
+    left: initial;
+    right: 0;
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+.product-quantity .quantity {
+  position: relative;
+}
+
 .alarnd--login-form-welcome span {
   font-size: 26px;
   margin-left: 10px;

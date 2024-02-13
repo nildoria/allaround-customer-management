@@ -1281,7 +1281,7 @@ jQuery(document).ready(function ($) {
                   $(this).remove();
               });
             }, 5000);
-          }, 3500);
+          }, 2500);
       }
   });
 
@@ -1879,6 +1879,79 @@ jQuery(document).ready(function ($) {
     e.preventDefault();
     $(this).closest('.mfp-container').find('.mfp-close').click();
   });
+	
+  $(document).on(
+    "change paste keyup",
+    ".allaround_check_min_qty",
+    function (e) {
+      var val = e.target.value;
+
+      var val = parseInt(val),
+        group = $(e.target).closest(".quantity"),
+        min = $(e.target).attr("min"),
+        max = $(e.target).attr("max");
+
+        min = parseInt(min);
+        max = parseInt(max);
+
+      var min_msg = allaround_vars.min_msg + " " + min;
+
+      if (e.target.value.length === 0 || isNaN(val)) { // Check if the input is empty or not a number
+        min_msg = allaround_vars.required_msg;
+        val = NaN; // Explicitly set val to NaN to indicate no valid number is present
+      }
+      
+      console.log(val, min, max);
+      
+      if (isNaN(val)) {
+        group.find(".tooltip_error").remove();
+        $(e.target).after(
+          '<div class="tooltip_error"><span class="arrow"></span><span class="text">' +
+            min_msg +
+            "</span></div>"
+        );
+
+        if (!$(e.target).hasClass("error_field")) {
+          $(e.target).addClass("error_field");
+        }
+        $("button.allaround_card_details_submit").prop("disabled", true);
+      } else if (val < min) {
+        // val is less than min and not NaN
+        group.find(".tooltip_error").remove();
+        $(e.target).after(
+          '<div class="tooltip_error"><span class="arrow"></span><span class="text">' +
+            min_msg +
+            "</span></div>"
+        );
+
+        if (!$(e.target).hasClass("error_field")) {
+          $(e.target).addClass("error_field");
+        }
+        $("button.allaround_card_details_submit").prop("disabled", true);
+      } else if (val > max) {
+        // val is greater than max
+        group.find(".tooltip_error").remove();
+        $(e.target).after(
+          '<div class="tooltip_error"><span class="arrow"></span><span class="text">' +
+            allaround_vars.max_msg +
+            " " +
+            max +
+            "</span></div>"
+        );
+
+        if (!$(e.target).hasClass("error_field")) {
+          $(e.target).addClass("error_field");
+        }
+        $("button.allaround_card_details_submit").prop("disabled", true);
+      } else {
+        // val is within the range
+        group.find(".tooltip_error").remove();
+        $(e.target).removeClass("error_field");
+        $("button.allaround_card_details_submit").prop("disabled", false);
+      }
+    }
+  );
+
 
 
   // var authorTargetUrl = sessionStorage.getItem('authorTargetUrl');
