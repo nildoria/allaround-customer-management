@@ -1124,8 +1124,8 @@ class ML_Ajax {
 
         $failed_popup = $this->popup_failed_markup();
 
-        if ( ! is_wp_error( $request ) && wp_remote_retrieve_response_code( $request ) == 200 && $message !== "Accepted" ) {
-		//if ( ! is_wp_error( $request ) && $message !== "Accepted" ) {
+        //if ( ! is_wp_error( $request ) && wp_remote_retrieve_response_code( $request ) == 200 && $message !== "Accepted" ) {
+		if ( ! is_wp_error( $request ) && $message !== "Accepted" ) {
             
             // first create order
             $order_id = ml_create_order($order_data);   
@@ -1632,7 +1632,7 @@ class ML_Ajax {
                             <div class="alarnd--select-opt-wrapper">
                                 <div class="alarnd--select-opt-header">
                                     <?php foreach( $all_sizes as $size ) : ?>
-                                        <?php if (!ml_is_omit($size, $selected_omit_sizes)) : ?>
+                                        <?php if (ml_is_omit($size, $selected_omit_sizes)) : ?>
                                         <span><?php echo esc_html( $size ); ?></span>
                                         <?php endif; ?>
                                     <?php endforeach; ?>
@@ -1643,10 +1643,10 @@ class ML_Ajax {
                                     <div class="alarn--opt-single-row">
                                         <?php foreach( $all_sizes as $size ) :
                                         $disabled = '';
-                                        if( ! empty( $color['omit_sizes'] ) && ml_is_omit($size, $color['omit_sizes'] ) ) {
+                                        if( ! empty( $color['omit_sizes'] ) && !ml_is_omit($size, $color['omit_sizes'] ) ) {
                                                 $disabled = 'disabled="disabled"'; 
                                         } ?>
-                                        <?php if (!ml_is_omit($size, $selected_omit_sizes)) : ?>
+                                        <?php if (ml_is_omit($size, $selected_omit_sizes)) : ?>
                                         <div class="tshirt-qty-input-field">
                                             <input style="box-shadow: 0px 0px 0px 1px <?php echo $color['color_hex_code']; ?>;" type="text" class="three-digit-input" placeholder="" pattern="^[0-9]*$" inputmode="numeric" autocomplete="off" name="alarnd__color_qty[<?php echo $key; ?>][<?php echo $size; ?>]" <?php echo $disabled; ?>>
                                             <span class="alarnd--limit-tooltip">Can't order more than 999</span>

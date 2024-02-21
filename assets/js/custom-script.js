@@ -1953,7 +1953,6 @@ jQuery(document).ready(function ($) {
   );
 
 
-
   // var authorTargetUrl = sessionStorage.getItem('authorTargetUrl');
 
   // if ($('body').hasClass('author')) {

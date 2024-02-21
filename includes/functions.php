@@ -1735,6 +1735,8 @@ function ml_create_order($data) {
     // Assuming you have received payment response and details
     $order = wc_create_order();
 
+    $gallery_thumbs = [];
+
     // Loop through the products and add them to the order
     foreach ($products as $product) {
         $product_id = $product['product_id'];
@@ -1779,13 +1781,8 @@ function ml_create_order($data) {
         if( ! empty( $size ) ) {
             wc_add_order_item_meta($item_id, __('Size', 'hello-elementor'), $size);
         }
-      
-        if( ! empty( $image_id ) ) {
-            $gen_thumbnail = ml_get_wc_thumbnail_url( $image_id, $product_id, $user_id, $alarnd_color_key );
-            if( ! empty( $gen_thumbnail ) ) {
-                // Add custom thumbnail URL as post meta for the product
-                update_post_meta($product_id, '_generated_thumbnail_url', $gen_thumbnail);
-            }
+        if( ! empty( $alarnd_color_key ) ) {
+            $gallery_thumbs[$item_id] = $alarnd_color_key;
         }
     }
 
@@ -1816,6 +1813,11 @@ function ml_create_order($data) {
 
         // Add the shipping item to the order
         $order->add_item($shipping_item);
+
+        // Set the applied coupons to the order
+        foreach ($applied_coupons as $coupon_code) {
+            $order->apply_coupon($coupon_code);
+        }
 
         // Recalculate totals and save the order
         $order->calculate_totals();
@@ -1882,11 +1884,6 @@ function ml_create_order($data) {
         }
     }
 
-    // Set the applied coupons to the order
-    foreach ($applied_coupons as $coupon_code) {
-        $order->apply_coupon($coupon_code);
-    }
-
     $woocommerce->cart->calculate_totals();
 
     $order->calculate_totals();
@@ -1898,6 +1895,11 @@ function ml_create_order($data) {
     $order->save();
 
     $order_id = $order->get_id();
+
+    if( ! empty( $gallery_thumbs ) ) {
+        // Add custom thumbnail URL as post meta for the product
+        update_post_meta($order_id, '_gallery_thumbs', $gallery_thumbs);
+    }
 
 
     // Trigger emails Manually
@@ -1912,13 +1914,37 @@ function ml_create_order($data) {
 add_filter('woocommerce_admin_order_item_thumbnail', 'custom_order_item_thumbnail', 10, 3);
 
 function custom_order_item_thumbnail($thumbnail, $item_id, $item) {
+
+    // get order id
+    $order_id = $item->get_order_id();
+    // get order object
+    $order = wc_get_order($order_id);
     // Get the product ID from the order item
     $product_id = $item->get_product_id();
 
-    $custom_thumbnail_url = get_post_meta($product_id, '_generated_thumbnail_url', true);
+    $customer_id = $order->get_customer_id();
 
-    if ($custom_thumbnail_url) {
-        $thumbnail = preg_replace('/src="([^"]*)"/', 'src="' . esc_url($custom_thumbnail_url) . '"', $thumbnail);
+    $gallery_thumbs = get_post_meta($item->get_order_id(), '_gallery_thumbs', true);
+
+
+    $thumb_item = array(
+        'user_id' => $customer_id
+    );
+
+    if( ! empty( $gallery_thumbs ) && isset( $gallery_thumbs[$item_id] ) ) {
+        $thumb_item['alarnd_color_key'] = $gallery_thumbs[$item_id];
+    }
+
+    $wc_thumb = ml_get_cart_thumb($product_id, $thumb_item);
+
+    error_log( print_r( $wc_thumb, true ) );
+
+    if ($wc_thumb) {
+        // Wrap the thumbnail with an anchor tag
+        $thumbnail = '<a target="_blank" href="' . esc_url( $wc_thumb ) . '">' . $thumbnail . '</a>';
+        
+        // Replace the image source with the custom thumbnail URL
+        $thumbnail = preg_replace('/src="([^"]*)"/', 'src="' . esc_url($wc_thumb) . '"', $thumbnail);
     }
 
     return $thumbnail;
@@ -2767,3 +2793,66 @@ function woocommerce_quantity_input_classes_cb( $classes, $product ) {
 
 }
 add_filter( 'woocommerce_quantity_input_classes', 'woocommerce_quantity_input_classes_cb', 10, 2 );
+
+
+/**
+ * Snippet Name:	WooCommerce Show Coupon Code Used In Emails
+ * Snippet Author:	ecommercehints.com
+ */
+
+add_action( 'woocommerce_email_after_order_table', 'allaround_show_coupons_used_in_emails', 10, 4 );
+function allaround_show_coupons_used_in_emails( $order, $sent_to_admin, $plain_text, $email ) {
+    if (count( $order->get_coupons() ) > 0 ) {
+        $html = '<div class="used-coupons">
+        <h2>Used coupons<h2>
+        <table class="td" cellspacing="0" cellpadding="6" border="1"><tr>
+        <th>Coupon Code</th>
+        <th>Coupon Amount</th>
+        </tr>';
+
+        foreach( $order->get_coupons() as $item ){
+            $coupon_code   = $item->get_code();
+            $coupon = new WC_Coupon($coupon_code);
+			$discount_type = $coupon->get_discount_type();
+			$coupon_amount = $coupon->get_amount();
+
+			if ($discount_type == 'percent') {
+				$output = $coupon_amount . "%";
+			} else {
+				$output = wc_price($coupon_amount);
+			}
+
+            $html .= '<tr>
+                <td>' . strtoupper($coupon_code) . '</td>
+                <td>' . $output . '</td>
+            </tr>';
+        }
+        $html .= '</table><br></div>';
+
+        $css = '<style>
+            .used-coupons table {
+				width: 100%;
+				font-family: \'Helvetica Neue\', Helvetica, Roboto, Arial, sans-serif;
+                color: #737373;
+				border: 1px solid #e4e4e4;
+				margin-bottom:8px;
+			}
+            .used-coupons table th, table.tracking-info td {
+			text-align: left;
+			border-top-width: 4px;
+            color: #737373;
+			border: 1px solid #e4e4e4;
+			padding: 12px;
+			}
+            .used-coupons table td {
+			text-align: left;
+			border-top-width: 4px;
+			color: #737373;
+			border: 1px solid #e4e4e4;
+			padding: 12px;
+			}
+        </style>';
+
+        echo $css . $html;
+    }
+}
