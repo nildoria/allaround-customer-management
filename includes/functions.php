@@ -341,6 +341,48 @@ add_filter( 'acf/load_field/name=disable_product', 'acf_select_products_choices_
 add_filter( 'acf/load_field/name=default_products', 'acf_select_products_choices_cb' );
 add_filter( 'acf/load_field/name=custom_logo_products', 'acf_select_products_choices_cb' );
 
+function acf_repeater_select_products_choices_cb( $field ) {
+
+    // Loop through repeater rows
+    if( isset($field['sub_fields']) && is_array($field['sub_fields']) ) {
+        foreach( $field['sub_fields'] as &$sub_field ) {
+            // Check if the subfield is the select field inside the repeater
+            if( $sub_field['name'] === 'select_products' ) {
+                // Reset choices for the select field inside the repeater
+                $sub_field['choices'] = array();
+
+                $args = array(
+                    'numberposts' => 1000,
+                    'post_type'   => 'product',
+                    'post_status' => 'publish'
+                );
+
+                $products = get_posts( $args );
+
+                // Loop through the array and add to field 'choices'
+                if( is_array($products) && ! empty($products) ) {
+                    foreach( $products as $product ) {
+                        $sub_field['choices'][ $product->ID ] = $product->post_title;
+                    }
+                }
+            }
+        }
+    }
+
+    // Return the modified repeater field
+    return $field;
+}
+
+// Filter to populate choices for the select field inside the repeater
+add_filter( 'acf/load_field/name=logo_collections', 'acf_repeater_select_products_choices_cb' );
+
+
+
+
+
+
+
+
 add_action( 'alarnd__modal_cart', 'woocommerce_template_single_add_to_cart' );
 
 
@@ -2855,4 +2897,25 @@ function allaround_show_coupons_used_in_emails( $order, $sent_to_admin, $plain_t
 
         echo $css . $html;
     }
+}
+
+function ml_format_timestamps($timestamps_array) {
+    $formatted_array = array();
+
+    if( empty( $timestamps_array ) )
+        return $timestamps_array;
+
+    foreach ($timestamps_array as $key => $timestamps) {
+        $start_time_formatted = date('Y-m-d H:i:s', $timestamps['start_time']);
+        $end_time_formatted = date('Y-m-d H:i:s', $timestamps['end_time']);
+        $generated_total = isset( $timestamps['generated'] ) ? $timestamps['generated'] : 0;
+
+        $formatted_array[$key] = array(
+            'start_time' => $start_time_formatted,
+            'end_time' => $end_time_formatted,
+            'generated' => $generated_total
+        );
+    }
+
+    return $formatted_array;
 }

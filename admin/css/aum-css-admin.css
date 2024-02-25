@@ -108,7 +108,7 @@
     order: -5;
 }
 #your-profile table:nth-child(2) {
-    opacity: 0.5;
+    /* opacity: 0.5; */
 }
 #your-profile table:nth-child(3) {
     /* order: 0; */

@@ -26,6 +26,52 @@ class ALRN_Genrator {
             'callback' => array( $this, 'save_image_callback' ),
             'permission_callback' => '__return_true'
         ));
+        register_rest_route('alaround-generate/v1', '/save-info', array(
+            'methods' => 'POST',
+            'callback' => array( $this, 'save_info_callback' ),
+            'permission_callback' => '__return_true'
+        ));
+    }
+
+    public function save_info_callback($request) {
+        $user_id = $request->get_param('user_id');
+        $start_time = $request->get_param('start_time');
+        $end_time = $request->get_param('end_time');
+        $total_items = $request->get_param('total_items');
+
+
+        if ( empty($start_time) || empty($end_time) || empty( $user_id ) ) {
+            return new WP_Error('invalid_info', 'Invalid info data', array('status' => 400));
+        }
+
+        // Get existing mockup generate records
+        $generated_records = get_user_meta($user_id, 'mockup_generated_records', true);
+
+        // If no existing records, initialize an empty array
+        if (empty($generated_records)) {
+            $generated_records = array();
+        }
+
+        // Add the current timestamp to the records array
+        $generated_records[] = array(
+            'start_time' => $start_time,
+            'end_time' => $end_time,
+            "generated" => $total_items
+        );
+
+        error_log( print_r( $generated_records, true ) );
+
+        $limit = 500;
+        // Limit the records to 100 by removing older records
+        if (count($generated_records) > $limit) {
+            $generated_records = array_slice($generated_records, -$limit, $limit, true);
+        }
+
+        // Save the updated records array in user meta
+        update_user_meta($user_id, 'mockup_generated_records', $generated_records);
+
+        return rest_ensure_response("Generated records saved successfully.");
+
     }
     
     // Callback function to save the image
@@ -40,13 +86,7 @@ class ALRN_Genrator {
     
         foreach ($batch as $image_data) {
 
-            
-            
-            // if( 0 < $success_count ) {
-            //     continue;
-            // }
-
-            error_log( print_r( $success_count, true ) );
+            // error_log( print_r( $success_count, true ) );
 
             $filename          = $image_data['filename'];
             $is_feature_image  = $image_data['is_feature_image'];
@@ -174,6 +214,7 @@ class ALRN_Genrator {
                 'nonce' => wp_create_nonce( "mockup_gen_nonce" ),
                 'generate_file' => plugin_dir_url(__FILE__) . 'js/image-generate.js',
                 'image_save_endpoint' => rest_url( 'alaround-generate/v1/save-image' ),
+                'info_save_endpoint' => rest_url( 'alaround-generate/v1/save-info' ),
                 'upload_foler' => $upload_dir['basedir'] . "/alaround-mockup"
             ));
         }
@@ -222,16 +263,20 @@ class ALRN_Genrator {
             $override_shape = get_field('override_shape', 'user_' . $user_id);
             $default_logo_shape = get_field('default_logo_shape', 'user_' . $user_id);
             $custom_logo_shape = get_field('custom_logo_shape', 'user_' . $user_id);
+            $logo_collections = get_field('logo_collections', 'user_' . $user_id);
 
             $type = ml_get_orientation( $profile_picture_id );
             $custom_type = '';
 
+            $override_logo_shape = $override_custom_logo_shape = false;
             if ($override_shape && in_array($default_logo_shape, array('square', 'horizontal'))) {
                 $type = $default_logo_shape;
+                $override_logo_shape = $default_logo_shape;
             }
 
             if ($override_shape && in_array($custom_logo_shape, array('square', 'horizontal'))) {
                 $custom_type = $custom_logo_shape;
+                $override_custom_logo_shape = $custom_logo_shape;
             }
             
             $custom_logo_data = array(
@@ -240,6 +285,20 @@ class ALRN_Genrator {
                 "allow_products" => $custom_logo_products
             );
 
+             // Get existing mockup generate records
+            $generated_records = get_user_meta($user_id, 'mockup_generated_records', true);
+            $generated_records = ml_format_timestamps( $generated_records );
+
+
+            $collections = [];
+            if( ! empty( $logo_collections ) ) {
+                $collections = array(
+                    'collections' => $logo_collections,
+                    'override_logo' => $override_logo_shape,
+                    'override_custom_logo' => $override_custom_logo_shape
+                );
+            }
+
             $user_data = array(
                 'user_id' => $user_id,
                 'logo' => $profile_picture_url,
@@ -247,6 +306,7 @@ class ALRN_Genrator {
                 'logo_type' => $type,
                 'custom_logo_type' => $custom_type,
                 'images' => $thumbnails,
+                'logo_collections' => $collections,
                 'logo_positions' => $logo_positions
             );
 
@@ -259,7 +319,8 @@ class ALRN_Genrator {
                 echo "<h2>$user_id</h2>";
                 echo '</pre>';
                 echo '<pre>';
-                print_r( $user_data );
+                print_r( $generated_records );
+                print_r( $collections );
                 echo '</pre>';
             }
 

@@ -218,6 +218,7 @@
                     // then get that type value from resultItem
                     // and re-initialize x, y, width, height, angle again with new values.
                     if( custom === true ) {
+                        console.log(`custom ${custom} custom_logo ${custom_logo}`);
                         let get_type = get_orientation(logoImage);
                         if (custom_logo_type && (custom_logo_type === "horizontal" || custom_logo_type === "square")) {
                             // console.log(`ProductID:${product_id} Type:${custom_logo_type}`);
@@ -226,6 +227,7 @@
 
                         // overwrite get_type if custom_logo[finalLogoNumber] == false. in short if custom logo with finalLogoNumber is emmpty.
                         if (
+                            custom_logo !== undefined &&
                             custom_logo.hasOwnProperty(finalLogoNumber) && 
                             custom_logo[finalLogoNumber] == false
                         ) {
@@ -354,6 +356,16 @@
         return await createImageBitmap(logoBlob);
     };
     
+    const loadSimpleImage = async (url) => {
+        const logoResponse = await fetch(url);
+        if (!logoResponse.ok) {
+            throw new Error(`Failed to fetch logo image: ${url}`);
+        }
+        const logoBlob = await logoResponse.blob();
+        return await createImageBitmap(logoBlob);
+    };
+    
+    
     
     let imageBatch = [];
     let totalImagesProcessed = 0;
@@ -362,11 +374,11 @@
     
     // Function to perform the image generation
     const generateImages = async (task) => {
-        const { backgrounds, logo, logo_second, custom_logo, user_id, logoData, logo_type, custom_logo_type } = task;
+        let { backgrounds, logo, logo_second, custom_logo, user_id, logoData, logo_type, custom_logo_type, logo_collections } = task;
         const totalImages = backgrounds.length;
         const imageResultList = [];
     
-        console.log('totalNumberItems:', totalNumberItems);
+        console.log('logo_collections:', logo_collections);
     
         for (let i = 0; i < totalImages; i++) {
             totalNumberItems++;
@@ -380,13 +392,35 @@
     
         console.log('finished totalNumberItems:', totalNumberItems);
     
-        
-    
         for (let i = 0; i < totalImages; i++) {
             getTotalItemNeedProcess++;
             const backgroundUrl = backgrounds[i]['url'];
             const product_id = backgrounds[i]['id'];
             const galleries = backgrounds[i]['galleries'];
+
+            // first check if logo collection even exists or not
+            if( logo_collections !== null && logo_collections.collections !== null ) {
+                const itemData = await getLightnessByID(logo_collections.collections, product_id);
+
+                const { override_logo } = logo_collections;
+
+                // check if itemData is not null
+                // although it's check first so it's just extra layour of security
+                if (itemData !== null) {
+                    logo = await getLighter( itemData, logo );
+                    logo_second = await getDarker( itemData, custom_logo );
+
+                    if( logo && logo !== null && ( override_logo === '' || override_logo === false) ) {
+                        const logoImage = await loadSimpleImage(logo);
+                        let get_type = get_orientation(logoImage);
+                        console.log(`override_logo: ${override_logo} newtype: ${get_type}`);
+                        logo_type = get_type;
+                    }
+    
+                    console.log(`user_id ${user_id} logo ${logo} logo_second ${logo_second} logo_type ${logo_type}`);
+                }
+            }
+            
     
             // Generate image for the main product
             const mainImageResult = await generateImageWithLogos(backgroundUrl, user_id, product_id, logo, logo_second, custom_logo, logoData, logo_type, custom_logo_type);
@@ -414,7 +448,45 @@
         return filteredResultList; // Return the result list if needed elsewhere
     };
     
+    /**
+     * Retrieves the lighter and darker logo by product ID
+     *
+     * @param {Array} data - the array of objects containing lightness information
+     * @param {string} productId - the ID of the product to retrieve lightness information for
+     * @return {Array|null} an array of objects containing logo_lighter and logo_darker properties, or null if no matching lightness information is found
+     */
+    async function getLightnessByID(data, productId) {
+        
+        for (let key = 0; key < data.length; key++) {
+          const item = data[key];
+          
+          // Check if at least one of logo_lighter or logo_darker is not empty
+          if ((item.logo_lighter !== '' || item.logo_darker !== '') && item.select_products.includes(productId)) {
+            return {
+              lighter: item.logo_lighter,
+              darker: item.logo_darker,
+            }
+          }
+        }
+        
+        return null;
+    }
+
+    async function getLighter( data, logo ) {
+        if ( data && data.lighter && data.lighter !== false ) {
+            return data.lighter;
+        }
+
+        return logo;
+    }
     
+    async function getDarker( data, logo ) {
+        if ( data && data.darker && data.darker !== false ) {
+            return data.darker;
+        }
+
+        return logo;
+    }
     
     // Function to convert ImageData to data URL
     async function canvasToDataUrl(imageData) {
@@ -440,6 +512,32 @@
             const response = await fetch(mockupGeneratorAjax.image_save_endpoint, {
                 method: 'POST',
                 body: JSON.stringify({ imageData: dataURL, filename, user_id, is_feature_image }),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+    
+            if (response.ok) {
+                // Image was successfully saved on the server
+                customLog('Image saved on the server');
+                return true; // or you can return some other value indicating success
+            } else {
+                // Handle the error if the save operation fails
+                console.error('Failed to save image on the server');
+                return false; // or you can return some other value indicating failure
+            }
+        } catch (error) {
+            console.error('Error sending data to the server:', error);
+            return false; // or you can return some other value indicating failure
+        }
+    }
+
+    async function saveInfo(user_id, start_time, end_time, total_items) {
+        console.log("saveInfo", user_id, start_time, end_time, total_items);
+        try {
+            const response = await fetch(mockupGeneratorAjax.info_save_endpoint, {
+                method: 'POST',
+                body: JSON.stringify({ user_id, start_time, end_time, total_items }),
                 headers: {
                     'Content-Type': 'application/json'
                 }
@@ -490,7 +588,10 @@
         while (userQueue.length > 0) {
             console.log( "userQueue start: " + new Date() );
             const user = userQueue.shift(); // Dequeue the first user from the queue
-            const { backgrounds, logo, logo_second, user_id, logoData, logo_type, custom_logo_type } = user;
+            console.log(user);
+            const { backgrounds, logo, logo_second, user_id, logoData, logo_type, custom_logo_type, logo_collections } = user;
+
+            const start_time = Math.floor(Date.now() / 1000);
     
             try {
                 imageBatch = [];
@@ -498,7 +599,7 @@
                 totalNumberItems = 0;
                 getTotalItemNeedProcess = 0;
                 isGeneratingImages = true; // Set the flag to indicate image generation is in progress
-                const result = await generateImages({ backgrounds, logo, logo_second, user_id, logoData, logo_type, custom_logo_type });
+                const result = await generateImages({ backgrounds, logo, logo_second, user_id, logoData, logo_type, custom_logo_type, logo_collections });
     
                 // Do something with the result if needed
                 if(result) {
@@ -511,9 +612,16 @@
                         checkboxItem.prop("checked", false);
                     }
                 }
-    
+                
+                const info = {
+                    "user_id": user_id,
+                    "start_time": start_time,
+                    "end_time": Math.floor(Date.now() / 1000),
+                    "total_items": result.length
+                }
+                
                 // Call the function to print the result after all images are generated
-                printImageResultList();
+                printImageResultList(info);
             } catch (error) {
                 console.error('Error generating images for user:', user, error);
             } finally {
@@ -525,6 +633,8 @@
         if (userQueue.length === 0) {
             customLog('All users in the queue have been processed.');
             alert("Generation Done!");
+            // refresh the page
+            location.reload();
         }
     };
     
@@ -678,6 +788,7 @@
         const user_id = settings.user_id;
         let logo_second = settings.logo_second;
         let custom_logo = settings.custom_logo_data;
+        let logo_collections = settings.logo_collections;
         let custom_logo_type = settings.custom_logo_type;
         // let custom_logo = undefined;
     
@@ -688,7 +799,7 @@
     
         elm.addClass('ml_loading');
     
-        const task = { backgrounds, logo, logo_second, custom_logo, user_id, logoData, logo_type, custom_logo_type };
+        const task = { backgrounds, logo, logo_second, custom_logo, user_id, logoData, logo_type, custom_logo_type, logo_collections };
     
         // console.log(task);
     
@@ -705,6 +816,10 @@
         }
     
         const task = getItemData(item);
+
+        const { user_id } = task;
+
+        const start_time = Math.floor(Date.now() / 1000);
     
         try {
             // Set the flag to indicate image generation is in progress
@@ -730,9 +845,16 @@
     
             // Remove the "ml_loading" class from the clicked item
             item.removeClass('ml_loading');
+
+            const info = {
+                "user_id": user_id,
+                "start_time": start_time,
+                "end_time": Math.floor(Date.now() / 1000),
+                "total_items": imageResultList.length
+            }
     
             // Call the function to print the result after all images are generated
-            printImageResultList();
+            printImageResultList(info);
         }
     
         return false;
@@ -740,7 +862,9 @@
     
     
     // Print the result after all images are generated
-    function printImageResultList() {
+    function printImageResultList(info) {
+        const { user_id, start_time, end_time, total_items } = info;
+        saveInfo( user_id, start_time, end_time, total_items );
         customLog('imageResultList', imageResultList);
         console.log( "finished: " + new Date() );
     }
