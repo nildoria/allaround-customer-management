@@ -209,12 +209,16 @@ class ALRN_Genrator {
             $upload_dir = wp_upload_dir();
             // Pass AJAX URL to the script
 
+            $background_enabled = get_field('enable_logo_background', 'option');
+            $background_enabled = $background_enabled ? 'true' : 'false';
+
             wp_localize_script('mockup-generator', 'mockupGeneratorAjax', array(
                 'ajax_url' => admin_url('admin-ajax.php'),
                 'nonce' => wp_create_nonce( "mockup_gen_nonce" ),
                 'generate_file' => plugin_dir_url(__FILE__) . 'js/image-generate.js',
                 'image_save_endpoint' => rest_url( 'alaround-generate/v1/save-image' ),
                 'info_save_endpoint' => rest_url( 'alaround-generate/v1/save-info' ),
+                'background_enabled' => $background_enabled,
                 'upload_foler' => $upload_dir['basedir'] . "/alaround-mockup"
             ));
         }
@@ -319,8 +323,8 @@ class ALRN_Genrator {
                 echo "<h2>$user_id</h2>";
                 echo '</pre>';
                 echo '<pre>';
-                print_r( $generated_records );
-                print_r( $collections );
+                // print_r( $generated_records );
+                print_r( $user_data );
                 echo '</pre>';
             }
 
