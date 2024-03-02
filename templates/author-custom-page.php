@@ -47,10 +47,9 @@ $current_user_id = $get_current_puser->ID;
         } else {
 
         $default_header_content = get_field('default_header_content', 'option');
-        $profile_picture_id = get_field('profile_picture_id', "user_{$current_user_id}");
         $user_header_title = get_field('user_header_title', "user_{$current_user_id}");
         $user_header_content = get_field('user_header_content', "user_{$current_user_id}");
-        $profile_picture_url = wp_get_attachment_image_url($profile_picture_id, 'medium');
+        $profile_picture_url = ml_get_image_url('profile_picture_id', $current_user_id, 'medium');
 
        
         $tick = '<img src="'.AlRNDCM_URL.'assets/images/verified.png" class="verified_tick" loading="lazy" /> ';

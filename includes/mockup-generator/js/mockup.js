@@ -193,7 +193,7 @@ const generateImageWithLogos = async (backgroundUrl, user_id, product_id, logo, 
 
         if (finalItem !== undefined && finalItem !== false) {
 
-            // customLog(`finalItem:${finalItem} id:${product_id} user:${user_id} finalLogoNumber:${finalLogoNumber}`, resultItem);
+            customLog(`finalItem:${finalItem} id:${product_id} user:${user_id} finalLogoNumber:${finalLogoNumber}`, resultItem);
 
             let imgData = {
                 url: finalLogo,
@@ -328,20 +328,20 @@ const generateImageWithLogos = async (backgroundUrl, user_id, product_id, logo, 
 // Function to calculate new dimensions while maintaining aspect ratio
 function calculateNewDimensions(originalWidth, originalHeight, maxWidth, maxHeight) {
     const aspectRatio = originalWidth / originalHeight;
-  
+    
     // Check if resizing is needed
     if (originalWidth > maxWidth || originalHeight > maxHeight) {
-      if (maxWidth / aspectRatio <= maxHeight) {
+        if (maxWidth / aspectRatio <= maxHeight) {
         return { newWidth: maxWidth, newHeight: maxWidth / aspectRatio };
-      } else {
+        } else {
         return { newWidth: maxHeight * aspectRatio, newHeight: maxHeight };
-      }
+        }
     } else {
-      return { newWidth: originalWidth, newHeight: originalHeight };
+        return { newWidth: originalWidth, newHeight: originalHeight };
     }
 }
 
-  // Function to calculate new y position to keep the image centered
+    // Function to calculate new y position to keep the image centered
 function calculateCenteredY(originalY, originalHeight, newHeight) {
     return originalY + (originalHeight - newHeight) / 2;
 }
@@ -513,16 +513,16 @@ const generateImages = async (task) => {
 async function getLightnessByID(data, productId) {
     
     for (let key = 0; key < data.length; key++) {
-      const item = data[key];
-      
-      // Check if at least one of logo_lighter or logo_darker is not empty
-      if ((item.logo_lighter !== '' || item.logo_darker !== '') && item.select_products.includes(productId)) {
+        const item = data[key];
+        
+        // Check if at least one of logo_lighter or logo_darker is not empty
+        if ((item.logo_lighter !== '' || item.logo_darker !== '') && item.select_products.includes(productId)) {
         return {
-          lighter: item.logo_lighter,
-          darker: item.logo_darker,
-          shape: item?.shape && item.shape !== '-- Select --' ? item.shape.toLowerCase() : ''
+            lighter: item.logo_lighter,
+            darker: item.logo_darker,
+            shape: item?.shape && item.shape !== '-- Select --' ? item.shape.toLowerCase() : ''
         }
-      }
+        }
     }
     
     return null;

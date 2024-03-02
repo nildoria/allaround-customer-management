@@ -7,7 +7,8 @@ class ALRN_Genrator {
     public function __construct() {
         add_filter('manage_users_columns', array( $this, 'users_column' ) );
         add_action('manage_users_custom_column', array( $this, 'column_content' ), 10, 3);
-
+		add_action('manage_users_sortable_columns', array( $this, 'registered_column_sortable' ) );
+		
         add_action('admin_enqueue_scripts', array( $this, 'generator_scripts' ));
         // add_action('wp_ajax_get_generate_button', array( $this, 'get_generate_button' ));
 
@@ -224,13 +225,31 @@ class ALRN_Genrator {
         }
 
     }
+	
+	function registered_column_sortable( $columns ) {
+	
+		return wp_parse_args( array( 'registration_date' => 'registered' ), $columns );
+	
+	}
 
     function users_column($columns) {
         $columns['mockup_generate'] = esc_html__('Mockup Generate', 'hello-elementor');
+		$columns['registration_date'] = esc_html__('Registered Time', 'hello-elementor');
+		$columns['last_generate_time'] = esc_html__('Last Generated', 'hello-elementor');
         return $columns;
     }
 
     function column_content($value, $column_name, $user_id) {
+		if( $column_name === 'registration_date' ) {
+            $registred_time = ml_display_user_registration_time($user_id);
+            $value .= $registred_time;
+        }
+		
+		if( $column_name === 'last_generate_time' ) {
+            $last_generated = ml_get_last_generated_time_ago($user_id);
+            $value .= $last_generated;
+        }
+		
         if ($column_name === 'mockup_generate') {
 
             if( ! ml_user_has_role( $user_id, 'customer' ) ) {
@@ -238,18 +257,17 @@ class ALRN_Genrator {
             }
 
             $profile_picture_id = get_field('profile_picture_id', "user_{$user_id}");
-            // $type = get_field('logo_type', "user_{$user_id}");
-            // $type = empty( $type ) ? 'square' : esc_attr( $type );
-            $profile_picture_url = wp_get_attachment_image_url($profile_picture_id, 'full');
-
-            $profile_second_logo = get_field('profile_picture_id_second', "user_{$user_id}");
+            $profile_picture_url = ml_get_image_url('profile_picture_id', $user_id);
+            
+            $profile_second_logo = ml_get_image_url('profile_picture_id_second', $user_id);
             if (! filter_var($profile_second_logo, FILTER_VALIDATE_URL)) {
                 $profile_second_logo = '';
             }
 
-            if( empty( $profile_picture_id ) || empty( $profile_picture_url ) || ! @getimagesize($profile_picture_url) )
+            
+            if( empty( $profile_picture_url ) || ! @getimagesize($profile_picture_url) )
                 return $value;
-
+                
             // user meta.
             $progress = get_user_meta($user_id, 'mockup_generation_status', true);
 
@@ -261,8 +279,8 @@ class ALRN_Genrator {
             $thumbnails = $this->get_thumbnails( $user_id );
             $logo_positions = $this->logo_positions( $user_id );
 
-            $custom_logo_lighter = get_field('custom_logo_lighter', "user_{$user_id}");
-            $custom_logo_darker = get_field('custom_logo_darker', "user_{$user_id}");
+            $custom_logo_lighter = ml_get_image_url('custom_logo_lighter', $user_id);
+            $custom_logo_darker = ml_get_image_url('custom_logo_darker', $user_id);
             $custom_logo_products = get_field('custom_logo_products', "user_{$user_id}");
             $override_shape = get_field('override_shape', 'user_' . $user_id);
             $default_logo_shape = get_field('default_logo_shape', 'user_' . $user_id);
@@ -293,7 +311,6 @@ class ALRN_Genrator {
             $generated_records = get_user_meta($user_id, 'mockup_generated_records', true);
             $generated_records = ml_format_timestamps( $generated_records );
 
-
             $collections = [];
             if( ! empty( $logo_collections ) ) {
                 $collections = array(
@@ -318,7 +335,9 @@ class ALRN_Genrator {
                 $user_data['custom_logo_data'] = $custom_logo_data;
             }
 
-            if( isset( $_GET['dev'] ) && 'true' === $_GET['dev'] ) {
+            
+
+            if( $user_id === 46 && isset( $_GET['dev'] ) && 'true' === $_GET['dev'] ) {
                 echo '<pre>';
                 echo "<h2>$user_id</h2>";
                 echo '</pre>';
@@ -347,90 +366,6 @@ class ALRN_Genrator {
             $user_id = isset($_GET['user_id']) ? intval($_GET['user_id']) : 0;
             echo '<div>This is an element outside the user form.</div>';
         }
-    }
-
-    public function get_generate_button() {
-        check_ajax_referer( 'mockup_gen_nonce', 'nonce' );
-
-        // Get the user ID from the AJAX request
-		$user_id = isset($_POST['user_id']) ? intval($_POST['user_id']) : 0;
-
-        if ($user_id > 0) {
-
-            if( ! ml_user_has_role( $user_id, 'customer' ) ) {
-                wp_die();
-            }
-
-            $profile_picture_id = get_field('profile_picture_id', "user_{$user_id}");
-            // $type = get_field('logo_type', "user_{$user_id}");
-            // $type = empty( $type ) ? 'square' : esc_attr( $type );
-            $profile_picture_url = wp_get_attachment_image_url($profile_picture_id, 'full');
-
-            $profile_second_logo = get_field('profile_picture_id_second', "user_{$user_id}");
-            if (! filter_var($profile_second_logo, FILTER_VALIDATE_URL)) {
-                $profile_second_logo = '';
-            }
-
-            if( empty( $profile_picture_id ) || empty( $profile_picture_url ) || ! @getimagesize($profile_picture_url) )
-                wp_die();
-
-            // user meta.
-            $progress = get_user_meta($user_id, 'mockup_generation_status', true);
-
-            $button_text = __("Generate", "hello-elementor");
-            // if( "completed" === $progress ) {
-            //     $button_text = __("Regenerate", "hello-elementor");
-            // };
-
-            $thumbnails = $this->get_thumbnails( $user_id );
-            $logo_positions = $this->logo_positions( $user_id );
-
-            $custom_logo_lighter = get_field('custom_logo_lighter', "user_{$user_id}");
-            $custom_logo_darker = get_field('custom_logo_darker', "user_{$user_id}");
-            $custom_logo_products = get_field('custom_logo_products', "user_{$user_id}");
-            $override_shape = get_field('override_shape', 'user_' . $user_id);
-            $default_logo_shape = get_field('default_logo_shape', 'user_' . $user_id);
-            $custom_logo_shape = get_field('custom_logo_shape', 'user_' . $user_id);
-
-            $type = ml_get_orientation( $profile_picture_id );
-
-            if ($override_shape && in_array($default_logo_shape, array('square', 'horizontal'))) {
-                $type = $default_logo_shape;
-            }
-
-            $custom_logo_data = array(
-                "lighter" => $custom_logo_lighter,
-                "darker" => $custom_logo_darker,
-                "allow_products" => $custom_logo_products
-            );
-
-            // echo '<pre>';
-            // echo "<h2>$user_id</h2>";
-            // print_r( $logo_positions );
-            // echo '</pre>';
-
-            $user_data = array(
-                'user_id' => $user_id,
-                'logo' => $profile_picture_url,
-                'logo_second' => $profile_second_logo,
-                'logo_type' => $type,
-                'images' => $thumbnails,
-                'logo_positions' => $logo_positions
-            );
-
-            if( ! empty( $custom_logo_data ) ) {
-                $user_data['custom_logo_data'] = $custom_logo_data;
-            }
-
-            // Output the content
-            $value = '<div class="alarnd--mockup-trigger-wrap"><div class="alarnd--mockup-trigger-area">';
-            $value .= '<button id="ml_mockup_gen-'.$user_id.'" type="button" class="button button-primary ml_mockup_gen_trigger ml_add_loading" data-settings=\'' . wp_json_encode($user_data) . '\' data-user_id="'.$user_id.'">'.$button_text.'</button>';
-            $value .= '</div></div>';
-
-            echo $value;
-        }
-
-        wp_die();
     }
 
     /**

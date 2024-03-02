@@ -267,8 +267,7 @@ class ALRN_Metabox {
 
         $customer_has_logo = [];
         foreach ( $customers as $customer_id ) {
-            $customer_picture_id = get_field('profile_picture_id', "user_{$customer_id}");
-            $profile_logo = wp_get_attachment_image_url($customer_picture_id, 'full');
+            $profile_logo = ml_get_image_url('profile_picture_id', $customer_id);
 
             if( empty( $profile_logo ) ) {
                 continue;
@@ -329,12 +328,12 @@ class ALRN_Metabox {
                             <?php 
                             $customer_has_logo = [];
                             foreach ( $customers as $customer_id ) : 
-                            $customer_picture_id = get_field('profile_picture_id', "user_{$customer_id}");
-                            $profile_logo = wp_get_attachment_image_url($customer_picture_id, 'full');
 
-                            $profile_picture_id_second = get_field('profile_picture_id_second', "user_{$customer_id}");
-                            $custom_logo_lighter = get_field('custom_logo_lighter', "user_{$customer_id}");
-                            $custom_logo_darker = get_field('custom_logo_darker', "user_{$customer_id}");
+                            $profile_logo = ml_get_image_url('profile_picture_id', $customer_id);
+                            $profile_picture_id_second = ml_get_image_url('profile_picture_id_second', $customer_id);
+
+                            $custom_logo_lighter = ml_get_image_url('custom_logo_lighter', $customer_id);
+                            $custom_logo_darker = ml_get_image_url('custom_logo_darker', $customer_id);
 
                             if( empty( $profile_logo ) ) {
                                 continue;

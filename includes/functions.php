@@ -408,8 +408,8 @@ remove_action( 'woocommerce_before_checkout_form', 'woocommerce_checkout_coupon_
 
 
 function alarnd_get_logo( $user_id, $type = '' ) {
-    $profile_picture_id = get_field('profile_picture_id', "user_{$user_id}");
-    $profile_picture_id_second = get_field('profile_picture_id_second', "user_{$user_id}");
+    $profile_picture_id = ml_get_image_url('profile_picture_id', $user_id);
+    $profile_picture_id_second = ml_get_image_url('profile_picture_id_second', $user_id);
 
     $profile_picture_url = '';
     if( ! empty( $profile_picture_id ) ) {
@@ -2918,4 +2918,100 @@ function ml_format_timestamps($timestamps_array) {
     }
 
     return $formatted_array;
+}
+
+
+/**
+ * Get the image URL for a given name and user ID.
+ *
+ * @param mixed $name The name of the image field.
+ * @param int $user_id The user ID.
+ * @param string $size (Optional) The size of the image. Default is 'full'.
+ * @return string|false The image URL or false if the attachment ID is empty.
+ */
+function ml_get_image_url( $name, $user_id, $size = 'full' ) {
+    $attachment_id = get_field($name, "user_{$user_id}");
+
+    if( empty( $attachment_id ) )
+        return false;
+
+    return wp_get_attachment_image_url($attachment_id, $size);
+}
+
+/**
+ * Get the time elapsed since the last record was generated in a human-readable format.
+ *
+ * @param int $user_id The ID of the user for whom to retrieve the time elapsed.
+ * @return string The time elapsed in a human-readable format, or 'N/A' if no suitable data is found.
+ */
+function ml_get_last_generated_time_ago($user_id) {
+    // Get the generated records from user meta
+    $generated_records = get_user_meta($user_id, 'mockup_generated_records', true);
+
+    // Check if the array is not empty
+    if (!empty($generated_records)) {
+        // Get the last array item
+        $last_record = end($generated_records);
+
+        // Check if "end_time" key exists in the last record
+        if (isset($last_record['end_time'])) {
+            // Calculate the time difference
+            $end_time = $last_record['end_time'];
+            $current_time = time();
+            $time_difference = $current_time - $end_time;
+
+            // Calculate hours, minutes, and seconds
+            $hours = floor($time_difference / 3600);
+            $minutes = floor(($time_difference % 3600) / 60);
+            $seconds = $time_difference % 60;
+
+            // Build the time ago string
+            $time_ago = '';
+            if ($hours > 0) {
+                $time_ago .= $hours . 'hr ';
+            }
+            if ($minutes > 0) {
+                $time_ago .= $minutes . 'm ';
+            }
+            if ($seconds > 0) {
+                $time_ago .= $seconds . 's ';
+            }
+
+            // Append "ago" to the string
+            $time_ago .= 'ago';
+
+            return $time_ago;
+        }
+    }
+
+    // Return a default value if no suitable data is found
+    return 'N/A';
+}
+
+
+function ml_display_user_registration_time($user_id) {
+    $user_info = get_userdata($user_id);
+
+    if ($user_info) {
+        $registration_time = $user_info->user_registered;
+        $formatted_time = date('F j, Y g:i a', strtotime($registration_time));
+
+        return $formatted_time;
+    }
+
+    return '';
+}
+
+/**
+ * Registers users by date registered by default. When user clicks
+ * other sortable column headers, those will take effect instead.
+ */
+add_action( 'pre_user_query', 'wpse209591_order_users_by_date_registered_by_default' );
+function wpse209591_order_users_by_date_registered_by_default( $query ) {
+    global $pagenow;
+
+    if ( ! is_admin() || 'users.php' !== $pagenow || isset( $_GET['orderby'] ) ) {
+        return;
+    }
+    $query->query_orderby = 'ORDER BY user_registered DESC';
 }
