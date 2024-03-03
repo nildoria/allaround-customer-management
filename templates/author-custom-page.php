@@ -9,7 +9,11 @@ $logged_user_id = $logged_user->ID;
 $current_author = get_query_var('author_name');
 
 // Get the author's user data
-$get_current_puser = get_user_by('login', $current_author);        
+$get_current_puser = get_user_by('login', $current_author);
+if (!isset($get_current_puser->ID)) {
+    esc_html_e("User not found for username: $current_author", "hello-elementor");
+    exit;
+}    
 $current_user_id = $get_current_puser->ID;
 ?>
 
@@ -55,7 +59,7 @@ $current_user_id = $get_current_puser->ID;
         $tick = '<img src="'.AlRNDCM_URL.'assets/images/verified.png" class="verified_tick" loading="lazy" /> ';
         
 
-        if (in_array('customer', $get_current_puser->roles)) {
+        if ($get_current_puser->roles !== null && in_array('customer', $get_current_puser->roles)) {
             echo '<div class="author-header aum-container">';
             echo '<div class="welcome-column">';
             echo '<h1>היי, ' . (($user_header_title) ? esc_html($user_header_title) : esc_html($get_current_puser->display_name)) . ' '.$tick.'</h1>';

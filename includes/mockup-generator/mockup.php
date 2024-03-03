@@ -14,6 +14,30 @@ class ALRN_Genrator {
 
         add_action( 'rest_api_init', array($this, 'generate_endpoint') );
         add_filter('bulk_actions-users', array( $this, 'bulk_action' ));
+		
+		add_filter('users_list_table_query_args', array( $this, 'custom_user_orderby' ));
+    }
+	
+	function custom_user_orderby($args) {
+        if ( is_admin() && isset( $args['orderby'] ) && 'mockup_last_generated_time' === $args['orderby'] ) {   
+            $meta_query   = isset( $args['meta_query'] ) ? (array) $args['meta_query'] : [];
+            $meta_query[] = array(
+                'relation'      => 'OR',
+                'has_generated_time' => array(
+                    'key'  => 'mockup_last_generated_time',
+                    'type' => 'NUMERIC',
+                ),
+                'no_generated_time'  => array(
+                    'key'     => 'mockup_last_generated_time',
+                    'compare' => 'NOT EXISTS',
+                ),
+            );
+    
+            $args['meta_query'] = $meta_query;
+            $args['orderby']    = 'has_generated_time';
+        }
+    
+        return $args;
     }
 
     function bulk_action($actions) {
@@ -70,6 +94,7 @@ class ALRN_Genrator {
 
         // Save the updated records array in user meta
         update_user_meta($user_id, 'mockup_generated_records', $generated_records);
+		update_user_meta($user_id, 'mockup_last_generated_time', $end_time);
 
         return rest_ensure_response("Generated records saved successfully.");
 
@@ -227,9 +252,7 @@ class ALRN_Genrator {
     }
 	
 	function registered_column_sortable( $columns ) {
-	
-		return wp_parse_args( array( 'registration_date' => 'registered' ), $columns );
-	
+		return wp_parse_args( array( 'registration_date' => 'registered', 'last_generate_time' => 'mockup_last_generated_time' ), $columns );
 	}
 
     function users_column($columns) {
@@ -246,7 +269,7 @@ class ALRN_Genrator {
         }
 		
 		if( $column_name === 'last_generate_time' ) {
-            $last_generated = ml_get_last_generated_time_ago($user_id);
+            $last_generated = ml_get_last_generated_time($user_id);
             $value .= $last_generated;
         }
 		

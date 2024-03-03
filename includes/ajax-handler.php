@@ -802,7 +802,7 @@ class ML_Ajax {
             'invoice' => $cardholderInvoiceName,
             'token' => $token,
             'cardNum' => $four_digit,
-            'price' => (int) WC()->cart->get_cart_contents_total(),
+            'price' => WC()->cart->get_cart_contents_total(),
             'items' => $cart_filter_data
         );
 
@@ -1049,7 +1049,7 @@ class ML_Ajax {
             'cardNumber' => $cardNumber,
             'expirationDate' => $expirationDate,
             'cvvCode' => $cvvCode,
-            'price' => (int) WC()->cart->get_cart_contents_total(),
+            'price' => WC()->cart->get_cart_contents_total(),
             'items' => $cart_filter_data
         );
 

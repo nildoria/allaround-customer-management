@@ -8,6 +8,7 @@
  */
 
 const itemPushEachAtOnce = 20;
+const angleApply = 15;
 let imageResultList = [];
 let isGeneratingImages = false; // Flag to track whether image generation is in progress
 const userQueue = []; // Queue to store users for processing
@@ -266,10 +267,18 @@ const generateImageWithLogos = async (backgroundUrl, user_id, product_id, logo, 
                 }
 
                 // Calculate the new dimensions while maintaining the aspect ratio
-                const { newWidth, newHeight } = calculateNewDimensions(originalWidth, originalHeight, width, height);
+                let { newWidth, newHeight } = calculateNewDimensions(originalWidth, originalHeight, width, height);
 
                 // Calculate new y position to keep the image centered
-                const newY = calculateCenteredY(y, height, newHeight);
+                let newY = calculateCenteredY(y, height, newHeight);
+	
+				// check if rotate not zero
+                if (angle === 0) {
+                    customLog("width force to full " + product_id);
+                    newHeight = aspect_height(originalWidth, originalHeight, width);
+                    newWidth = width;
+                    newY =  aspectY(newHeight, height, y);
+                }
 
                 ctx.save();
                 ctx.translate(x + width / 2, newY + newHeight / 2);
@@ -340,6 +349,7 @@ function calculateNewDimensions(originalWidth, originalHeight, maxWidth, maxHeig
         return { newWidth: originalWidth, newHeight: originalHeight };
     }
 }
+
 
     // Function to calculate new y position to keep the image centered
 function calculateCenteredY(originalY, originalHeight, newHeight) {

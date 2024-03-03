@@ -3015,3 +3015,38 @@ function wpse209591_order_users_by_date_registered_by_default( $query ) {
     }
     $query->query_orderby = 'ORDER BY user_registered DESC';
 }
+
+function ml_get_last_generated_time($user_id) {
+    $mockup_last_generated_time = get_user_meta($user_id, 'mockup_last_generated_time', true);
+
+    if ( !empty($mockup_last_generated_time) ) {
+        // Calculate the time difference
+        $end_time = $mockup_last_generated_time;
+        $current_time = time();
+        $time_difference = $current_time - $end_time;
+
+        // Calculate hours, minutes, and seconds
+        $hours = floor($time_difference / 3600);
+        $minutes = floor(($time_difference % 3600) / 60);
+        $seconds = $time_difference % 60;
+
+        // Build the time ago string
+        $time_ago = '';
+        if ($hours > 0) {
+            $time_ago .= $hours . 'hr ';
+        }
+        if ($minutes > 0) {
+            $time_ago .= $minutes . 'm ';
+        }
+        if ($seconds > 0) {
+            $time_ago .= $seconds . 's ';
+        }
+
+        // Append "ago" to the string
+        $time_ago .= 'ago';
+
+        return $time_ago;
+    }
+
+    return 'N/A';
+}
