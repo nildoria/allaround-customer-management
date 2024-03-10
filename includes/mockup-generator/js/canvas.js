@@ -1202,6 +1202,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
                             console.log('Updated Settings:', settings);
                             console.log('saved_positions:', saved_positions);
+                            
+                            // Force browser reload after successful AJAX request
+                            location.reload(true)
                         } catch (error) {
                             console.error('Error parsing updated settings:', error);
                         }

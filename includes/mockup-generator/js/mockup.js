@@ -181,11 +181,12 @@ const generateImageWithLogos = async (backgroundUrl, user_id, product_id, logo, 
         }
 
         if( gallery && gallery !== false && gallery.length !== 0 ) {
-            
+
             if( gallery['type'] == 'light' ) {
                 finalLogo = logo;
                 finalLogoNumber = 'lighter';
             }
+
             if( gallery['type'] == 'dark' && (logo_second && logo_second != null && logo_second != undefined) ) {
                 finalLogo = logo_second;
                 finalLogoNumber = 'darker';
@@ -277,7 +278,7 @@ const generateImageWithLogos = async (backgroundUrl, user_id, product_id, logo, 
                     customLog("width force to full " + product_id);
                     newHeight = aspect_height(originalWidth, originalHeight, width);
                     newWidth = width;
-                    newY =  aspectY(newHeight, height, y);
+                    newY =  calculateCenteredY(y, height, newHeight);
                 }
 
                 ctx.save();
@@ -308,6 +309,10 @@ const generateImageWithLogos = async (backgroundUrl, user_id, product_id, logo, 
 
             customLog("totalNumberItems", totalNumberItems);
             customLog("getTotalItemNeedProcess", getTotalItemNeedProcess);
+
+            if( totalNumberItems === getTotalItemNeedProcess ) {
+                console.log('--------------------------------');
+            }
 
             // If the batch size reaches itemPushEachAtOnce or it's the last iteration, send the batch to the server
             if (
@@ -422,22 +427,62 @@ let totalNumberItems = 0;
 let getTotalItemNeedProcess = 0;
 
 // Function to perform the image generation
-const generateImages = async (task) => {
+const generateByProduct = async (users) => {
+    const totalUsers = users.length;
+    const imageResultList = [];
+
+    for (var userId in users) {
+        const itemTask = formateData(users[userId]);
+        if (!itemTask) {
+            continue;
+        }
+        const { backgrounds } = itemTask;
+        const totalImages = backgrounds.length;
+
+        for (let i = 0; i < totalImages; i++) {
+            totalNumberItems++;
+            const galleries = backgrounds[i]['galleries'];
+
+            // If there are galleries, generate images for each gallery
+            if (galleries && galleries.length !== 0) {
+                totalNumberItems += galleries.length;
+            }
+        }
+    }
+    
+    for (var userId in users) {
+        const itemTask = formateData(users[userId]);
+        if (!itemTask) {
+            continue;
+        }
+        const resultList = await generateImages(itemTask, 'product');
+        imageResultList.push(resultList);
+    }
+
+    // Filter out the false values (failed image generation)
+    const filteredResultList = imageResultList.filter(resultList => resultList !== false);
+
+    return filteredResultList; // Return the result list if needed elsewhere
+};
+
+const generateImages = async (task, refType = 'user') => {
     let { backgrounds, logo, logo_second, custom_logo, user_id, logoData, logo_type, custom_logo_type, logo_collections } = task;
     const totalImages = backgrounds.length;
     const imageResultList = [];
 
     
-
     customLog('logo_collections:', logo_collections);
 
-    for (let i = 0; i < totalImages; i++) {
-        totalNumberItems++;
-        const galleries = backgrounds[i]['galleries'];
-
-        // If there are galleries, generate images for each gallery
-        if (galleries && galleries.length !== 0) {
-            totalNumberItems += galleries.length;
+    // if reference type is user then we need to calculate total number of items.
+    if( refType === 'user' ) {
+        for (let i = 0; i < totalImages; i++) {
+            totalNumberItems++;
+            const galleries = backgrounds[i]['galleries'];
+    
+            // If there are galleries, generate images for each gallery
+            if (galleries && galleries.length !== 0) {
+                totalNumberItems += galleries.length;
+            }
         }
     }
 
@@ -872,6 +917,46 @@ function getItemData(elm) {
     return task;
 }
 
+function formateData(elm) {
+    if (elm.length === 0)
+        return false;
+
+    let settings = elm;
+
+    if (settings.length === 0)
+        return false;
+
+    const backgrounds = convertBackgrounds(settings.images);
+    if(!backgrounds) {
+        return false;
+    }
+
+
+    let logoData = '';
+    if (settings.logo_positions && settings.logo_positions.length !== 0) {
+        logoData = convertLogos(settings.logo_positions);
+    }
+
+    let logo_type = settings.logo_type;
+
+    const logo = settings.logo;
+    const user_id = settings.user_id;
+    let logo_second = settings.logo_second;
+    let custom_logo = settings.custom_logo_data;
+    let logo_collections = settings.logo_collections;
+    let custom_logo_type = settings.custom_logo_type;
+    // let custom_logo = undefined;
+
+    if (logo_second && !isValidUrl(logo_second)) {
+        // customLog('logo_second is not a valid URL. Setting to undefined or default.');
+        logo_second = undefined; // or set to a default value
+    }
+
+    const task = { backgrounds, logo, logo_second, custom_logo, user_id, logoData, logo_type, custom_logo_type, logo_collections };
+
+    return task;
+}
+
 $(document).on('click', ".ml_mockup_gen_trigger", async function () {
     var item = $(this);
 
@@ -921,6 +1006,53 @@ $(document).on('click', ".ml_mockup_gen_trigger", async function () {
 
         // Call the function to print the result after all images are generated
         printImageResultList(info);
+    }
+
+    return false;
+});
+
+
+$(document).on('click', "#alarndGenerateMockup", async function (e) {
+    e.preventDefault();
+    
+    var item = $(this);
+
+    // Check if image generation is already in progress
+    if (isGeneratingImages) {
+        customLog('Image generation is already in progress. Please wait.');
+        return;
+    }
+
+    const users = item.data('settings');
+    const product_id = item.data('product_id');
+
+    const start_time = Math.floor(Date.now() / 1000);
+
+    try {
+        // Set the flag to indicate image generation is in progress
+        isGeneratingImages = true;
+
+        imageBatch = [];
+        totalImagesProcessed = 0;
+        totalNumberItems = 0;
+        getTotalItemNeedProcess = 0;
+
+        // Add the "ml_loading" class to the clicked item
+        item.addClass('ml_loading');
+
+        customLog( "start: " + new Date() );
+
+        // Perform image generation
+        imageResultList = await generateByProduct(users);
+        console.log(imageResultList);
+    } catch (error) {
+        console.error('Error:', error);
+    } finally {
+        // Reset the flag once image generation is complete
+        isGeneratingImages = false;
+
+        // Remove the "ml_loading" class from the clicked item
+        item.removeClass('ml_loading');
     }
 
     return false;

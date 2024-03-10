@@ -4,6 +4,21 @@ require_once( AlRNDCM_PATH . '/includes/mockup-generator/editor.php');
 
 class ALRN_Genrator {
 
+    /**
+	 * Call this method to get singleton
+	 *
+	 * @return singleton instance of OW_Utility
+	 */
+	public static function instance() {
+
+		static $instance = null;
+		if ( is_null( $instance ) ) {
+			$instance = new ALRN_Genrator();
+		}
+
+		return $instance;
+	}
+
     public function __construct() {
         add_filter('manage_users_columns', array( $this, 'users_column' ) );
         add_action('manage_users_custom_column', array( $this, 'column_content' ), 10, 3);
@@ -224,29 +239,40 @@ class ALRN_Genrator {
     function generator_scripts() {
 
         // Check if this is the Users List page or User Edit page
-        global $pagenow;
+        $current_screen = get_current_screen();
         
-        if (($pagenow === 'users.php') || ($pagenow === 'user-edit.php')) {
-            wp_enqueue_style('mockup-generator', plugin_dir_url(__FILE__) . '/css/admin.css', array(), AlRNDCM_VERSION);
+        wp_register_style('mockup-generator', plugin_dir_url(__FILE__) . '/css/admin.css', array(), AlRNDCM_VERSION);
 
+        wp_register_script('mockup-generator', plugin_dir_url(__FILE__) . 'js/mockup.js', array('jquery'), AlRNDCM_VERSION, true);
+
+        $upload_dir = wp_upload_dir();
+        // Pass AJAX URL to the script
+
+        $background_enabled = get_field('enable_logo_background', 'option');
+        $background_enabled = $background_enabled ? 'true' : 'false';
+
+        wp_localize_script('mockup-generator', 'mockupGeneratorAjax', array(
+            'ajax_url' => admin_url('admin-ajax.php'),
+            'nonce' => wp_create_nonce( "mockup_gen_nonce" ),
+            'generate_file' => plugin_dir_url(__FILE__) . 'js/image-generate.js',
+            'image_save_endpoint' => rest_url( 'alaround-generate/v1/save-image' ),
+            'info_save_endpoint' => rest_url( 'alaround-generate/v1/save-info' ),
+            'background_enabled' => $background_enabled,
+            'upload_foler' => $upload_dir['basedir'] . "/alaround-mockup"
+        ));
+
+        // Check if it's the product post type edit screen
+        if ($current_screen && $current_screen->post_type === 'product') {
+            wp_enqueue_style('mockup-generator');
             wp_enqueue_script('jquery');
-            wp_enqueue_script('mockup-generator', plugin_dir_url(__FILE__) . 'js/mockup.js', array('jquery'), AlRNDCM_VERSION, true);
-    
-            $upload_dir = wp_upload_dir();
-            // Pass AJAX URL to the script
+            wp_enqueue_script('mockup-generator');
+        }
 
-            $background_enabled = get_field('enable_logo_background', 'option');
-            $background_enabled = $background_enabled ? 'true' : 'false';
-
-            wp_localize_script('mockup-generator', 'mockupGeneratorAjax', array(
-                'ajax_url' => admin_url('admin-ajax.php'),
-                'nonce' => wp_create_nonce( "mockup_gen_nonce" ),
-                'generate_file' => plugin_dir_url(__FILE__) . 'js/image-generate.js',
-                'image_save_endpoint' => rest_url( 'alaround-generate/v1/save-image' ),
-                'info_save_endpoint' => rest_url( 'alaround-generate/v1/save-info' ),
-                'background_enabled' => $background_enabled,
-                'upload_foler' => $upload_dir['basedir'] . "/alaround-mockup"
-            ));
+        // Check if it's the users.php page
+        if ($current_screen && $current_screen->base === 'users') {
+            wp_enqueue_style('mockup-generator');
+            wp_enqueue_script('jquery');
+            wp_enqueue_script('mockup-generator');
         }
 
     }
@@ -262,24 +288,8 @@ class ALRN_Genrator {
         return $columns;
     }
 
-    function column_content($value, $column_name, $user_id) {
-		if( $column_name === 'registration_date' ) {
-            $registred_time = ml_display_user_registration_time($user_id);
-            $value .= $registred_time;
-        }
-		
-		if( $column_name === 'last_generate_time' ) {
-            $last_generated = ml_get_last_generated_time($user_id);
-            $value .= $last_generated;
-        }
-		
-        if ($column_name === 'mockup_generate') {
-
-            if( ! ml_user_has_role( $user_id, 'customer' ) ) {
-                return $value;
-            }
-
-            $profile_picture_id = get_field('profile_picture_id', "user_{$user_id}");
+    public function get_user_data( $user_id, $value = false, $filter_product_id = '' ) {
+        $profile_picture_id = get_field('profile_picture_id', "user_{$user_id}");
             $profile_picture_url = ml_get_image_url('profile_picture_id', $user_id);
             
             $profile_second_logo = ml_get_image_url('profile_picture_id_second', $user_id);
@@ -287,20 +297,11 @@ class ALRN_Genrator {
                 $profile_second_logo = '';
             }
 
-            
             if( empty( $profile_picture_url ) || ! @getimagesize($profile_picture_url) )
                 return $value;
-                
-            // user meta.
-            $progress = get_user_meta($user_id, 'mockup_generation_status', true);
 
-            $button_text = __("Generate", "hello-elementor");
-            // if( "completed" === $progress ) {
-            //     $button_text = __("Regenerate", "hello-elementor");
-            // };
-
-            $thumbnails = $this->get_thumbnails( $user_id );
-            $logo_positions = $this->logo_positions( $user_id );
+            $thumbnails = $this->get_thumbnails( $user_id, $filter_product_id );
+            $logo_positions = $this->logo_positions( $user_id, $filter_product_id );
 
             $custom_logo_lighter = ml_get_image_url('custom_logo_lighter', $user_id);
             $custom_logo_darker = ml_get_image_url('custom_logo_darker', $user_id);
@@ -358,9 +359,31 @@ class ALRN_Genrator {
                 $user_data['custom_logo_data'] = $custom_logo_data;
             }
 
-            
+            return $user_data;
+    }
 
-            if( $user_id === 46 && isset( $_GET['dev'] ) && 'true' === $_GET['dev'] ) {
+    function column_content($value, $column_name, $user_id) {
+		if( $column_name === 'registration_date' ) {
+            $registred_time = ml_display_user_registration_time($user_id);
+            $value .= $registred_time;
+        }
+		
+		if( $column_name === 'last_generate_time' ) {
+            $last_generated = ml_get_last_generated_time($user_id);
+            $value .= $last_generated;
+        }
+		
+        if ($column_name === 'mockup_generate') {
+
+            if( ! ml_user_has_role( $user_id, 'customer' ) ) {
+                return $value;
+            }
+
+            $button_text = __("Generate", "hello-elementor");
+            $user_data = $this->get_user_data($user_id, $value);
+            $type = isset(  $user_data['logo_type'] ) ? $user_data['logo_type'] : '';
+
+            if( $user_id === 2 && isset( $_GET['dev'] ) && 'true' === $_GET['dev'] ) {
                 echo '<pre>';
                 echo "<h2>$user_id</h2>";
                 echo '</pre>';
@@ -395,9 +418,10 @@ class ALRN_Genrator {
 	 * Get all product thumbnail as array by users select products
 	 *
 	 * @param int $user_id
+     * @param int $filter_product_id 
 	 * @return array
 	 */
-	function get_thumbnails( $user_id ) {
+	function get_thumbnails( $user_id, $filter_product_id = '' ) {
         $selected_product_ids = ml_get_user_products($user_id);
 
         // Create an array to store product categories
@@ -411,6 +435,13 @@ class ALRN_Genrator {
                     continue;
 			
 				$product_id = (int) $product['value'];
+
+                if( ! empty( $filter_product_id ) && $product_id !== $filter_product_id ) {
+                    continue;
+                }
+
+                error_log( "product_id: $product_id" );
+
                 $galleries = get_color_thumbnails( $product_id );
 
 				$featured_img_url = wp_get_attachment_image_src(get_post_thumbnail_id($product_id), 'alarnd_main_thumbnail');
@@ -436,7 +467,7 @@ class ALRN_Genrator {
 		return $thumbnails;
 	}
 
-    function logo_positions( $user_id ) {
+    function logo_positions( $user_id, $filter_product_id = '' ) {
         $selected_product_ids = ml_get_user_products($user_id);
 
         // Create an array to store product categories
@@ -450,6 +481,10 @@ class ALRN_Genrator {
                     continue;
 			
 				$product_id = (int) $product['value'];
+
+                if( ! empty( $filter_product_id ) && $product_id !== $filter_product_id ) {
+                    continue;
+                }
 
 				$logo_positons = $this->get_metas($product_id);
 

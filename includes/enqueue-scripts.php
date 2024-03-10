@@ -1,7 +1,6 @@
 <?php
 
-function enqueue_aum_script()
-{
+function enqueue_aum_script() {
 
     // Enqueue the Magnific Popup styles
     wp_enqueue_style('magnific-popup-style', AlRNDCM_URL . 'assets/css/magnific-popup.css');
@@ -9,27 +8,27 @@ function enqueue_aum_script()
     wp_enqueue_style('zoom', AlRNDCM_URL . 'assets/css/magnify.css');
 
     // Enqueue custom CSS for front-end
-    wp_enqueue_style('css-frontend', AlRNDCM_URL . 'assets/css/css-frontend.css', array(), AlRNDCM_VERSION);
+    wp_enqueue_style('css-frontend', AlRNDCM_URL . 'assets/css/css-frontend.css', array(), AlRNDCM_VERSION );
 
-
+    
     // Enqueue WooCommerce scripts
     if (class_exists('WooCommerce')) {
 
-        if (is_author()) {
+        if( is_author() ) {
             wp_enqueue_script('wc-cart');
             wp_enqueue_script('wc-checkout');
             wp_enqueue_script('wc-cart-fragments');
-            wp_enqueue_script('wc-add-to-cart-variation');
-            wp_enqueue_script('wc-single-product');
-            wp_enqueue_script('wc-single-product');
+            wp_enqueue_script( 'wc-add-to-cart-variation' );
+            wp_enqueue_script( 'wc-single-product' );
+            wp_enqueue_script( 'wc-single-product' );
 
             wp_enqueue_script('slick-js', AlRNDCM_URL . 'assets/js/slick.min.js', array('jquery'), null, true);
             wp_enqueue_style('slick-css', AlRNDCM_URL . 'assets/css/slick.css');
-            if (defined('XOO_ML_VERSION')) {
+            if( defined('XOO_ML_VERSION') ) {
                 wp_deregister_style('xoo-ml-style');
-                wp_enqueue_style('xoo-ml-style', XOO_ML_URL . '/assets/css/xoo-ml-style.css', array(), XOO_ML_VERSION);
+                wp_enqueue_style( 'xoo-ml-style', XOO_ML_URL.'/assets/css/xoo-ml-style.css', array(), XOO_ML_VERSION );
             }
-
+            
             // wp_enqueue_style('slick-theme-css', AlRNDCM_URL . 'assets/css/slick-theme.css');
             wp_enqueue_script('isotope-script', AlRNDCM_URL . 'assets/js/isotope.pkgd.min.js', array('jquery'), '3.0.6', true);
             wp_enqueue_script('magnific-popup', AlRNDCM_URL . 'assets/js/jquery.magnific-popup.min.js', array('jquery'), '1.0', true);
@@ -46,7 +45,7 @@ function enqueue_aum_script()
 
         // wp_enqueue_script( 'wc-cart' );
         // wp_enqueue_script( 'wc-cart-fragments' );
-
+        
     }
 
     wp_enqueue_script('magnifyzoom', AlRNDCM_URL . 'assets/js/jquery.magnify.js', array('jquery'), AlRNDCM_VERSION, true);
@@ -70,31 +69,28 @@ function enqueue_aum_script()
         'slick-js',
     ), AlRNDCM_VERSION, true);
 
-    wp_localize_script(
-        'custom-script',
-        'ajax_object',
-        array(
-            'ajax_url' => admin_url('admin-ajax.php'),
-            'admin_email' => get_bloginfo('admin_email'),
-            'nonce' => wp_create_nonce("aum_ajax_nonce")
-        )
+    wp_localize_script( 'custom-script', 'ajax_object',
+        array( 
+            'ajax_url' => admin_url( 'admin-ajax.php' ),
+            'admin_email' => get_bloginfo( 'admin_email' ),
+            'nonce' => wp_create_nonce( "aum_ajax_nonce" )
+        ) 
     );
 }
 add_action('wp_enqueue_scripts', 'enqueue_aum_script', 99);
 
 
-function ml_admin_scripts()
-{
+function ml_admin_scripts() {
     // Check if this is the Users List page or User Edit page
     global $pagenow;
-
-    if (($pagenow === 'admin.php')) {
+        
+    if (($pagenow === 'admin.php') ) {
         wp_enqueue_style('ml-orderoverwrite', AlRNDCM_URL . 'assets/css/orderoverwrite.css', array(), AlRNDCM_VERSION);
     }
 }
 add_action('admin_enqueue_scripts', 'ml_admin_scripts');
 
 // function enqueue_frontend_css() {
-
+    
 // }
 // add_action('wp_enqueue_scripts', 'enqueue_frontend_css');

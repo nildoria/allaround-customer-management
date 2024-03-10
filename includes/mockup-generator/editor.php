@@ -228,22 +228,24 @@ class ALRN_Metabox {
             'high' // Priority (high, core, default, low)
         );
         
-        // add_meta_box(
-        //     'alaround_canvas_gen', // Metabox ID
-        //     'Mockup Generate',   // Metabox Title
-        //     array( $this, 'mockup_generate' ), // Callback function to display the content
-        //     'product', // Post type (WooCommerce products)
-        //     'side', // Context (normal, side, advanced)
-        //     'high' // Priority (high, core, default, low)
-        // );
+        add_meta_box(
+            'alaround_canvas_gen', // Metabox ID
+            'Mockup Generate',   // Metabox Title
+            array( $this, 'mockup_generate' ), // Callback function to display the content
+            'product', // Post type (WooCommerce products)
+            'side', // Context (normal, side, advanced)
+            'high' // Priority (high, core, default, low)
+        );
     }
 
     public function mockup_generate( $post ) {
         $filter_arr = get_positions_by_id( $post->ID );
+        $get_users = ml_get_users_by_product( $post->ID );
+
         if( ! empty( $filter_arr ) ) {
             ?>
             <div class="allaround--product-mockup-gen-wrap">
-                <button id="alarndGenerateMockup" data-product_id="<?php echo esc_attr( $post->ID ); ?>" class="button button-primary button-large ml_add_loading">Generate</button>
+                <button id="alarndGenerateMockup" data-product_id="<?php echo esc_attr( $post->ID ); ?>" data-settings='<?php echo wp_json_encode($get_users); ?>' class="button button-primary button-large ml_add_loading">Generate</button>
             </div>
             <?php
         }
@@ -297,9 +299,11 @@ class ALRN_Metabox {
             "background" => $featured_img_url
         );
 
+        $get_users = ml_get_users_by_product( $post->ID );
+
         if( isset( $_GET['dev'] ) && 'true' === $_GET['dev'] ) {
             echo '<pre>';
-            print_r( $data );
+            print_r( $get_users );
             echo '</pre>';
         }
 
