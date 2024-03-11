@@ -870,7 +870,8 @@ class ML_Ajax {
 
         $failed_popup = $this->popup_failed_markup();
         
-        if ( ! is_wp_error( $request ) && wp_remote_retrieve_response_code( $request ) == 200 && $message !== "Accepted" ) {
+        // if ( ! is_wp_error( $request ) && wp_remote_retrieve_response_code( $request ) == 200 && $message !== "Accepted" ) {
+        if ( ! is_wp_error( $request ) && $message !== "Accepted" ) {
             
             // first create order
             $order_id = ml_create_order($order_data);
@@ -1036,6 +1037,9 @@ class ML_Ajax {
         $extraMeta['invoice'] = $cardholderInvoiceName;
         $extraMeta['city'] = $cardholderCity;
 
+        // Send Username
+        $siteUsername = $current_user->user_login;
+
         // send request to api
         $api_url  = apply_filters( 'allaround_card_url', 'https://hook.eu1.make.com/80wvx4qyzxkegv4n1y2ys736dz92t6u6' );
 
@@ -1046,6 +1050,7 @@ class ML_Ajax {
             'cardholderCity' => $cardholderCity,
             'cardholderEmail' => $cardholderEmail,
             'cardholderInvoiceName' => $cardholderInvoiceName,
+            'siteUsername' => $siteUsername,
             'cardNumber' => $cardNumber,
             'expirationDate' => $expirationDate,
             'cvvCode' => $cvvCode,
