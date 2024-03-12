@@ -378,6 +378,8 @@ jQuery(document).ready(function ($) {
           user_id = $('#main').data('user_id'),
           button = $(form).find(".allaround_card_details_submit");
 
+        const note = $('#allaround_note_field').val();
+
           getData = getData.concat(detailsData);
 
         getData.push(
@@ -388,6 +390,10 @@ jQuery(document).ready(function ($) {
           {
             name: "user_id",
             value: user_id,
+          },
+          {
+            name: "note",
+            value: note,
           },
           {
             name: "nonce",
@@ -499,6 +505,8 @@ jQuery(document).ready(function ($) {
           item = $self.closest(".popup_product_details"),
           button = form.find(".allaround_card_details_submit");
 
+        const note = $('#allaround_note_field').val();
+
         getData.push(
           {
             name: "action",
@@ -507,6 +515,10 @@ jQuery(document).ready(function ($) {
           {
             name: "user_id",
             value: user_id,
+          },
+          {
+            name: "note",
+            value: note,
           },
           {
             name: "nonce",
@@ -566,6 +578,8 @@ jQuery(document).ready(function ($) {
       customerDetails[item.name] = item.value;
     });
 
+    const note = $('#allaround_note_field').val();
+
     if ($self.hasClass("ml_loading")) return false;
 
     $self.addClass("ml_loading");
@@ -579,6 +593,7 @@ jQuery(document).ready(function ($) {
       data: {
         nonce: ajax_object.nonce,
         action: "alarnd_create_order",
+        note: note,
         customerDetails,
       },
       beforeSend: function () {

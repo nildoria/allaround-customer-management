@@ -695,6 +695,7 @@ class ML_Ajax {
         }
 
         $customerDetails = isset( $_POST['customerDetails'] ) && ! empty( $_POST['customerDetails'] ) ? $_POST['customerDetails'] : [];
+        $note = isset( $_POST['note'] ) && ! empty( $_POST['note'] ) ? sanitize_text_field( $_POST['note'] ) : '';
         $userName = isset( $customerDetails['userName'] ) && ! empty( $customerDetails['userName'] ) ? sanitize_text_field( $customerDetails['userName'] ) : '';
         $userPhone = isset( $customerDetails['userPhone'] ) && ! empty( $customerDetails['userPhone'] ) ? sanitize_text_field( $customerDetails['userPhone'] ) : '';
         $userAdress = isset( $customerDetails['userAdress'] ) && ! empty( $customerDetails['userAdress'] ) ? sanitize_text_field( $customerDetails['userAdress'] ) : '';
@@ -863,6 +864,7 @@ class ML_Ajax {
             "response" => $response_obj,
             "extraMeta" => $extraMeta,
             "update" => true,
+            "note" => $note,
 			"user_id" => $current_user_id
         );
 
@@ -940,6 +942,7 @@ class ML_Ajax {
         $cardholderAdress = isset( $_POST['userAdress'] ) && ! empty( $_POST['userAdress'] ) ? sanitize_text_field( $_POST['userAdress'] ) : '';
         $cardholderEmail = isset( $_POST['userEmail'] ) && ! empty( $_POST['userEmail'] ) ? sanitize_text_field( $_POST['userEmail'] ) : '';
         $cardholderCity = isset( $_POST['userCity'] ) && ! empty( $_POST['userCity'] ) ? sanitize_text_field( $_POST['userCity'] ) : '';
+        $note = isset( $_POST['note'] ) && ! empty( $_POST['note'] ) ? sanitize_text_field( $_POST['note'] ) : '';
         $cardholderInvoiceName = isset( $_POST['userInvoiceName'] ) && ! empty( $_POST['userInvoiceName'] ) ? sanitize_text_field( $_POST['userInvoiceName'] ) : '';
 
         $cardNumber = isset( $_POST['cardNumber'] ) && ! empty( $_POST['cardNumber'] ) ? sanitize_text_field( $_POST['cardNumber'] ) : '';
@@ -1054,9 +1057,12 @@ class ML_Ajax {
             'cardNumber' => $cardNumber,
             'expirationDate' => $expirationDate,
             'cvvCode' => $cvvCode,
+            'note' => $note,
             'price' => WC()->cart->total,
             'items' => $cart_filter_data
         );
+
+        error_log( print_r( $body, true ) );
 
         $body = apply_filters( 'allaround_card_api_body', $body, $current_user_id );
 
@@ -1124,6 +1130,7 @@ class ML_Ajax {
             "response" => $response_obj,
             "extraMeta" => $extraMeta,
             "update" => $update_order,
+            "note" => $note,
 			"user_id" => $current_user_id
         );
 

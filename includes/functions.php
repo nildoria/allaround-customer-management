@@ -1454,7 +1454,7 @@ function allaround_card_form($user_id = '')
         $current_user_id = $user_id;
     }
 
-    error_log("he id $current_user_id");
+    // error_log("he id $current_user_id");
 
     $name = $phone = $user_billing_info = $email = '';
     $available_card_path = AlRNDCM_URL . "assets/images/available-cards.png";
@@ -1474,7 +1474,7 @@ function allaround_card_form($user_id = '')
     $name = isset($the_user->display_name) && !empty($the_user->display_name) ? $the_user->display_name : $current_user_id;
     $email = $the_user->user_email;
     $lock_profile = get_field('lock_profile', 'user_' . $current_user_id);
-    error_log("email $email");
+    // error_log("email $email");
 
 
     $is_disabled = false;
@@ -1974,6 +1974,7 @@ function ml_create_order($data)
     $cardNumber = isset($data['cardNumber']) && !empty($data['cardNumber']) ? $data['cardNumber'] : '';
     $extraMeta = isset($data['extraMeta']) ? $data['extraMeta'] : [];
     $response = isset($data['response']) ? $data['response'] : [];
+    $note = isset($data['note']) ? $data['note'] : '';
     $update = isset($data['update']) ? true : false;
     $token_update = isset($data['token_update']) ? true : false;
     $fullname = isset($customerInfo['name']) ? $customerInfo['name'] : '';
@@ -1982,8 +1983,10 @@ function ml_create_order($data)
 
     // Assuming you have received payment response and details
     $order = wc_create_order();
+    $order->set_created_via('function');
 
     $gallery_thumbs = [];
+    $gallery_thumb_urls = [];
 
     // Loop through the products and add them to the order
     foreach ($products as $product) {
@@ -2029,8 +2032,46 @@ function ml_create_order($data)
         if (!empty($size)) {
             wc_add_order_item_meta($item_id, __('Size', 'hello-elementor'), $size);
         }
+
+        if ($alarnd_color_key !== '') {
+            $thumb_item = array(
+                'user_id' => $user_id,
+                'alarnd_color_key' => $alarnd_color_key
+            );
+
+            $wc_thumb = ml_get_cart_thumb($product_id, $thumb_item);
+
+            if (!empty($wc_thumb)) {
+                $filename_only = basename(get_attached_file($image_id)); // Just the file name
+                $filetype = wp_check_filetype($filename_only);
+                $ext = $filetype['ext'];
+                $colors = get_field('color', $product_id);
+                $attachment_id = isset($colors[$alarnd_color_key]['thumbnail']['ID']) ? $colors[$alarnd_color_key]['thumbnail']['ID'] : '';
+
+                $filename_only = 'wc_thumb_' . $product_id . '-' . $alarnd_color_key . '-' . $attachment_id . '.' . $ext;
+                ;
+                $media_info = '<div class="allarnd__order_item">';
+                $media_info = '<p>' . $filename_only . '</p>';
+                $media_info .= '<a href="' . esc_url($wc_thumb) . '" target="_blank"><img class="alarnd__artwork_img" src="' . esc_url($wc_thumb) . '" /></a>';
+                $media_info .= '</div>';
+
+                wc_add_order_item_meta($item_id, __('Attachment', 'hello-elementor'), $media_info);
+
+                $gallery_thumb_urls[$item_id] = $wc_thumb;
+            }
+        }
+
         if (!empty($alarnd_color_key)) {
             $gallery_thumbs[$item_id] = $alarnd_color_key;
+        }
+    }
+
+    // The loop to get the order items to add `_gallery_thumbnail` meta data.
+    if (!empty($gallery_thumb_urls)) {
+        foreach ($order->get_items() as $item_id => $item) {
+            if (isset($gallery_thumb_urls[$item_id]) && !empty($gallery_thumb_urls[$item_id])) {
+                $item->add_meta_data('_gallery_thumbnail', esc_attr($gallery_thumb_urls[$item_id]), true);
+            }
         }
     }
 
@@ -2039,6 +2080,12 @@ function ml_create_order($data)
     $order->set_address($customerInfo, 'shipping');
 
     $order->set_customer_id($user_id);
+    $order->set_currency(get_woocommerce_currency());
+    $order->set_prices_include_tax('yes' === get_option('woocommerce_prices_include_tax'));
+    $order->set_customer_ip_address(WC_Geolocation::get_ip_address());
+    $order->set_customer_user_agent(wc_get_user_agent());
+    $order->set_customer_note($note);
+
 
     // Set payment method (e.g., 'zcredit_checkout_payment' for zcredit)
     $order->set_payment_method('zcredit_checkout_payment');
@@ -2186,7 +2233,7 @@ function custom_order_item_thumbnail($thumbnail, $item_id, $item)
 
     $wc_thumb = ml_get_cart_thumb($product_id, $thumb_item);
 
-    error_log(print_r($wc_thumb, true));
+    // error_log(print_r($wc_thumb, true));
 
     if ($wc_thumb) {
         // Wrap the thumbnail with an anchor tag
@@ -2335,7 +2382,7 @@ function ml_get_cart_thumb($product_id, $cart_item)
     }
 
     $gen_thumbnail = ml_get_wc_thumbnail_url($image_id, $product_id, $current_user_id, $alarnd_color_key);
-    error_log("cart thumb $gen_thumbnail");
+    // error_log("cart thumb $gen_thumbnail");
     if (empty($gen_thumbnail)) {
         return '';
     }
@@ -3358,3 +3405,22 @@ function ml_get_users_by_product($product_id)
 
     return $filter_user;
 }
+
+function ml_woocommerce_after_cart()
+{
+    ?>
+    <div class="allaround--note-form">
+        <textarea name="allaround--note-field" id="allaround_note_field" cols="30" rows="3"
+            placeholder="<?php esc_attr_e("Have a note for us? Write it down!", "hello-elementor"); ?>"></textarea>
+    </div>
+    <?php
+}
+add_action('woocommerce_after_cart_table', 'ml_woocommerce_after_cart');
+
+function ml_wocommerce_hidden_order_itemmeta($arr)
+{
+    $arr[] = '_gallery_thumbnail';
+    return $arr;
+}
+
+add_filter('woocommerce_hidden_order_itemmeta', 'ml_wocommerce_hidden_order_itemmeta', 10, 1);

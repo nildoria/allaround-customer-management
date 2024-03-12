@@ -1947,6 +1947,18 @@ text#svgnameback {
   flex: 0 0 48%;
   margin-top: -20px;
 }
+.allaround--note-form {
+  margin-top: 30px;
+  overflow: hidden;
+}
+.allaround--note-form textarea{
+    margin-left: 2%;
+    float: right;
+    max-width: 100%;
+    resize:none
+}
+
+
 form#customerDetails {
   position: relative;
 }
@@ -2378,6 +2390,11 @@ body.elementor-default main#main {
     width: 100%;
     display: block;
   }
+  .allaround--note-form {
+    margin-top: 25px;
+    margin-bottom: 25px;
+  }
+  
 }
 
 /*For Wide Mobile Layout*/
