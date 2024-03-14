@@ -909,8 +909,7 @@ function ml_refactor_selects($selections)
  * @param int $user_id
  * @return array
  */
-function ml_get_user_products($user_id, $filter_item = '')
-{
+function ml_get_customers_products( $user_id, $filter_item = '' ) {
     $default_products = get_field('default_products', 'option');
     $selected_product_ids = get_field('selected_products', "user_{$user_id}");
     $disable_product = get_field('disable_product', "user_{$user_id}");
@@ -960,6 +959,45 @@ function ml_get_user_products($user_id, $filter_item = '')
     }
 
     return $results;
+}
+
+/**
+ * Get user selected products with defaults
+ *
+ * @param int $user_id
+ * @return array
+ */
+function ml_get_user_products($user_id, $filter_item = '', $apply_featured = false )
+{
+    $selected_products = ml_get_customers_products($user_id, $filter_item);
+
+    if( empty( $selected_products ) || false === $apply_featured ) {
+        return $selected_products;
+    }
+
+    // Get the featured product IDs using wc_get_featured_product_ids
+    $featured_product_ids = wc_get_featured_product_ids();
+
+    // Separate featured and non-featured products
+    $featured_products = $non_featured_products = array();
+    foreach ($selected_products as $item) {
+        if (in_array($item['value'], $featured_product_ids)) {
+            $featured_products[] = $item;
+        } else {
+            $non_featured_products[] = $item;
+        }
+    }
+
+    // Sort featured products by newer first
+    arsort($featured_products);
+
+    // Sort non-featured products by newer first
+    arsort($non_featured_products);
+
+    // Merge featured products first, followed by non-featured products
+    $sorted_product_lists = array_merge($featured_products, $non_featured_products);
+
+    return $sorted_product_lists;
 }
 
 function productBelongsToCategory($product_id, $category_id)
@@ -2809,7 +2847,7 @@ function ml_get_filter_content($current_user_id, $filter = '')
     $active_class = empty($filter) || 'all' === $filter ? "filter_wrap-active" : "";
 
     // Get selected product IDs for the user
-    $selected_product_ids = ml_get_user_products($current_user_id);
+    $selected_product_ids = ml_get_user_products($current_user_id, '', true);
 
     $filtered_product_ids = array();
     // Filter products by the selected category

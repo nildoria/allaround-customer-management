@@ -134,7 +134,7 @@ $current_user_id = $get_current_puser->ID;
 
         // Selected Product Ids for the User
         // $selected_product_ids = get_user_meta($get_current_puser->ID, 'selected_products', true);
-        $selected_product_ids = ml_get_user_products($current_user_id);
+        $selected_product_ids = ml_get_user_products($current_user_id, '', true);
 
         // Create an array to store product categories
         $product_categories = array();
