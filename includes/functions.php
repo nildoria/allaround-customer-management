@@ -3277,6 +3277,35 @@ function ml_get_image_url($name, $user_id, $size = 'full')
     return wp_get_attachment_image_url($attachment_id, $size);
 }
 
+function ml_get_image_url_child($data, $size = 'full')
+{
+    if (empty($data))
+        return $data;
+
+    return wp_get_attachment_image_url($data, $size);
+}
+
+
+function ml_map_logo_collections($array)
+{
+    if( empty( $array ) )
+        return $array;
+    
+    $reformatted_array = [];
+    
+    foreach ($array as $item) {
+        $reformatted_item = [
+            'logo_lighter' => ml_get_image_url_child($item['logo_lighter']),
+            'logo_darker' => ml_get_image_url_child($item['logo_darker']),
+            'shape' => $item['shape'],
+            'select_products' => $item['select_products']
+        ];
+        $reformatted_array[] = $reformatted_item;
+    }
+
+    return $reformatted_array;
+}
+
 /**
  * Get the time elapsed since the last record was generated in a human-readable format.
  *

@@ -161,7 +161,7 @@ class ML_Ajax {
 
                 // Price
 
-                echo '<p>' . $product->get_price_html() . '</p>';
+                 echo '<p class="mini_productCard_price">' . $product->get_price_html() . '</p>';
                 
                 // Buttons
                 echo '<div class="product-buttons">';
@@ -391,7 +391,7 @@ class ML_Ajax {
 
                 // Price
 
-                echo '<p>' . $product->get_price_html() . '</p>';
+                echo '<p class="mini_productCard_price">' . $product->get_price_html() . '</p>';
                 
                 // Buttons
                 echo '<div class="product-buttons">';

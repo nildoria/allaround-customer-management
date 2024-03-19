@@ -310,6 +310,7 @@ class ALRN_Genrator {
             $default_logo_shape = get_field('default_logo_shape', 'user_' . $user_id);
             $custom_logo_shape = get_field('custom_logo_shape', 'user_' . $user_id);
             $logo_collections = get_field('logo_collections', 'user_' . $user_id);
+            $logo_collections = ml_map_logo_collections($logo_collections);
 
             $type = ml_get_orientation( $profile_picture_id );
             $custom_type = '';
