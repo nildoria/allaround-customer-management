@@ -129,68 +129,81 @@ $current_user_id = $get_current_puser->ID;
         </div>
 
         <?php
-        echo '<section class="allaround--products-section">';
-        echo '<div class="alarnd--overlay"></div>';
+        echo '<section class="allaround--user-mini-store allaround--min-height">';
+        // update_post_meta( $product_id, 'ml_mockup_generation_running', false );
+        $is_running = get_user_meta( $current_user_id, 'ml_mockup_generation_running', true );
+        if( $is_running ) {
+            echo '<h2 class="allaround--is_running">' . esc_html__("Your mini store is being generated. Please check back in a few minutes!", "hello-elementor" ) . '</h2>';
+        } else {
+            echo '<section class="allaround--products-section">';
+            echo '<div class="alarnd--overlay"></div>';
 
-        // Selected Product Ids for the User
-        // $selected_product_ids = get_user_meta($get_current_puser->ID, 'selected_products', true);
-        $selected_product_ids = ml_get_user_products($current_user_id, '', true);
+            // Selected Product Ids for the User
+            // $selected_product_ids = get_user_meta($get_current_puser->ID, 'selected_products', true);
+            $selected_product_ids = ml_get_user_products($current_user_id, '', true);
 
-        // Create an array to store product categories
-        $product_categories = array();
-        
-        if (!empty($selected_product_ids)) {
+            // Create an array to store product categories
+            $product_categories = array();
+            
+            if (!empty($selected_product_ids)) {
 
-            echo '<div class="product-filter">';
-            // Collect categories for filtering
-            foreach ($selected_product_ids as $product) {
-                if( ! isset( $product['value'] ) || empty( $product['value'] ) )
-                    continue;
+                echo '<div class="product-filter">';
+                // Collect categories for filtering
+                foreach ($selected_product_ids as $product) {
+                    if( ! isset( $product['value'] ) || empty( $product['value'] ) )
+                        continue;
 
-                $product_id = $product['value'];
-                $product = wc_get_product($product_id);
-                if ($product) {
-                    $terms = wp_get_post_terms($product_id, 'product_cat');
-                    foreach ($terms as $term) {
-                        $product_categories[$term->term_id] = $term;
+                    $product_id = $product['value'];
+                    $product = wc_get_product($product_id);
+                    if ($product) {
+                        $terms = wp_get_post_terms($product_id, 'product_cat');
+                        foreach ($terms as $term) {
+                            $product_categories[$term->term_id] = $term;
+                        }
                     }
                 }
+
+                // Display category filters
+                
+                echo '<button class="filter_active filter_item" data-category="all">'.esc_html__("All", "hello-elementor").'</button>';
+                foreach ($product_categories as $category) {
+                    echo '<button class="filter_item" data-filter=".category-' . $category->term_id . '" data-category="' . $category->term_id . '">' . esc_html($category->name) . '</button>';
+                }
+
+                echo '</div>';
+
+                echo '<div class="allaround--products-filter-container">';
+
+                echo ml_get_filter_content( $current_user_id, 'all' );
+                foreach ($product_categories as $category) {
+                    echo ml_get_filter_content( $current_user_id, $category->term_id );
+                }
+
+                echo '</div>'; // End allaround--products-filter-container
             }
+            echo '</section>'; // end .allaround--products-section section
+            ?>
 
-            // Display category filters
-            
-            echo '<button class="filter_active filter_item" data-category="all">'.esc_html__("All", "hello-elementor").'</button>';
-            foreach ($product_categories as $category) {
-                echo '<button class="filter_item" data-filter=".category-' . $category->term_id . '" data-category="' . $category->term_id . '">' . esc_html($category->name) . '</button>';
-            }
-
-            echo '</div>';
-
-            echo '<div class="allaround--products-filter-container">';
-
-            echo ml_get_filter_content( $current_user_id, 'all' );
-            foreach ($product_categories as $category) {
-                echo ml_get_filter_content( $current_user_id, $category->term_id );
-            }
-
-            echo '</div>'; // End allaround--products-filter-container
-        }
-        echo '</section>'; // end .allaround--products-section section
-        ?>
-
-        <div class="cart-page alarnd--cart-wrapper-main" id="woocommerce_cart">
-            <div class="alarnd--cart-wrapper-inner alarnd--full-width">
-                <h2>העגלה שלך</h2>
-                <?php echo do_shortcode('[woocommerce_cart]'); ?>
+            <div class="cart-page alarnd--cart-wrapper-main" id="woocommerce_cart">
+                <div class="alarnd--cart-wrapper-inner alarnd--full-width">
+                    <h2>העגלה שלך</h2>
+                    <?php echo do_shortcode('[woocommerce_cart]'); ?>
+                </div>
             </div>
-        </div>
 
-        <div class="alarnd--custom-checkout-section<?php echo WC()->cart->is_empty() ? ' ml_pay_hidden-not' : ''; ?>" id="ministore--custom-checkout-section">
+            <div class="alarnd--custom-checkout-section<?php echo WC()->cart->is_empty() ? ' ml_pay_hidden-not' : ''; ?>" id="ministore--custom-checkout-section">
 
-            <?php if( is_user_logged_in() ) : ?>
-                <?php
-                if( $is_tokenpayout_show === true ) : ?>
-                <?php echo alarnd_single_checkout($logged_user_id); ?>
+                <?php if( is_user_logged_in() ) : ?>
+                    <?php
+                    if( $is_tokenpayout_show === true ) : ?>
+                    <?php echo alarnd_single_checkout($logged_user_id); ?>
+                    <?php else : ?>
+                        <div class="alarnd--woocommerce-checkout-page alarnd--default-visible">
+                            <div class="alarnd-checkout-wrap-inner">
+                                <?php echo allaround_card_form(); ?>
+                            </div>
+                        </div>
+                    <?php endif; ?>
                 <?php else : ?>
                     <div class="alarnd--woocommerce-checkout-page alarnd--default-visible">
                         <div class="alarnd-checkout-wrap-inner">
@@ -198,17 +211,11 @@ $current_user_id = $get_current_puser->ID;
                         </div>
                     </div>
                 <?php endif; ?>
-            <?php else : ?>
-                <div class="alarnd--woocommerce-checkout-page alarnd--default-visible">
-                    <div class="alarnd-checkout-wrap-inner">
-                        <?php echo allaround_card_form(); ?>
-                    </div>
-                </div>
-            <?php endif; ?>
-        
-        </div>
+            
+            </div>
 
-        <div id="product-quick-view"></div>
+            <div id="product-quick-view"></div>
+        <?php } ?> <!-- $is_running end -->
         <?php } ?> <!-- $is_login_form_show end -->
     </main><!-- #main -->
 </div><!-- #primary -->

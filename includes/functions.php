@@ -2840,7 +2840,7 @@ function modify_user_notification_checkbox()
 }
 
 
-function ml_get_filter_content($current_user_id, $filter = '')
+function ml_get_filter_content($current_user_id, $filter = '', $pagination = true)
 {
 
     $id = empty($filter) || 'all' === $filter ? "filter_wrap-all" : "filter_wrap-$filter";
@@ -2886,8 +2886,14 @@ function ml_get_filter_content($current_user_id, $filter = '')
     $end = $start + $itemsPerPage;
     $itemsToDisplay = array_slice($items, $start, $itemsPerPage);
     $big = 999999999; // need an unlikely integer
+	
+	if( false === $pagination ) {
+        $itemsToDisplay = $filtered_product_ids;
+    }
 
     echo '<ul id="allaround_products_list-' . $filter . '" data-user_id="' . esc_attr($current_user_id) . '" class="mini-store-product-list product-list-container products columns-3">';
+	
+	$item_irr_num = 1;
     foreach ($itemsToDisplay as $prod_object) {
         if (!isset($prod_object['value']) || empty($prod_object['value']))
             continue;
@@ -2916,8 +2922,18 @@ function ml_get_filter_content($current_user_id, $filter = '')
 
         if ($product) {
             $terms = wp_get_post_terms($product_id, 'product_cat');
+			
+			$product_class = array( 'product', 'product-item' );
+            if( false === $pagination && $item_irr_num > 6 ) {
+                $product_class[] = 'loadmore-loaded';
+            }
 
-            echo '<li class="product-item product ';
+            $item_irr_num++;
+
+            // convert $product_class array to html class by space into a string
+            $product_class = implode( ' ', $product_class );
+
+            echo '<li class="'. esc_attr( $product_class ) .'"';
 
             foreach ($terms as $term) {
                 echo 'category-' . $term->term_id . ' ';
@@ -3491,3 +3507,16 @@ function ml_wocommerce_hidden_order_itemmeta($arr)
 }
 
 add_filter('woocommerce_hidden_order_itemmeta', 'ml_wocommerce_hidden_order_itemmeta', 10, 1);
+
+
+// Schedule the event using a unique hook name and custom interval
+// Schedule the event using a unique hook name and custom interval
+add_action( 'init', 'ml_schedule_custom_event' );
+function ml_schedule_custom_event() {
+    // Remove existing schedules for the event
+    wp_clear_scheduled_hook( 'ml_product_mockup_generate_cron_event' );
+
+    // Schedule the event with the desired interval
+    wp_schedule_event( time(), 'ml_product_mockup_generate_cron_interval', 'ml_product_mockup_generate_cron_event' );
+}
+

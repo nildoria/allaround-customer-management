@@ -1542,6 +1542,12 @@ input#cvvCode::-webkit-inner-spin-button {
   margin: 0;
 }
 
+h2.allaround--is_running {
+  text-align: center;
+  padding: 100px 0 100px;
+  font-size: 40px;
+}
+
 /* Firefox */
 input#cvvCode[type="number"] {
   -moz-appearance: textfield;

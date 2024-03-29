@@ -69,10 +69,13 @@ function enqueue_aum_script() {
         'slick-js',
     ), AlRNDCM_VERSION, true);
 
+    $itemsPerPage = ml_products_per_page();
+
     wp_localize_script( 'custom-script', 'ajax_object',
         array( 
             'ajax_url' => admin_url( 'admin-ajax.php' ),
             'admin_email' => get_bloginfo( 'admin_email' ),
+            'itemsPerPage' => $itemsPerPage,
             'nonce' => wp_create_nonce( "aum_ajax_nonce" )
         ) 
     );

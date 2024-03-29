@@ -239,15 +239,27 @@ class ALRN_Metabox {
     }
 
     public function mockup_generate( $post ) {
-        $filter_arr = get_positions_by_id( $post->ID );
-        $get_users = ml_get_users_by_product( $post->ID );
+        $product_id = $post->ID;
+        $filter_arr = get_positions_by_id( $product_id );
+        $get_users = ml_get_users_by_product( $product_id );
 
-        if( ! empty( $filter_arr ) ) {
-            ?>
-            <div class="allaround--product-mockup-gen-wrap">
-                <button id="alarndGenerateMockup" data-product_id="<?php echo esc_attr( $post->ID ); ?>" data-settings='<?php echo wp_json_encode($get_users); ?>' class="button button-primary button-large ml_add_loading">Generate</button>
-            </div>
-            <?php
+        // update_post_meta( $product_id, 'ml_mockup_generation_running', false );
+        $is_running = get_post_meta( $product_id, 'ml_mockup_generation_running', true );
+
+        // Check if the background process associated with the product ID is running
+        if ($is_running) { ?>
+        <div class="allaround--generation-running">
+            <p><?php printf( esc_html__( 'Background process is running for product ID: %s', 'hello-elementor' ), $product_id ); ?></p>
+        </div>
+        <?php
+        } else {
+            if( ! empty( $filter_arr ) ) {
+                ?>
+                <div class="allaround--product-mockup-gen-wrap">
+                    <button id="alarndGenerateMockup" data-product_id="<?php echo esc_attr( $product_id ); ?>" data-settings='<?php echo wp_json_encode($get_users); ?>' class="button button-primary button-large ml_add_loading">Generate</button>
+                </div>
+                <?php
+            }
         }
     }
 

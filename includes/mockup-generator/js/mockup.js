@@ -1017,46 +1017,88 @@ $(document).on('click', "#alarndGenerateMockup", async function (e) {
     
     var item = $(this);
 
-    // Check if image generation is already in progress
-    if (isGeneratingImages) {
-        customLog('Image generation is already in progress. Please wait.');
-        return;
-    }
-
     const users = item.data('settings');
     const product_id = item.data('product_id');
 
-    const start_time = Math.floor(Date.now() / 1000);
+    // Data to send
+    var data = {
+        product_id: product_id
+    };
 
-    try {
-        // Set the flag to indicate image generation is in progress
-        isGeneratingImages = true;
+    console.log('product_id', product_id);
 
-        imageBatch = [];
-        totalImagesProcessed = 0;
-        totalNumberItems = 0;
-        getTotalItemNeedProcess = 0;
+    item.addClass('ml_loading');
 
-        // Add the "ml_loading" class to the clicked item
-        item.addClass('ml_loading');
-
-        customLog( "start: " + new Date() );
-
-        // Perform image generation
-        imageResultList = await generateByProduct(users);
-        console.log(imageResultList);
-    } catch (error) {
-        console.error('Error:', error);
-    } finally {
-        // Reset the flag once image generation is complete
-        isGeneratingImages = false;
-
-        // Remove the "ml_loading" class from the clicked item
-        item.removeClass('ml_loading');
-    }
-
-    return false;
+    $.ajax({
+        url: mockupGeneratorAjax.product_mockup_generate,
+        type: 'POST', // or 'GET', depending on your API
+        data: JSON.stringify(data),
+        contentType: 'application/json',
+        success: function(data) {
+            // Handle the data received from the API
+            console.log('Data received:', data);
+            // Do something with the data here, like update the UI
+            setTimeout(function() {
+                item.removeClass('ml_loading');
+                item.replaceWith('<p>Background process is running for product ID: ' + product_id + '</p>');
+            }, 2000);
+        },
+        error: function(xhr, status, error) {
+            // Handle errors
+            console.error('Error:', error);
+            item.removeClass('ml_loading');
+        },
+        complete: function() {
+            item.removeClass('ml_loading');
+        }
+    });
 });
+
+// $(document).on('click', "#alarndGenerateMockup", async function (e) {
+//     e.preventDefault();
+    
+//     var item = $(this);
+
+//     // Check if image generation is already in progress
+//     if (isGeneratingImages) {
+//         customLog('Image generation is already in progress. Please wait.');
+//         return;
+//     }
+
+//     const users = item.data('settings');
+//     const product_id = item.data('product_id');
+
+//     const start_time = Math.floor(Date.now() / 1000);
+
+//     try {
+//         // Set the flag to indicate image generation is in progress
+//         isGeneratingImages = true;
+
+//         imageBatch = [];
+//         totalImagesProcessed = 0;
+//         totalNumberItems = 0;
+//         getTotalItemNeedProcess = 0;
+
+//         // Add the "ml_loading" class to the clicked item
+//         item.addClass('ml_loading');
+
+//         customLog( "start: " + new Date() );
+
+//         // Perform image generation
+//         imageResultList = await generateByProduct(users);
+//         console.log(imageResultList);
+//     } catch (error) {
+//         console.error('Error:', error);
+//     } finally {
+//         // Reset the flag once image generation is complete
+//         isGeneratingImages = false;
+
+//         // Remove the "ml_loading" class from the clicked item
+//         item.removeClass('ml_loading');
+//     }
+
+//     return false;
+// });
 
 
 // Print the result after all images are generated
