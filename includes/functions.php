@@ -420,7 +420,7 @@ add_filter('woocommerce_add_to_cart_form_action', 'ml_avoid_redirect_to_single_p
 
 function alarnd_is_quick_view()
 {
-    return(defined('DOING_AJAX') && DOING_AJAX && isset($_REQUEST['action']) && 'get_item_selector' === $_REQUEST['action']);
+    return (defined('DOING_AJAX') && DOING_AJAX && isset($_REQUEST['action']) && 'get_item_selector' === $_REQUEST['action']);
 }
 function ml_avoid_redirect_to_single_page($value)
 {
@@ -909,7 +909,8 @@ function ml_refactor_selects($selections)
  * @param int $user_id
  * @return array
  */
-function ml_get_customers_products( $user_id, $filter_item = '' ) {
+function ml_get_customers_products($user_id, $filter_item = '')
+{
     $default_products = get_field('default_products', 'option');
     $selected_product_ids = get_field('selected_products', "user_{$user_id}");
     $disable_product = get_field('disable_product', "user_{$user_id}");
@@ -967,11 +968,11 @@ function ml_get_customers_products( $user_id, $filter_item = '' ) {
  * @param int $user_id
  * @return array
  */
-function ml_get_user_products($user_id, $filter_item = '', $apply_featured = false )
+function ml_get_user_products($user_id, $filter_item = '', $apply_featured = false)
 {
     $selected_products = ml_get_customers_products($user_id, $filter_item);
 
-    if( empty( $selected_products ) || false === $apply_featured ) {
+    if (empty($selected_products) || false === $apply_featured) {
         return $selected_products;
     }
 
@@ -1158,9 +1159,9 @@ function isColorLightOrDark($hexColor)
 
     // Compare the luminance to the threshold
     if ($luminance > $threshold) {
-        return 'dark';
+        return 'darker';
     } else {
-        return 'light';
+        return 'lighter';
     }
 }
 
@@ -2847,7 +2848,22 @@ function ml_get_filter_content($current_user_id, $filter = '', $pagination = tru
     $active_class = empty($filter) || 'all' === $filter ? "filter_wrap-active" : "";
 
     // Get selected product IDs for the user
-    $selected_product_ids = ml_get_user_products($current_user_id, '', true);
+    $all_products = ml_get_user_products($current_user_id, '', true);
+
+    $disable_product = get_field('disable_product', "user_{$current_user_id}");
+    if (!is_array($disable_product)) {
+        $disable_product = array();
+    }
+    $selected_product_ids = array_filter($all_products, function ($product) use ($disable_product) {
+        return !in_array($product['value'], $disable_product);
+    });
+
+    // if (isset($_GET['dev']) && $_GET['dev'] === 'true') {
+    //     echo '<pre>';
+    //     print_r($disable_product);
+    //     echo '</pre>';
+    // }
+
 
     $filtered_product_ids = array();
     // Filter products by the selected category
@@ -2886,14 +2902,14 @@ function ml_get_filter_content($current_user_id, $filter = '', $pagination = tru
     $end = $start + $itemsPerPage;
     $itemsToDisplay = array_slice($items, $start, $itemsPerPage);
     $big = 999999999; // need an unlikely integer
-	
-	if( false === $pagination ) {
+
+    if (false === $pagination) {
         $itemsToDisplay = $filtered_product_ids;
     }
 
     echo '<ul id="allaround_products_list-' . $filter . '" data-user_id="' . esc_attr($current_user_id) . '" class="mini-store-product-list product-list-container products columns-3">';
-	
-	$item_irr_num = 1;
+
+    $item_irr_num = 1;
     foreach ($itemsToDisplay as $prod_object) {
         if (!isset($prod_object['value']) || empty($prod_object['value']))
             continue;
@@ -2922,18 +2938,18 @@ function ml_get_filter_content($current_user_id, $filter = '', $pagination = tru
 
         if ($product) {
             $terms = wp_get_post_terms($product_id, 'product_cat');
-			
-			$product_class = array( 'product', 'product-item' );
-            if( false === $pagination && $item_irr_num > 6 ) {
+
+            $product_class = array('product', 'product-item');
+            if (false === $pagination && $item_irr_num > 6) {
                 $product_class[] = 'loadmore-loaded';
             }
 
             $item_irr_num++;
 
             // convert $product_class array to html class by space into a string
-            $product_class = implode( ' ', $product_class );
+            $product_class = implode(' ', $product_class);
 
-            echo '<li class="'. esc_attr( $product_class ) .'"';
+            echo '<li class="' . esc_attr($product_class) . '"';
 
             foreach ($terms as $term) {
                 echo 'category-' . $term->term_id . ' ';
@@ -3304,11 +3320,11 @@ function ml_get_image_url_child($data, $size = 'full')
 
 function ml_map_logo_collections($array)
 {
-    if( empty( $array ) )
+    if (empty($array))
         return $array;
-    
+
     $reformatted_array = [];
-    
+
     foreach ($array as $item) {
         $reformatted_item = [
             'logo_lighter' => ml_get_image_url_child($item['logo_lighter']),
@@ -3408,6 +3424,7 @@ function ml_get_last_generated_time($user_id)
     $mockup_last_generated_time = get_user_meta($user_id, 'mockup_last_generated_time', true);
 
     if (!empty($mockup_last_generated_time)) {
+
         // Calculate the time difference
         $end_time = $mockup_last_generated_time;
         $current_time = time();
@@ -3494,7 +3511,7 @@ function ml_woocommerce_after_cart()
     ?>
     <div class="allaround--note-form">
         <textarea name="allaround--note-field" id="allaround_note_field" cols="30" rows="3"
-            placeholder="<?php esc_attr_e("Have a note for us? Write it down!", "hello-elementor"); ?>"></textarea>
+            placeholder="<?php esc_html__("Have a note for us? Write it down!", "hello-elementor"); ?>"></textarea>
     </div>
     <?php
 }
@@ -3509,14 +3526,78 @@ function ml_wocommerce_hidden_order_itemmeta($arr)
 add_filter('woocommerce_hidden_order_itemmeta', 'ml_wocommerce_hidden_order_itemmeta', 10, 1);
 
 
-// Schedule the event using a unique hook name and custom interval
-// Schedule the event using a unique hook name and custom interval
-add_action( 'init', 'ml_schedule_custom_event' );
-function ml_schedule_custom_event() {
-    // Remove existing schedules for the event
-    wp_clear_scheduled_hook( 'ml_product_mockup_generate_cron_event' );
 
-    // Schedule the event with the desired interval
-    wp_schedule_event( time(), 'ml_product_mockup_generate_cron_interval', 'ml_product_mockup_generate_cron_event' );
+
+
+
+
+
+
+
+function ml_error_log($message)
+{
+    $log_folder = '/ml-logs/';
+    $log_file_prefix = 'ml-debug';
+    $max_lines_per_file = 30000; // Updated max lines per file
+
+    // Create log folder if it doesn't exist
+    $log_folder_path = WP_CONTENT_DIR . $log_folder;
+    if (!file_exists($log_folder_path)) {
+        mkdir($log_folder_path, 0777, true);
+    }
+
+    // Find the current log file
+    $current_log_file = get_current_log_file($log_folder_path, $log_file_prefix, $max_lines_per_file);
+    $log_file_path = $log_folder_path . $current_log_file;
+
+    // Check if log file exceeds maximum lines, create a new one
+    $line_count = file_exists($log_file_path) ? count(file($log_file_path)) : 0;
+    if ($line_count >= $max_lines_per_file) {
+        $current_log_file = increment_log_file($log_folder_path, $log_file_prefix);
+        $log_file_path = $log_folder_path . $current_log_file;
+    }
+
+    // Generate timestamp
+    $timestamp = '[' . date('d-M-Y H:i:s T') . '] ';
+
+    // Append message with timestamp to the log file
+    file_put_contents($log_file_path, $timestamp . $message . PHP_EOL, FILE_APPEND);
 }
 
+function get_current_log_file($log_folder_path, $log_file_prefix, $max_lines_per_file)
+{
+    // Find the current log file
+    $index = 0;
+    do {
+        $index++;
+        $current_log_file = $log_file_prefix . ($index > 1 ? '-' . $index : '') . '.log';
+        $current_log_file_path = $log_folder_path . $current_log_file;
+    } while (file_exists($current_log_file_path) && count(file($current_log_file_path)) >= $max_lines_per_file);
+
+    return $current_log_file;
+}
+
+function increment_log_file($log_folder_path, $log_file_prefix)
+{
+    // Find the next available log file
+    $index = 0;
+    do {
+        $index++;
+        $next_log_file = $log_file_prefix . '-' . $index . '.log';
+        $next_log_file_path = $log_folder_path . $next_log_file;
+    } while (file_exists($next_log_file_path));
+
+    return $next_log_file;
+}
+
+
+// Add admin notice when transient exists
+add_action('admin_notices', function () {
+    if (get_transient('ml_bulk_generate_success_notice')) {
+        echo '<div class="notice notice-success is-dismissible"><p>' . __('Background bulk user mockup generated started.', 'your-text-domain') . '</p></div>';
+        delete_transient('ml_bulk_generate_success_notice');
+        if (get_transient('ml_bulk_generate_error_notice')) {
+            delete_transient('ml_bulk_generate_error_notice');
+        }
+    }
+});

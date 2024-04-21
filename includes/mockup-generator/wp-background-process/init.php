@@ -14,7 +14,10 @@ class MLBackgroundInit {
 		}
 		
 		require_once plugin_dir_path( __FILE__ ) . 'classes/class-data.php';
-		require_once plugin_dir_path( __FILE__ ) . 'classes/class-background-process.php';
+		require_once plugin_dir_path( __FILE__ ) . 'classes/class-product-process.php';
+		require_once plugin_dir_path( __FILE__ ) . 'classes/class-user-process.php';
+		require_once plugin_dir_path( __FILE__ ) . 'classes/class-bulk-process.php';
+		require_once plugin_dir_path( __FILE__ ) . 'class-generation-options.php';
 	}
 
 }

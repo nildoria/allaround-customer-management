@@ -170,3 +170,7 @@ msgstr ""
 #: includes/ajax-handler.php:1280
 msgid "שינוי"
 msgstr ""
+
+msgctxt "מוצרים נוספים..."
+msgid "More Items"
+msgstr ""

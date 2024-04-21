@@ -182,7 +182,34 @@ abstract class WP_Background_Process extends WP_Async_Request {
 	 *
 	 * @return bool
 	 */
-	protected function is_queue_empty() {
+	public function is_queue_empty() {
+		global $wpdb;
+
+		$table  = $wpdb->options;
+		$column = 'option_name';
+
+		if ( is_multisite() ) {
+			$table  = $wpdb->sitemeta;
+			$column = 'meta_key';
+		}
+
+		$key = $wpdb->esc_like( $this->identifier . '_batch_' ) . '%';
+
+		$count = $wpdb->get_var( $wpdb->prepare( "
+			SELECT COUNT(*)
+			FROM {$table}
+			WHERE {$column} LIKE %s
+		", $key ) );
+
+		return ( $count > 0 ) ? false : true;
+	}
+	
+	/**
+	 * Is queue empty
+	 *
+	 * @return bool
+	 */
+	public function is_queue_there() {
 		global $wpdb;
 
 		$table  = $wpdb->options;
@@ -484,8 +511,9 @@ abstract class WP_Background_Process extends WP_Async_Request {
 			$this->delete( $batch->key );
 
 			wp_clear_scheduled_hook( $this->cron_hook_identifier );
-		}
 
+			error_log( 'Canceled ' . $this->identifier . ' process.' );
+		}
 	}
 
 	/**

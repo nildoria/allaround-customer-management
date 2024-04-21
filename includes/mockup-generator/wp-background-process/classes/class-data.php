@@ -17,7 +17,7 @@ trait MLGetUserData {
 	 * @param string $message
 	 */
 	public function log( $message ) {
-		error_log( print_r( $message, true ) );
+		ml_error_log( print_r( $message, true ) );
 	}
 
 	/**
@@ -29,19 +29,32 @@ trait MLGetUserData {
 	 */
 	protected function get_mockup( $item ) {
 
-		$task_id = isset($item['task_id']) ? $item['task_id'] : null;
-        $this->log( "item details $task_id" );
-        // $this->log( print_r( $item, true ) );
+		$task_group = isset($item['task_group']) ? $item['task_group'] : null;
+
+		if( $task_group === null ) {
+			return;
+		}
+
+        $this->log( "item details $task_group" );
+        $this->log( print_r( $item, true ) );
+
+		// vercel end point as default url.
+		$generate_api_url = 'https://generate-mockups-xi.vercel.app/api/create';
+		
+		$home_url = home_url();
+		// check if home ur has localhost or mlimon.io domain
+		if ( strpos( $home_url, 'localhost' ) !== false || strpos( $home_url, 'mlimon.io' ) !== false ) {
+			$generate_api_url = 'http://localhost:3000/api/create';
+		}
 
         // Make an HTTP request to an external server to get the image data
-        $response = wp_remote_post('https://generate-mockups-xi.vercel.app/api/create', array(
+        $response = wp_remote_post($generate_api_url, array(
             'body' => json_encode( $item ),
 			'timeout' => 50,
             'headers' => array('Content-Type' => 'application/json'),
         ));
 
         if ( is_wp_error($response) ) {
-			error_log( print_r( $response->get_error_message(), true ) );
             // Handle error
             return $response;
         }
@@ -50,7 +63,7 @@ trait MLGetUserData {
         // Decode JSON string into an associative array
         $response_data = json_decode($response_data, true);
 
-        $this->log( "response $task_id" );
+        $this->log( "response $task_group" );
         // $this->log( print_r( $response_data, true ) );
 
         if ( ! is_array($response_data) || ! isset( $response_data['batch'] ) || empty( $response_data['batch'] ) ) {

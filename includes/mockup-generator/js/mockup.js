@@ -16,6 +16,7 @@ const userQueue = []; // Queue to store users for processing
 // Define a variable to control logging
 let enableLogging = true;
 const enableBackgroundColor = mockupGeneratorAjax?.background_enabled;
+const is_background_process_on = mockupGeneratorAjax?.is_background_process_on;
 
 // Custom logging function
 const customLog = (...args) => {
@@ -850,7 +851,7 @@ window.addEventListener('beforeunload', (event) => {
 
 // event listener for the bulk action apply button
 const doActionButton = document.getElementById('doaction');
-if (doActionButton) {
+if (doActionButton && is_background_process_on === 'on') {
     doActionButton.addEventListener('click', handleBulkActionApply);
 }
 
@@ -1052,6 +1053,45 @@ $(document).on('click', "#alarndGenerateMockup", async function (e) {
             item.removeClass('ml_loading');
         }
     });
+});
+
+$(document).on('click', ".ml_background_prcess_button", async function (e) {
+    e.preventDefault();
+
+    var item = $(this),
+        user_id = item.data('user_id');
+
+    item.addClass('ml_loading')
+
+    // Data to send
+    var data = {
+        user_id: user_id
+    };
+
+    $.ajax({
+        url: mockupGeneratorAjax.user_mockup_generate,
+        type: 'POST', // or 'GET', depending on your API
+        data: JSON.stringify(data),
+        contentType: 'application/json',
+        success: function(data) {
+            // Handle the data received from the API
+            console.log('Data received:', data);
+            item.addClass('ml_loading').prop('disabled', true).attr('disabled', true);
+			
+			// lets reload after 2s
+			setTimeout(function(){
+				// reload page
+            	location.reload();
+			}, 2000);
+        },
+        error: function(xhr, status, error) {
+            // Handle errors
+            console.error('Error:', error);
+            item.removeClass('ml_loading').prop('disabled', false).attr('disabled', false);
+        }
+    });
+
+    return false;
 });
 
 // $(document).on('click', "#alarndGenerateMockup", async function (e) {

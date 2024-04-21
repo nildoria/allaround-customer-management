@@ -1112,9 +1112,21 @@ jQuery(document).ready(function ($) {
       if (page_num >= totalPages) {
         $(this).fadeOut();
       }
+      disableSecondProductsWithSameId();
     });
   }
 
+
+  function disableSecondProductsWithSameId() {
+      $('.filter_wrap-active ul.mini-store-product-list li[data-product-id]').each(function() {
+          var productId = $(this).data('product-id');
+          var $itemsWithId = $('.filter_wrap-active ul.mini-store-product-list li[data-product-id="' + productId + '"]');
+          $itemsWithId.not(':first').css({
+              'pointer-events': 'none',
+              'display': 'none'
+          });
+      });
+  }
 
 
   $('#userPhone').on('input', function() {

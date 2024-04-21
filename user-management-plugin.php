@@ -3,7 +3,7 @@
 Plugin Name: AllAround Mini Store
 Plugin URI: https://allaround.co.il/
 Description: AllAround User Management and Mini Store.
-Version: 3.1
+Version: 3.4
 Text Domain: hello-elementor
 */
 
@@ -20,7 +20,7 @@ class AlrndCustomerManagement {
      *
      * @var string
      */
-    const version = '3.1';
+    const version = '3.4';
 
     /**
 	 * Call this method to get the singleton

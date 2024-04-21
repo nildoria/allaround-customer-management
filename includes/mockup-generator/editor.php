@@ -313,9 +313,12 @@ class ALRN_Metabox {
 
         $get_users = ml_get_users_by_product( $post->ID );
 
-        if( isset( $_GET['dev'] ) && 'true' === $_GET['dev'] ) {
+        if( isset( $_GET['dev'] ) && 'true' == $_GET['dev'] ) {
             echo '<pre>';
-            print_r( $get_users );
+            print_r( count( $get_users ) );
+            echo '</pre>';
+            echo '<pre>';
+            print_r( $data );
             echo '</pre>';
         }
 

@@ -80,7 +80,7 @@ document.addEventListener('DOMContentLoaded', function () {
             image.onerror = reject;
         })))
             .then(async () => {
-      
+			      
                 // Use the original width and height of the logo
                 const originalWidth = logoImage1.width;
                 const originalHeight = logoImage1.height;
@@ -114,6 +114,10 @@ document.addEventListener('DOMContentLoaded', function () {
                             angle: angle,
                             image: new Image()
                         };
+						
+						if (custom === true) {
+							newLogo.custom = true;
+						}
 
                         // Set the source of the newLogo image based on the custom property
                         newLogo.image.src = custom ? back_logo_src : logo_src;
@@ -127,6 +131,8 @@ document.addEventListener('DOMContentLoaded', function () {
                         logos.push(newLogo);
                         
                     }
+					
+					console.log("logos", logos);
                     is_saved_found = true;
 
                     if( 
@@ -391,6 +397,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 
                 logos.push(newLogo);
             }
+		
+		console.log( "logos", logos );
     
             is_saved_found = true;
             draw(); // Draw after all images are loaded

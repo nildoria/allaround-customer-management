@@ -5,9 +5,19 @@ require_once( AlRNDCM_PATH . '/includes/mockup-generator/editor.php');
 class ALRN_Genrator {
 
     /**
-	 * @var MLBackgroundProcess
+	 * @var MLUserProcess
 	 */
-	protected $process_all;
+	protected $ml_user_process;
+
+    /**
+	 * @var MLProductProcess
+	 */
+	protected $ml_product_process;
+
+    /**
+	 * @var MLBulkProcess
+	 */
+	protected $ml_bulk_process;
 
     /**
 	 * Call this method to get singleton
@@ -34,12 +44,18 @@ class ALRN_Genrator {
 
         add_action( 'rest_api_init', array($this, 'generate_endpoint') );
         add_filter('bulk_actions-users', array( $this, 'bulk_action' ));
+        add_filter('handle_bulk_actions-users', array( $this, 'handle_bulk_action' ), 10, 3);
+
 		
 		add_filter('users_list_table_query_args', array( $this, 'custom_user_orderby' ));
 
-        $this->process_all = new MLBackgroundProcess();
-       
+        add_action( 'admin_bar_menu', array( $this, 'admin_bar' ), 100 );
+		add_action( 'init', array( $this, 'process_handler' ) );
+		add_action( 'init', array( $this, 'process_single_user' ) );
 
+        $this->ml_user_process = new MLUserProcess();
+        $this->ml_product_process = new MLProductProcess();
+        $this->ml_bulk_process = new MLBulkProcess();
     }
 	
 	function custom_user_orderby($args) {
@@ -62,6 +78,36 @@ class ALRN_Genrator {
         }
     
         return $args;
+    }
+
+    function handle_bulk_action($redirect_to, $action, $user_ids) {
+        if ($action === 'alaround_mockup_gen') {
+
+            $is_bulk_running = get_option( "ml_bulk_process_running" );
+            if( ! $is_bulk_running && ! empty( $user_ids ) ) {
+
+                update_option( "ml_bulk_process_running", true );
+                ml_error_log( "ml_bulk_process_running start" );
+
+                foreach ($user_ids as $user_id) {
+                    update_user_meta( $user_id, 'ml_mockup_generation_queue', true );
+                    ml_error_log( "user: $user_id added to ml_mockup_generation_queue" );
+                }
+                
+                foreach ($user_ids as $user_id) {
+                    $this->ml_bulk_process->push_to_queue( $user_id );
+                }
+                $this->ml_bulk_process->save()->dispatch();
+
+                // Set a transient to indicate that a mockup was generated
+                set_transient('ml_bulk_generate_success_notice', true, 5); // This will expire after 5 seconds
+                return $redirect_to;
+            }
+
+            // Set a transient to indicate that a mockup was generated
+            set_transient('ml_bulk_generate_error_notice', true, 5); // This will expire after 5 seconds
+        }
+        return $redirect_to;
     }
 
     function bulk_action($actions) {
@@ -123,35 +169,166 @@ class ALRN_Genrator {
         return $logo;
     }
 
+    function reformatItems( $get_items ) {
+        // Count occurrences of each task_group
+        $group_counts = count( $get_items );
+
+        // Update each item with task_group_total
+        foreach ($get_items as &$item) {
+            $item['task_group_total'] = $group_counts;
+        }
+
+        return $get_items;
+    }
+
+    /**
+	 * Admin bar
+	 *
+	 * @param WP_Admin_Bar $wp_admin_bar
+	 */
+	public function admin_bar( $wp_admin_bar ) {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return;
+		}
+
+		$wp_admin_bar->add_menu( array(
+			'id'    => 'ml-background-process',
+			'title' => __( 'Process', 'hello-elementor' ),
+			'href'  => '#',
+		) );
+
+		$wp_admin_bar->add_menu( array(
+			'parent' => 'ml-background-process',
+			'id'     => 'ml-background-process-all',
+			'title'  => __( 'Remove Running Meta', 'hello-elementor' ),
+			'href'   => wp_nonce_url( admin_url( '?process=all'), 'process' ),
+		) );
+
+		$wp_admin_bar->add_menu( array(
+			'parent' => 'ml-background-process',
+			'id'     => 'ml-background-process-user',
+			'title'  => __( 'User Dispatch', 'hello-elementor' ),
+			'href'   => wp_nonce_url( admin_url( '?process=user'), 'process' ),
+		) );
+		
+        // $wp_admin_bar->add_menu( array(
+		// 	'parent' => 'ml-background-process',
+		// 	'id'     => 'ml-background-process-product',
+		// 	'title'  => __( 'Cancel Product Process', 'hello-elementor' ),
+		// 	'href'   => wp_nonce_url( admin_url( '?process=product'), 'process' ),
+		// ) );
+	}
+
+    public function update_users_meta() {
+        $all_customers = ml_customer_list();
+
+        foreach ($all_customers as $customer_id) {
+            if (empty($customer_id))
+                continue;
+
+            // Update mockup generation status to false
+            update_user_meta($customer_id, 'ml_mockup_generation_running', false);
+            update_user_meta($customer_id, 'ml_mockup_generation_queue', false);
+        }
+    }
+    
+    public function update_products_meta() {
+        $args = array(
+            'numberposts' => 1000,
+            'post_type' => 'product',
+            'post_status' => 'publish'
+        );
+    
+        $products = get_posts($args);
+
+        foreach ($products as $product) {
+            // error_log( "productID " . $product->ID . "" );
+            // Update mockup generation status to false
+            update_post_meta($product->ID, 'ml_mockup_generation_running', false);
+        }
+    }
+    public function update_options() {
+        update_option( 'ml_bulk_process_running', false );
+    }
+
+    /**
+	 * Process handler
+	 */
+	public function process_handler() {
+		if ( ! isset( $_GET['process'] ) || ! isset( $_GET['_wpnonce'] ) ) {
+			return;
+		}
+
+		if ( ! wp_verify_nonce( $_GET['_wpnonce'], 'process') ) {
+			return;
+		}
+
+		if ( 'all' === $_GET['process'] ) {
+            $this->update_users_meta();
+            $this->update_products_meta();
+		}
+
+		if ( 'user' === $_GET['process'] ) {
+            if ( ! $this->ml_user_process->is_queue_empty() ) {
+                ml_error_log( "is_queue_not_empty so start dispatch" );
+                $this->ml_user_process->save()->dispatch();
+            } 
+		}
+
+	}
+	
+    public function process_single_user() {
+		if (  ! ( isset( $_GET['generation'] ) && isset( $_GET['user_id'] ) && isset( $_GET['_wpnonce'] ) ) ) {
+			return;
+		}
+
+		if ( ! wp_verify_nonce( $_GET['_wpnonce'], 'ml_mockup_generate_nonce') ) {
+			return;
+		}
+
+		$user_id = isset( $_GET['user_id'] ) ? sanitize_text_field( $_GET['user_id'] ) : 0;
+
+		if ( ! empty( $user_id ) ) {
+            $this->get_user_mockups( $user_id, 'single' );
+            add_action('admin_notices', function() {
+                echo '<div class="notice notice-success is-dismissible"><p>' . __('Single User Mockup Generated Start ', 'hello-elementor') . '</p></div>';
+            });
+		}
+
+        return;
+	}
+
     public function product_generate( $request ) {
         $product_id = $request->get_param('product_id');
+		
+		ml_error_log("productId : {$product_id}");
 
         if ( empty( $product_id ) || ! get_post_status( $product_id ) ) {
-            error_log("productId can't be empty: {$product_id}");
+            ml_error_log("productId can't be empty: {$product_id}");
             return new WP_Error('invalid_info', "productId can't be empty: {$product_id}", array('status' => 400));
         }
 
         $is_running = get_post_meta( $product_id, 'ml_mockup_generation_running', true );
 
         if ( $is_running ) {
-            error_log("Background process is running for product ID: $product_id");
+            ml_error_log("Background process is running for product ID: $product_id");
             return rest_ensure_response(array(
                 "message" => "Background process is running for product ID: ${product_id}.",
             ));
         }
 
-        error_log( "mockup generation starts for product: $product_id" );
+        ml_error_log( "mockup generation starts for product: $product_id" );
 
         $featured_img_url = get_the_post_thumbnail_url( $product_id,'full');
 
         if( empty( $featured_img_url ) ) {
-            error_log("There's no featured image for this product: {$product_id}");
+            ml_error_log("There's no featured image for this product: {$product_id}");
             return new WP_Error('invalid_info', "There's no featured image for this product: {$product_id}", array('status' => 400));
         }
 
         $get_users = ml_get_users_by_product( $product_id );
         if ( empty( $get_users ) ) {
-            error_log("There's no users for this product: {$product_id}");
+            ml_error_log("There's no users for this product: {$product_id}");
             return new WP_Error('invalid_info', "There's no users for this product: {$product_id}", array('status' => 400));
         }
 
@@ -200,6 +377,7 @@ class ALRN_Genrator {
                 $custom_type = $custom_logo_shape;
                 $override_custom_logo_shape = $custom_logo_shape;
             }
+            
             
             $custom_logo_data = array(
                 "lighter" => $custom_logo_lighter,
@@ -259,6 +437,7 @@ class ALRN_Genrator {
                     $galleries = $product_gallery;
                 }
     
+                
                 $queue_item = array(
                     'backgroundUrl' => $product_thumbnail[0],
                     'user_id' => $user_id,
@@ -269,7 +448,7 @@ class ALRN_Genrator {
                     'logo_positions' => $logoData,
                     'logo_type' => $storeLogoType,
                     'custom_logo_type' => $custom_type,
-                    'task_id' => "product_{$product_id}",
+                    'task_group' => "product_{$product_id}",
                     'galleries' => $galleries
                 );
     
@@ -280,10 +459,13 @@ class ALRN_Genrator {
         if( ! empty( $get_all_items ) ) {
             // loop only five items
             // $get_all_items = array_slice($get_all_items, 0, 3);
+            $get_all_items = $this->reformatItems( $get_all_items );
             foreach ( $get_all_items as $item ) {
-                $this->process_all->push_to_queue( $item );
+                $this->ml_product_process->push_to_queue( $item );
             }
-            $this->process_all->save()->dispatch();
+            $this->ml_product_process->save()->dispatch();
+
+            // update_post_meta( $product_id, 'ml_mockup_generation_running', true );
     
             $total_items = count( $get_all_items );
             return rest_ensure_response(array(
@@ -298,26 +480,33 @@ class ALRN_Genrator {
 
     }
 
-    public function get_user_mockups( $request ) {
-        $user_id = $request->get_param('user_id');
+    public function get_user_mockups( $request, $type = '' ) {
+        if( $type === 'single' ) {
+            $user_id = $request;
+        } else {
+            $user_id = $request->get_param('user_id');
+        }
 
         if ( empty( $user_id ) ) {
-            error_log("UserID can't be empty.");
+            ml_error_log("UserID can't be empty.");
             return new WP_Error('invalid_info', "UserID can't be empty.", array('status' => 400));
         }
 
+        // update_user_meta( $user_id, 'ml_mockup_generation_running', false );
         $is_running = get_user_meta( $user_id, 'ml_mockup_generation_running', true );
 
         if ( $is_running ) {
-            error_log("Background process is running for user ID: $user_id");
+            ml_error_log("Background process is running for user ID: $user_id");
             return new WP_Error('invalid_info', "Background process is running for user ID: $user_id", array('status' => 400));
         }
 
-        error_log( "mockup generation starts for user:$user_id" );
+        ml_error_log( "mockup generation starts for user:$user_id" );
 
-        $user = get_userdata( $user_id );
-        if ( $user === false ) {
-            error_log("user {$user_id} id does not exist");
+        // update_option( 'ml_task_group_completion', [] );
+
+        $user = get_user_by('ID', $user_id);
+        if ( ! $user ) {
+            ml_error_log("user {$user_id} id does not exist");
             return new WP_Error('invalid_info', "user {$user_id} id does not exist", array('status' => 400));
         }
 
@@ -329,8 +518,10 @@ class ALRN_Genrator {
             $profile_second_logo = '';
         }
 
-        if( empty( $profile_picture_id ) || empty( $profile_picture_url ) || ! @getimagesize($profile_picture_url) )
-            return $value;
+        if( empty( $profile_picture_id ) || empty( $profile_picture_url ) || ! @getimagesize($profile_picture_url) ) {
+            ml_error_log("user {$user_id} profile picture id does not exist");
+            return new WP_Error('invalid_info', "user {$user_id} profile picture id does not exist", array('status' => 400));
+        }
 
         $thumbnails = $this->get_thumbnails( $user_id );
         $logo_positions = $this->logo_positions( $user_id );
@@ -363,6 +554,8 @@ class ALRN_Genrator {
             "darker" => $custom_logo_darker,
             "allow_products" => $custom_logo_products
         );
+		
+// 		ml_error_log( print_r( $custom_logo_data, true ) );
 
         $get_all_items = [];
 
@@ -391,7 +584,7 @@ class ALRN_Genrator {
             $storeLogoType = $type;
             $storeLogoSecond = $profile_second_logo;
 
-            // error_log( print_r( $product_id, true ) );
+            // ml_error_log( print_r( $product_id, true ) );
 
             if ( ! empty( $logo_collections ) && count($logo_collections) !== 0) {
                 $itemData = $this->getLightnessByID($logo_collections, $product_id);
@@ -430,20 +623,29 @@ class ALRN_Genrator {
                 'logo_positions' => $logoData,
                 'logo_type' => $storeLogoType,
                 'custom_logo_type' => $custom_type,
-                'task_id' => "user_{$user_id}",
+                'task_group' => "user_{$user_id}",
                 'galleries' => $galleries
             );
+			
+// 			ml_error_log( "queue_item" );
+// 			ml_error_log( print_r( $queue_item, true ) );
 
             $get_all_items[] = $queue_item;
         }
 
-        // error_log( print_r( $get_all_items, true ) );
+        // ml_error_log( print_r( $get_all_items, true ) );
 
         if( ! empty( $get_all_items ) ) {
+            // $get_all_items = array_slice($get_all_items, 0, 3);
+            $get_all_items = $this->reformatItems( $get_all_items );
+
             foreach ( $get_all_items as $item ) {
-                $this->process_all->push_to_queue( $item );
+                $this->ml_user_process->push_to_queue( $item );
             }
-            $this->process_all->save()->dispatch();
+            $this->ml_user_process->save()->dispatch();
+
+            // update_user_meta( $user_id, 'ml_mockup_generation_running', true );
+            update_user_meta( $user_id, 'ml_mockup_generation_queue', true );
     
             $total_items = count( $get_all_items );
             return rest_ensure_response(array(
@@ -483,7 +685,7 @@ class ALRN_Genrator {
             "generated" => $total_items
         );
 
-        // error_log( print_r( $generated_records, true ) );
+        // ml_error_log( print_r( $generated_records, true ) );
 
         $limit = 500;
         // Limit the records to 100 by removing older records
@@ -638,6 +840,8 @@ class ALRN_Genrator {
         $background_enabled = get_field('enable_logo_background', 'option');
         $background_enabled = $background_enabled ? 'true' : 'false';
 
+        $is_background_process_on = get_option('ml_disable_background_process_for_user');
+
         wp_localize_script('mockup-generator', 'mockupGeneratorAjax', array(
             'ajax_url' => admin_url('admin-ajax.php'),
             'nonce' => wp_create_nonce( "mockup_gen_nonce" ),
@@ -647,6 +851,7 @@ class ALRN_Genrator {
             'user_mockup_generate' => rest_url( 'alaround-generate/v1/user-mockups' ),
             'product_mockup_generate' => rest_url( 'alaround-generate/v1/product-generate' ),
             'background_enabled' => $background_enabled,
+            'is_background_process_on' => $is_background_process_on,
             'upload_foler' => $upload_dir['basedir'] . "/alaround-mockup"
         ));
 
@@ -680,6 +885,9 @@ class ALRN_Genrator {
     public function get_user_data( $user_id, $value = false, $filter_product_id = '' ) {
         $profile_picture_id = get_field('profile_picture_id', "user_{$user_id}");
             $profile_picture_url = ml_get_image_url('profile_picture_id', $user_id);
+            
+            $main_logo_default = get_field('profile_picture_id', 'user_' . $user_id);
+            $main_logo_second = get_field('profile_picture_id_second', 'user_' . $user_id);
             
             $profile_second_logo = ml_get_image_url('profile_picture_id_second', $user_id);
             if (! filter_var($profile_second_logo, FILTER_VALIDATE_URL)) {
@@ -715,11 +923,23 @@ class ALRN_Genrator {
                 $override_custom_logo_shape = $custom_logo_shape;
             }
             
+            $custom_logo_lighter_id = get_field('custom_logo_lighter', 'user_' . $user_id);
+            $custom_logo_darker_id = get_field('custom_logo_darker', 'user_' . $user_id);
+            
             $custom_logo_data = array(
                 "lighter" => $custom_logo_lighter,
                 "darker" => $custom_logo_darker,
                 "allow_products" => $custom_logo_products
             );
+            
+            $main_logo_ids = array(
+                'default' => $main_logo_default,
+                'second' => $main_logo_second,
+                'lighter' => $custom_logo_lighter_id,
+                "darker" => $custom_logo_darker_id
+            );
+            
+            //ml_error_log( print_r( $custom_logo_data, true ) );
 
              // Get existing mockup generate records
             $generated_records = get_user_meta($user_id, 'mockup_generated_records', true);
@@ -739,6 +959,7 @@ class ALRN_Genrator {
                 'logo' => $profile_picture_url,
                 'logo_second' => $profile_second_logo,
                 'logo_type' => $type,
+                'logo_ids' => $main_logo_ids,
                 'custom_logo_type' => $custom_type,
                 'images' => $thumbnails,
                 'logo_collections' => $collections,
@@ -765,15 +986,18 @@ class ALRN_Genrator {
 		
         if ($column_name === 'mockup_generate') {
 
+            $button_text = __("Generate", "hello-elementor");
+
             if( ! ml_user_has_role( $user_id, 'customer' ) ) {
                 return $value;
             }
 
-            $button_text = __("Generate", "hello-elementor");
             $user_data = $this->get_user_data($user_id, $value);
             $type = isset(  $user_data['logo_type'] ) ? $user_data['logo_type'] : '';
 
-            if( $user_id === 2 && isset( $_GET['dev'] ) && 'true' === $_GET['dev'] ) {
+            $generated_records = get_user_meta( $user_id, 'ml_mockup_generation_queue', true );
+
+            if( isset( $_GET['dev'] ) && 'true' === $_GET['dev'] ) {
                 echo '<pre>';
                 echo "<h2>$user_id</h2>";
                 echo '</pre>';
@@ -785,30 +1009,49 @@ class ALRN_Genrator {
             
             // update_post_meta( $product_id, 'ml_mockup_generation_running', false );
             $is_running = get_user_meta( $user_id, 'ml_mockup_generation_running', true );
+            $is_queue = get_user_meta( $user_id, 'ml_mockup_generation_queue', true );
+            
             $class = '';
+            $disabled = '';
+            if( $is_queue ) {
+                $disabled = 'disabled="disabled"';
+            }
+
             if( $is_running ) {
                 $class = 'ml_loading';
             }
 
+            $is_background_process_on = get_option('ml_disable_background_process_for_user');
+            if( $is_background_process_on !== 'on' ) {
+                $paged = isset( $_REQUEST['paged'] ) ? $_REQUEST['paged'] : '';
+                $url_args = array(
+                    'generation' => 'on',
+                    'user_id' => esc_attr( $user_id ),
+                    '_wpnonce' => wp_create_nonce('ml_mockup_generate_nonce'),
+                );
+
+                if( ! empty( $paged ) ) {
+                    $url_args['paged'] = $paged;
+                }
+
+                $mockup_gen_url = add_query_arg( $url_args, admin_url( 'users.php' ) );
+
+                $value = '<div class="alarnd--mockup-trigger-area">';
+                $value .= '<a href="#" data-user_id="'.$user_id.'" class="button button-primary ml_background_prcess_button ml_add_loading '.$class.'" '.$disabled.'>'. esc_html( $button_text ) .'</a>';
+                $value .= '<div>'.$type.'</div>';
+                $value .= '</div>';
+                return $value;
+            }
+
             // Output the content
             $value = '<div class="alarnd--mockup-trigger-area">';
-            $value .= '<button id="ml_mockup_gen-'.$user_id.'" type="button" class="button button-primary ml_mockup_gen_trigger ml_add_loading '.$class.'" data-settings=\'' . wp_json_encode($user_data) . '\' data-user_id="'.$user_id.'">'.$button_text.'</button>';
+            $value .= '<button id="ml_mockup_gen-'.$user_id.'" type="button"  class="button button-primary ml_mockup_gen_trigger ml_add_loading '.$class.'" data-settings=\'' . wp_json_encode($user_data) . '\' data-user_id="'.$user_id.'" '.$disabled.'>'.$button_text.'</button>';
             // if( isset( $_GET['dev'] ) && 'true' === $_GET['dev'] ) {
                 $value .= '<div>'.$type.'</div>';
             // }
             $value .= '</div>';
         }
         return $value;
-    }
-
-    function add_element_outside_user_form() {
-        global $pagenow;
-    
-        // Check if we are on the user edit page
-        if ($pagenow === 'user-edit.php') {
-            $user_id = isset($_GET['user_id']) ? intval($_GET['user_id']) : 0;
-            echo '<div>This is an element outside the user form.</div>';
-        }
     }
 
     /**

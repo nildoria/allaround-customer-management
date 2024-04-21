@@ -1,0 +1,18 @@
+.ml_select_log_form label,
+.ml_select_log_form select {
+    margin-right: 10px;
+}
+
+.ml_select_log_container {
+    padding-top: 35px;
+    display: flex;
+}
+
+form.ml_delete_log_form {
+    padding-left: 50px;
+}
+
+.ml_general_form {
+    width: 40%;
+    max-width: 100%;
+}
