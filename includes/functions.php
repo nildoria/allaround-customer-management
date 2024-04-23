@@ -1775,9 +1775,8 @@ function allaround_customer_form($is_disabled = false)
     $invoice = get_field('invoice', "user_{$current_user_id}");
     $city = get_user_meta($current_user_id, 'billing_city', true);
     $billing_address = get_user_meta($current_user_id, 'billing_address_1', true);
-    $first_name = get_user_meta($current_user_id, 'billing_first_name', true);
-    $last_name = get_user_meta($current_user_id, 'billing_last_name', true);
-    $user_display_name = trim("{$first_name} {$last_name}");
+    $current_user = get_userdata($current_user_id);
+    $user_display_name = $current_user->display_name;
     ?>
     <form action="" id="customerDetails"
         class="allaround--card-form<?php echo $is_disabled === false ? ' hidden_form' : ''; ?>">
@@ -2170,7 +2169,7 @@ function ml_create_order($data)
 
             // WcooCommerce user field update
             update_user_meta_if_different($user_id, 'billing_address_1', $customerInfo['address_1']);
-            update_user_meta_if_different($user_id, 'billing_phone', $customerInfo['phone']);
+            update_user_meta_if_different($user_id, 'billing_phone', $phoneNumber);
 
             update_user_meta_if_different($user_id, 'xoo_ml_phone_code', $countryCode);
             update_user_meta_if_different($user_id, 'xoo_ml_phone_no', $phoneNumber);
@@ -2185,6 +2184,7 @@ function ml_create_order($data)
         if ($extraMeta && !empty($extraMeta)) {
             if (isset($extraMeta['invoice']) && !empty($extraMeta['invoice'])) {
                 update_acf_usermeta($user_id, 'invoice', $extraMeta['invoice']);
+                update_user_meta_if_different($user_id, 'billing_company', $extraMeta['invoice']);
             }
             if (isset($extraMeta['city']) && !empty($extraMeta['city'])) {
                 update_user_meta_if_different($user_id, 'billing_city', $extraMeta['city']);
@@ -2229,6 +2229,12 @@ function ml_create_order($data)
     $order->save();
 
     $order_id = $order->get_id();
+
+    // Update billing company field with invoice name
+    $invoice_name = isset($extraMeta['invoice']) ? $extraMeta['invoice'] : '';
+    $order->set_billing_company($invoice_name);
+    $order->save();
+
 
     if (!empty($gallery_thumbs)) {
         // Add custom thumbnail URL as post meta for the product
