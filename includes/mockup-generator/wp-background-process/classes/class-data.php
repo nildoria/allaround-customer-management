@@ -36,7 +36,7 @@ trait MLGetUserData {
 		}
 
         $this->log( "item details $task_group" );
-        $this->log( print_r( $item, true ) );
+        // $this->log( print_r( $item, true ) );
 
 		// vercel end point as default url.
 		$generate_api_url = 'https://generate-mockups-xi.vercel.app/api/create';

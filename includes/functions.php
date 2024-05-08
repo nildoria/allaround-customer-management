@@ -420,7 +420,7 @@ add_filter('woocommerce_add_to_cart_form_action', 'ml_avoid_redirect_to_single_p
 
 function alarnd_is_quick_view()
 {
-    return (defined('DOING_AJAX') && DOING_AJAX && isset($_REQUEST['action']) && 'get_item_selector' === $_REQUEST['action']);
+    return(defined('DOING_AJAX') && DOING_AJAX && isset($_REQUEST['action']) && 'get_item_selector' === $_REQUEST['action']);
 }
 function ml_avoid_redirect_to_single_page($value)
 {
@@ -909,8 +909,7 @@ function ml_refactor_selects($selections)
  * @param int $user_id
  * @return array
  */
-function ml_get_customers_products($user_id, $filter_item = '')
-{
+function ml_get_customers_products( $user_id, $filter_item = '' ) {
     $default_products = get_field('default_products', 'option');
     $selected_product_ids = get_field('selected_products', "user_{$user_id}");
     $disable_product = get_field('disable_product', "user_{$user_id}");
@@ -968,11 +967,11 @@ function ml_get_customers_products($user_id, $filter_item = '')
  * @param int $user_id
  * @return array
  */
-function ml_get_user_products($user_id, $filter_item = '', $apply_featured = false)
+function ml_get_user_products($user_id, $filter_item = '', $apply_featured = false )
 {
     $selected_products = ml_get_customers_products($user_id, $filter_item);
 
-    if (empty($selected_products) || false === $apply_featured) {
+    if( empty( $selected_products ) || false === $apply_featured ) {
         return $selected_products;
     }
 
@@ -1775,6 +1774,8 @@ function allaround_customer_form($is_disabled = false)
     $invoice = get_field('invoice', "user_{$current_user_id}");
     $city = get_user_meta($current_user_id, 'billing_city', true);
     $billing_address = get_user_meta($current_user_id, 'billing_address_1', true);
+    $first_name = get_user_meta($current_user_id, 'billing_first_name', true);
+    $last_name = get_user_meta($current_user_id, 'billing_last_name', true);
     $current_user = get_userdata($current_user_id);
     $user_display_name = $current_user->display_name;
     ?>
@@ -2090,7 +2091,7 @@ function ml_create_order($data)
                 $filename_only = 'wc_thumb_' . $product_id . '-' . $alarnd_color_key . '-' . $attachment_id . '.' . $ext;
                 $gallery_thumb_urls[$item_id] = $wc_thumb;
             }
-
+            
             $media_info = '<div class="allarnd__order_item">';
             $media_info = '<p>' . $filename_only . '</p>';
             $media_info .= '<a href="' . esc_url($wc_thumb) . '" target="_blank"><img class="alarnd__artwork_img" src="' . esc_url($wc_thumb) . '" /></a>';
@@ -2907,14 +2908,14 @@ function ml_get_filter_content($current_user_id, $filter = '', $pagination = tru
     $end = $start + $itemsPerPage;
     $itemsToDisplay = array_slice($items, $start, $itemsPerPage);
     $big = 999999999; // need an unlikely integer
-
-    if (false === $pagination) {
+	
+	if( false === $pagination ) {
         $itemsToDisplay = $filtered_product_ids;
     }
 
     echo '<ul id="allaround_products_list-' . $filter . '" data-user_id="' . esc_attr($current_user_id) . '" class="mini-store-product-list product-list-container products columns-3">';
-
-    $item_irr_num = 1;
+	
+	$item_irr_num = 1;
     foreach ($itemsToDisplay as $prod_object) {
         if (!isset($prod_object['value']) || empty($prod_object['value']))
             continue;
@@ -2943,18 +2944,18 @@ function ml_get_filter_content($current_user_id, $filter = '', $pagination = tru
 
         if ($product) {
             $terms = wp_get_post_terms($product_id, 'product_cat');
-
-            $product_class = array('product', 'product-item');
-            if (false === $pagination && $item_irr_num > 6) {
+			
+			$product_class = array( 'product', 'product-item' );
+            if( false === $pagination && $item_irr_num > 6 ) {
                 $product_class[] = 'loadmore-loaded';
             }
 
             $item_irr_num++;
 
             // convert $product_class array to html class by space into a string
-            $product_class = implode(' ', $product_class);
+            $product_class = implode( ' ', $product_class );
 
-            echo '<li class="' . esc_attr($product_class) . '"';
+            echo '<li class="'. esc_attr( $product_class ) .'"';
 
             foreach ($terms as $term) {
                 echo 'category-' . $term->term_id . ' ';
@@ -3325,11 +3326,11 @@ function ml_get_image_url_child($data, $size = 'full')
 
 function ml_map_logo_collections($array)
 {
-    if (empty($array))
+    if( empty( $array ) )
         return $array;
-
+    
     $reformatted_array = [];
-
+    
     foreach ($array as $item) {
         $reformatted_item = [
             'logo_lighter' => ml_get_image_url_child($item['logo_lighter']),
@@ -3539,8 +3540,7 @@ add_filter('woocommerce_hidden_order_itemmeta', 'ml_wocommerce_hidden_order_item
 
 
 
-function ml_error_log($message)
-{
+function ml_error_log($message) {
     $log_folder = '/ml-logs/';
     $log_file_prefix = 'ml-debug';
     $max_lines_per_file = 30000; // Updated max lines per file
@@ -3569,8 +3569,7 @@ function ml_error_log($message)
     file_put_contents($log_file_path, $timestamp . $message . PHP_EOL, FILE_APPEND);
 }
 
-function get_current_log_file($log_folder_path, $log_file_prefix, $max_lines_per_file)
-{
+function get_current_log_file($log_folder_path, $log_file_prefix, $max_lines_per_file) {
     // Find the current log file
     $index = 0;
     do {
@@ -3582,8 +3581,7 @@ function get_current_log_file($log_folder_path, $log_file_prefix, $max_lines_per
     return $current_log_file;
 }
 
-function increment_log_file($log_folder_path, $log_file_prefix)
-{
+function increment_log_file($log_folder_path, $log_file_prefix) {
     // Find the next available log file
     $index = 0;
     do {
