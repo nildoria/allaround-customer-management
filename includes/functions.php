@@ -420,7 +420,7 @@ add_filter('woocommerce_add_to_cart_form_action', 'ml_avoid_redirect_to_single_p
 
 function alarnd_is_quick_view()
 {
-    return(defined('DOING_AJAX') && DOING_AJAX && isset($_REQUEST['action']) && 'get_item_selector' === $_REQUEST['action']);
+    return (defined('DOING_AJAX') && DOING_AJAX && isset($_REQUEST['action']) && 'get_item_selector' === $_REQUEST['action']);
 }
 function ml_avoid_redirect_to_single_page($value)
 {
@@ -909,7 +909,8 @@ function ml_refactor_selects($selections)
  * @param int $user_id
  * @return array
  */
-function ml_get_customers_products( $user_id, $filter_item = '' ) {
+function ml_get_customers_products($user_id, $filter_item = '')
+{
     $default_products = get_field('default_products', 'option');
     $selected_product_ids = get_field('selected_products', "user_{$user_id}");
     $disable_product = get_field('disable_product', "user_{$user_id}");
@@ -967,11 +968,11 @@ function ml_get_customers_products( $user_id, $filter_item = '' ) {
  * @param int $user_id
  * @return array
  */
-function ml_get_user_products($user_id, $filter_item = '', $apply_featured = false )
+function ml_get_user_products($user_id, $filter_item = '', $apply_featured = false)
 {
     $selected_products = ml_get_customers_products($user_id, $filter_item);
 
-    if( empty( $selected_products ) || false === $apply_featured ) {
+    if (empty($selected_products) || false === $apply_featured) {
         return $selected_products;
     }
 
@@ -2100,7 +2101,7 @@ function ml_create_order($data)
                 $filename_only = 'wc_thumb_' . $product_id . '-' . $alarnd_color_key . '-' . $attachment_id . '.' . $ext;
                 $gallery_thumb_urls[$item_id] = $wc_thumb;
             }
-            
+
             $media_info = '<div class="allarnd__order_item">';
             $media_info = '<p>' . $filename_only . '</p>';
             $media_info .= '<a href="' . esc_url($wc_thumb) . '" target="_blank"><img class="alarnd__artwork_img" src="' . esc_url($wc_thumb) . '" /></a>';
@@ -2584,9 +2585,13 @@ function ml_modify_price_html($price, $product)
 {
 
     $discount_steps = get_field('discount_steps', $product->get_id());
+    $percentage_increase = 10; // 10%
+    $discount_steps = apply_percentage_increase($discount_steps, $percentage_increase);
+
     $custom_quanity_enable = get_field('enable_custom_quantity', $product->get_id());
     $quantity_steps = get_field('quantity_steps', $product->get_id());
     $regular_price = (int) get_post_meta($product->get_id(), '_regular_price', true);
+    $regular_price = $regular_price + ($regular_price * $percentage_increase / 100);
     // error_log( print_r( $discount_steps, true ) );
 
     if (
@@ -2925,14 +2930,14 @@ function ml_get_filter_content($current_user_id, $filter = '', $pagination = tru
     $end = $start + $itemsPerPage;
     $itemsToDisplay = array_slice($items, $start, $itemsPerPage);
     $big = 999999999; // need an unlikely integer
-	
-	if( false === $pagination ) {
+
+    if (false === $pagination) {
         $itemsToDisplay = $filtered_product_ids;
     }
 
     echo '<ul id="allaround_products_list-' . $filter . '" data-user_id="' . esc_attr($current_user_id) . '" class="mini-store-product-list product-list-container products columns-3">';
-	
-	$item_irr_num = 1;
+
+    $item_irr_num = 1;
     foreach ($itemsToDisplay as $prod_object) {
         if (!isset($prod_object['value']) || empty($prod_object['value']))
             continue;
@@ -2948,7 +2953,13 @@ function ml_get_filter_content($current_user_id, $filter = '', $pagination = tru
         $sizes = get_field('size', $product->get_id());
         $pricing_description = get_field('pricing_description', $product->get_id());
         $discount_steps = get_field('discount_steps', $product->get_id());
+
         $discount_steps = ml_filter_disount_steps($discount_steps);
+        $percentage_increase = 10; // 10%
+        $discount_steps = apply_percentage_increase($discount_steps, $percentage_increase);
+
+        // error_log(print_r($updated_discount_steps, true));
+        error_log(print_r($discount_steps, true));
 
         $customQuantity_steps = get_field('quantity_steps', $product->get_id());
         $customQuantity_steps = ml_filter_disount_steps($customQuantity_steps);
@@ -2961,18 +2972,18 @@ function ml_get_filter_content($current_user_id, $filter = '', $pagination = tru
 
         if ($product) {
             $terms = wp_get_post_terms($product_id, 'product_cat');
-			
-			$product_class = array( 'product', 'product-item' );
-            if( false === $pagination && $item_irr_num > 6 ) {
+
+            $product_class = array('product', 'product-item');
+            if (false === $pagination && $item_irr_num > 6) {
                 $product_class[] = 'loadmore-loaded';
             }
 
             $item_irr_num++;
 
             // convert $product_class array to html class by space into a string
-            $product_class = implode( ' ', $product_class );
+            $product_class = implode(' ', $product_class);
 
-            echo '<li class="'. esc_attr( $product_class ) .'"';
+            echo '<li class="' . esc_attr($product_class) . '"';
 
             foreach ($terms as $term) {
                 echo 'category-' . $term->term_id . ' ';
@@ -3022,10 +3033,10 @@ function ml_get_filter_content($current_user_id, $filter = '', $pagination = tru
             } else {
                 echo '<span class="view_details_not_available"></span>';
             }
-            
-            $viewItemsAtts = ml_get_gtm_item( $product );
-            $viewItemsAtts = wc_implode_html_attributes( $viewItemsAtts );
-            
+
+            $viewItemsAtts = ml_get_gtm_item($product);
+            $viewItemsAtts = wc_implode_html_attributes($viewItemsAtts);
+
             echo '<button class="quick-view-button ml_add_loading ml_trigger_details button" ' . $viewItemsAtts . ' data-product-id="' . esc_attr($product->get_id()) . '">' . esc_html($product->single_add_to_cart_text()) . '</button>';
             echo '</div>';
             echo '</div>';
@@ -3147,6 +3158,26 @@ function ml_get_filter_content($current_user_id, $filter = '', $pagination = tru
     echo '</div>'; // End mini-store-product-list woocommerce
 }
 
+
+function apply_percentage_increase($discount_steps, $percentage)
+{
+    // Initialize a new array to store the modified steps
+    $updated_steps = array();
+
+    foreach ($discount_steps as $step) {
+        // Ensure the original amount is treated as a float
+        $original_amount = (float) $step['amount'];
+        $new_amount = $original_amount + ($original_amount * ($percentage / 100));
+
+        // Add the updated step to the new array
+        $updated_steps[] = array(
+            'quantity' => $step['quantity'],
+            'amount' => $new_amount
+        );
+    }
+
+    return $updated_steps;
+}
 
 /**
  * Function to handle the quantity callback for Woocommerce cart items.
@@ -3347,11 +3378,11 @@ function ml_get_image_url_child($data, $size = 'full')
 
 function ml_map_logo_collections($array)
 {
-    if( empty( $array ) )
+    if (empty($array))
         return $array;
-    
+
     $reformatted_array = [];
-    
+
     foreach ($array as $item) {
         $reformatted_item = [
             'logo_lighter' => ml_get_image_url_child($item['logo_lighter']),
@@ -3561,7 +3592,8 @@ add_filter('woocommerce_hidden_order_itemmeta', 'ml_wocommerce_hidden_order_item
 
 
 
-function ml_error_log($message) {
+function ml_error_log($message)
+{
     $log_folder = '/ml-logs/';
     $log_file_prefix = 'ml-debug';
     $max_lines_per_file = 30000; // Updated max lines per file
@@ -3590,7 +3622,8 @@ function ml_error_log($message) {
     file_put_contents($log_file_path, $timestamp . $message . PHP_EOL, FILE_APPEND);
 }
 
-function get_current_log_file($log_folder_path, $log_file_prefix, $max_lines_per_file) {
+function get_current_log_file($log_folder_path, $log_file_prefix, $max_lines_per_file)
+{
     // Find the current log file
     $index = 0;
     do {
@@ -3602,7 +3635,8 @@ function get_current_log_file($log_folder_path, $log_file_prefix, $max_lines_per
     return $current_log_file;
 }
 
-function increment_log_file($log_folder_path, $log_file_prefix) {
+function increment_log_file($log_folder_path, $log_file_prefix)
+{
     // Find the next available log file
     $index = 0;
     do {
@@ -3627,17 +3661,18 @@ add_action('admin_notices', function () {
 });
 
 
-function ml_get_gtm_item( $product, $extra = array() ) {
+function ml_get_gtm_item($product, $extra = array())
+{
 
     $category_ids = $product->get_category_ids();
-    if ( $product->get_parent_id() > 0 ) {
-        $parent_product = wc_get_product( $product->get_parent_id() );
-        if ( ! empty( $parent_product ) ) {
+    if ($product->get_parent_id() > 0) {
+        $parent_product = wc_get_product($product->get_parent_id());
+        if (!empty($parent_product)) {
             $category_ids = $parent_product->get_category_ids();
         }
     }
 
-    $result =  [
+    $result = [
         "data-ml_gtm_item_name" => $product->get_title(),
         "data-ml_gtm_item_id" => $product->get_id(),
         "data-ml_gtm_item_sku" => $product->get_sku(),
@@ -3645,18 +3680,18 @@ function ml_get_gtm_item( $product, $extra = array() ) {
     ];
 
     // check $category_ids is empty or not then loop through it and get_term to get term name.
-    if ( ! empty( $category_ids ) ) {
+    if (!empty($category_ids)) {
         $index = 0;
-        foreach ( $category_ids as $key => $value ) {
-            $category_name = get_term( $value, 'product_cat' );
+        foreach ($category_ids as $key => $value) {
+            $category_name = get_term($value, 'product_cat');
             $item_key = $index === 0 ? '' : ($key + 1);
-            if ( ! empty( $category_name ) ) {
+            if (!empty($category_name)) {
                 $result['data-ml_gtm_item_category' . $item_key] = $category_name->name;
             }
             $index++;
         }
     }
-    
+
 
     // marge $result with $extra
     return array_merge($result, $extra);
@@ -3669,63 +3704,66 @@ function ml_get_gtm_item( $product, $extra = array() ) {
  * @param  string $cart_item_key Item key.
  * @return string
  */
-function ml_woocommerce_cart_item_remove_link( $link, $cart_item_key ) {
-    $item = WC()->cart->get_cart_item( $cart_item_key );
-    if ( empty( $item ) ) {
+function ml_woocommerce_cart_item_remove_link($link, $cart_item_key)
+{
+    $item = WC()->cart->get_cart_item($cart_item_key);
+    if (empty($item)) {
         return $link;
     }
 
-    $data             = ml_get_gtm_item( $item['data'] );
-    $data['quantity'] = isset( $item['quantity'] ) ? intval( $item['quantity'] ) : 1;
-    $attrs            = ml_convert_product_data_to_html_attrs( $data );
-    $link             = str_replace( '<a ', '<a ' . join( ' ', $attrs ), $link );
+    $data = ml_get_gtm_item($item['data']);
+    $data['quantity'] = isset($item['quantity']) ? intval($item['quantity']) : 1;
+    $attrs = ml_convert_product_data_to_html_attrs($data);
+    $link = str_replace('<a ', '<a ' . join(' ', $attrs), $link);
 
     return $link;
 }
 add_filter('woocommerce_cart_item_remove_link', 'ml_woocommerce_cart_item_remove_link', 10, 2);
 
 
-function ml_convert_product_data_to_html_attrs( $data ) {
+function ml_convert_product_data_to_html_attrs($data)
+{
     $array = array();
-    foreach ( $data as $key => $value ) {
-        $array[] = esc_attr( $key ) . '="' . esc_attr( $value ) . '"';
+    foreach ($data as $key => $value) {
+        $array[] = esc_attr($key) . '="' . esc_attr($value) . '"';
     }
     return $array;
 }
 
 
-function ml_get_data_layer_user_data( $customer_id ) {
-    if ( empty( $customer_id ) ) {
+function ml_get_data_layer_user_data($customer_id)
+{
+    if (empty($customer_id)) {
         return array();
     }
-    $customer = new WC_Customer( (int) $customer_id );
+    $customer = new WC_Customer((int) $customer_id);
 
     $fields = array(
-        'customer_id'         => $customer->get_id(),
-        'email'               => $customer->get_email(),
-        'first_name'          => $customer->get_first_name(),
-        'last_name'           => $customer->get_last_name(),
-        'billing_first_name'  => $customer->get_billing_first_name(),
-        'billing_last_name'   => $customer->get_billing_last_name(),
-        'billing_company'     => $customer->get_billing_company(),
-        'billing_address'     => join( ' ', array( $customer->get_billing_address_1(), $customer->get_billing_address_2() ) ),
-        'billing_postcode'    => $customer->get_billing_postcode(),
-        'billing_country'     => $customer->get_billing_country(),
-        'billing_state'       => $customer->get_billing_state(),
-        'billing_city'        => $customer->get_billing_city(),
-        'billing_email'       => $customer->get_billing_email(),
-        'billing_phone'       => $customer->get_billing_phone(),
+        'customer_id' => $customer->get_id(),
+        'email' => $customer->get_email(),
+        'first_name' => $customer->get_first_name(),
+        'last_name' => $customer->get_last_name(),
+        'billing_first_name' => $customer->get_billing_first_name(),
+        'billing_last_name' => $customer->get_billing_last_name(),
+        'billing_company' => $customer->get_billing_company(),
+        'billing_address' => join(' ', array($customer->get_billing_address_1(), $customer->get_billing_address_2())),
+        'billing_postcode' => $customer->get_billing_postcode(),
+        'billing_country' => $customer->get_billing_country(),
+        'billing_state' => $customer->get_billing_state(),
+        'billing_city' => $customer->get_billing_city(),
+        'billing_email' => $customer->get_billing_email(),
+        'billing_phone' => $customer->get_billing_phone(),
         'shipping_first_name' => $customer->get_billing_first_name(),
-        'shipping_last_name'  => $customer->get_billing_last_name(),
-        'shipping_company'    => $customer->get_billing_company(),
-        'shipping_address'    => join( ' ', array( $customer->get_billing_address_1(), $customer->get_billing_address_2() ) ),
-        'shipping_postcode'   => $customer->get_billing_postcode(),
-        'shipping_country'    => $customer->get_billing_country(),
-        'shipping_state'      => $customer->get_billing_state(),
-        'shipping_city'       => $customer->get_billing_city(),
+        'shipping_last_name' => $customer->get_billing_last_name(),
+        'shipping_company' => $customer->get_billing_company(),
+        'shipping_address' => join(' ', array($customer->get_billing_address_1(), $customer->get_billing_address_2())),
+        'shipping_postcode' => $customer->get_billing_postcode(),
+        'shipping_country' => $customer->get_billing_country(),
+        'shipping_state' => $customer->get_billing_state(),
+        'shipping_city' => $customer->get_billing_city(),
     );
 
-    if ( method_exists( $customer, 'get_shipping_phone' ) ) {
+    if (method_exists($customer, 'get_shipping_phone')) {
         $fields['shipping_phone'] = $customer->get_billing_phone();
     }
 
@@ -3733,30 +3771,31 @@ function ml_get_data_layer_user_data( $customer_id ) {
 }
 
 
-function ml_get_cart_data() {
+function ml_get_cart_data()
+{
     // Ensure WooCommerce is active
-    if ( ! class_exists( 'WooCommerce' ) ) {
-        wp_send_json_error( 'WooCommerce is not active.' );
+    if (!class_exists('WooCommerce')) {
+        wp_send_json_error('WooCommerce is not active.');
     }
 
     // Get cart contents
     $cart_items = WC()->cart->get_cart();
 
     $filter_items = [];
-    foreach ( $cart_items as $cart_item_key => $cart_item ) {
+    foreach ($cart_items as $cart_item_key => $cart_item) {
         // error_log( print_r( $cart_item, true ) );
-        $_product = wc_get_product( $cart_item['product_id'] );
-        $group_enable = get_field( 'group_enable', $cart_item['product_id'] );
-        $custom_quanity = get_field( 'enable_custom_quantity', $cart_item['product_id'] );
-        if( 
-            $_product->is_type( 'simple' ) && 
-            ! empty( $group_enable ) && 
-            empty( $custom_quanity ) && 
-            isset( $cart_item['quantity'] ) 
+        $_product = wc_get_product($cart_item['product_id']);
+        $group_enable = get_field('group_enable', $cart_item['product_id']);
+        $custom_quanity = get_field('enable_custom_quantity', $cart_item['product_id']);
+        if (
+            $_product->is_type('simple') &&
+            !empty($group_enable) &&
+            empty($custom_quanity) &&
+            isset($cart_item['quantity'])
         ) {
 
             // Check if the product ID exists in $filter_items, if not, initialize it to 0
-            if ( ! isset($filter_items[$cart_item['product_id']])) {
+            if (!isset($filter_items[$cart_item['product_id']])) {
                 $filter_items[$cart_item['product_id']] = 0;
             }
 
@@ -3769,46 +3808,46 @@ function ml_get_cart_data() {
     $items = array();
 
     // Loop through cart items
-    foreach ( $cart_items as $cart_item_key => $cart_item ) {
+    foreach ($cart_items as $cart_item_key => $cart_item) {
         $product_id = $cart_item['product_id'];
-        $_product = wc_get_product( $product_id );
+        $_product = wc_get_product($product_id);
 
         $regular_price = $_product->get_regular_price();
-        $group_enable = get_field( 'group_enable', $_product->get_id() );
-        $custom_quanity = get_field( 'enable_custom_quantity', $_product->get_id() );
+        $group_enable = get_field('group_enable', $_product->get_id());
+        $custom_quanity = get_field('enable_custom_quantity', $_product->get_id());
 
         $item_price = $_product->get_price();
-    
-        if( 
-            $_product->is_type( 'simple' ) && 
-            ! empty( $group_enable ) && 
-            empty( $custom_quanity ) && 
-            isset( $cart_item['quantity'] ) &&
-            isset( $filter_items[$cart_item['product_id']] )
-        ) {
-            $final_price = Alarnd_Utility::instance()->get_final_amount( $cart_item['product_id'], $filter_items[$cart_item['product_id']], $regular_price );
 
-            if(
+        if (
+            $_product->is_type('simple') &&
+            !empty($group_enable) &&
+            empty($custom_quanity) &&
+            isset($cart_item['quantity']) &&
+            isset($filter_items[$cart_item['product_id']])
+        ) {
+            $final_price = Alarnd_Utility::instance()->get_final_amount($cart_item['product_id'], $filter_items[$cart_item['product_id']], $regular_price);
+
+            if (
                 isset($cart_item['art_item_price']) &&
-                ! empty($cart_item['art_item_price'])
+                !empty($cart_item['art_item_price'])
             ) {
-                $final_price = $final_price+$cart_item['art_item_price'];
+                $final_price = $final_price + $cart_item['art_item_price'];
             }
 
             $item_price = $final_price;
 
-        } elseif( 
-            $_product->is_type( 'simple' ) && 
-            empty( $group_enable ) && 
-            ! empty( $custom_quanity ) 
+        } elseif (
+            $_product->is_type('simple') &&
+            empty($group_enable) &&
+            !empty($custom_quanity)
         ) {
-            $custom_price = Alarnd_Utility::instance()->get_custom_amount( $cart_item['product_id'], $cart_item['quantity'], $regular_price );
+            $custom_price = Alarnd_Utility::instance()->get_custom_amount($cart_item['product_id'], $cart_item['quantity'], $regular_price);
 
-            if(
+            if (
                 isset($cart_item['art_item_price']) &&
-                ! empty($cart_item['art_item_price'])
+                !empty($cart_item['art_item_price'])
             ) {
-                $custom_price = $custom_price+$cart_item['art_item_price'];
+                $custom_price = $custom_price + $cart_item['art_item_price'];
             }
 
             $item_price = $custom_price;
@@ -3818,16 +3857,16 @@ function ml_get_cart_data() {
 
         // Prepare product data
         $product_data = array(
-            'item_name'      => $_product->get_name(),
-            'item_id'        => $product_id,
-            'price'  => $item_price,
-            'quantity'  => $cart_item['quantity']
+            'item_name' => $_product->get_name(),
+            'item_id' => $product_id,
+            'price' => $item_price,
+            'quantity' => $cart_item['quantity']
         );
-		
-		if( isset( $cart_item['alarnd_color'] ) ) {
+
+        if (isset($cart_item['alarnd_color'])) {
             $product_data['item_variant'] = $cart_item['alarnd_color'];
         }
-        if( isset( $cart_item['alarnd_size'] ) ) {
+        if (isset($cart_item['alarnd_size'])) {
             $product_data['size'] = $cart_item['alarnd_size'];
         }
 
@@ -3837,10 +3876,10 @@ function ml_get_cart_data() {
 
     $applied_coupons = WC()->cart->get_applied_coupons();
 
-    
+
 
     $begin_checkout = [
-        'currency' => esc_attr( get_woocommerce_currency() ),
+        'currency' => esc_attr(get_woocommerce_currency()),
         'value' => WC()->cart->total
     ];
 
@@ -3860,10 +3899,10 @@ function ml_get_cart_data() {
         // Get the discount type
         $coupon_type = $coupon->get_discount_type();
 
-        $coupon_discount_amount = ml_get_coupon_discount_amount( $coupon_code );
+        $coupon_discount_amount = ml_get_coupon_discount_amount($coupon_code);
 
         $item_key = $index === 0 ? '' : ($key + 1);
-        if ( ! empty( $discount_amount ) ) {
+        if (!empty($discount_amount)) {
             $begin_checkout['coupon' . $item_key] = $coupon_code;
             $begin_checkout['discount' . $item_key] = $coupon_discount_amount;
         }
@@ -3872,10 +3911,10 @@ function ml_get_cart_data() {
     }
 
     $chosen_shipping_method = ml_get_shipping_data('method');
-    if ( ! empty( $chosen_shipping_method ) ) {
+    if (!empty($chosen_shipping_method)) {
         $shipping_cost = ml_get_shipping_data('cost');
         $shipping_title = ml_get_shipping_data();
-        if( ! empty( $shipping_title ) ) {
+        if (!empty($shipping_title)) {
             $begin_checkout['shipping'] = $shipping_cost;
             $begin_checkout['shipping_label'] = $shipping_title;
         }
@@ -3888,7 +3927,8 @@ function ml_get_cart_data() {
     return $begin_checkout;
 }
 
-function ml_get_coupon_discount_amount($coupon_code) {
+function ml_get_coupon_discount_amount($coupon_code)
+{
     // Ensure WooCommerce is active
     if (!class_exists('WooCommerce')) {
         return null;

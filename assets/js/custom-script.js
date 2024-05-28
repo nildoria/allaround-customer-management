@@ -2205,7 +2205,9 @@ jQuery(document).ready(function ($) {
 
 
 
-
+if (typeof dataLayer === 'undefined') {
+    var dataLayer = [];
+}
 
 var pluginMLGtmServerSide = {
   getFieldInfo(customer_id, fieldName = 'alarnd__color_qty') {
