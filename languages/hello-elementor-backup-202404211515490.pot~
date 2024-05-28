@@ -1,47 +1,36 @@
+#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: AllAround Mini Store\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-01-07 17:21+0000\n"
-"PO-Revision-Date: 2024-04-24 09:47+0000\n"
-"Last-Translator: admin\n"
-"Language-Team: עִבְרִית\n"
-"Language: he_IL\n"
-"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"POT-Creation-Date: 2024-04-21 14:41+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: \n"
+"Language: \n"
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: Loco https://localise.biz/\n"
-"X-Loco-Version: 2.6.6; wp-6.5.2\n"
+"X-Loco-Version: 2.6.6; wp-6.4.2\n"
 "X-Domain: hello-elementor"
 
 #: includes/ajax-handler.php:1724
 msgid "0"
 msgstr ""
 
-#: includes/functions.php:1590
-msgid "1111 1111 1111 1111"
-msgstr ""
-
-#: includes/functions.php:1616
-msgid "3 סיטרכה בגב תורפס"
-msgstr ""
-
 #: includes/ajax-handler.php:1709
 msgid "Add"
-msgstr "הוסיפו"
+msgstr ""
 
 #: includes/ajax-handler.php:1729 includes/ajax-handler.php:1839
 msgid "Added to Cart"
-msgstr "התווסף לעגלה"
-
-#: includes/functions.php:1842
-msgid "Address"
-msgstr "כתובת (רחוב ומספר)"
+msgstr ""
 
 #: templates/author-custom-page.php:168
 msgid "All"
-msgstr "הכל"
+msgstr ""
 
 #. Name of the plugin
 msgid "AllAround Mini Store"
@@ -49,10 +38,6 @@ msgstr ""
 
 #. Description of the plugin
 msgid "AllAround User Management and Mini Store."
-msgstr ""
-
-#: includes/functions.php:2099
-msgid "Attachment"
 msgstr ""
 
 #: includes/mockup-generator/editor.php:252
@@ -64,37 +49,13 @@ msgstr ""
 msgid "Can't order more than 999"
 msgstr ""
 
-#: includes/functions.php:1586
-msgid "Card Number"
-msgstr "מספר כרטיס אשראי"
-
 #: includes/ajax-handler.php:684
 msgid "Cart is empty."
-msgstr "עגלת הקניות ריקה."
-
-#: includes/functions.php:1831
-msgid "City"
-msgstr "עיר"
+msgstr ""
 
 #: includes/ajax-handler.php:554 includes/ajax-handler.php:596
 msgid "Click To Pay "
-msgstr "לחצו לתשלום על סך "
-
-#: includes/functions.php:2063 includes/functions.php:2067
-msgid "Color"
 msgstr ""
-
-#: includes/functions.php:1609 includes/functions.php:1613
-msgid "CVC"
-msgstr ""
-
-#: includes/functions.php:1810
-msgid "Email"
-msgstr "אימייל"
-
-#: includes/functions.php:1599
-msgid "Expiration Date"
-msgstr "תוקף"
 
 #: includes/mockup-generator/mockup.php:989
 msgid "Generate"
@@ -108,32 +69,12 @@ msgstr ""
 msgid "https://allaround.co.il/"
 msgstr ""
 
-#: includes/functions.php:1799
-msgid "Invoice Name"
-msgstr "שם לחשבונית"
-
 #: includes/mockup-generator/mockup.php:881
 msgid "Last Generated"
 msgstr ""
 
-#: includes/functions.php:3110
-msgid "Load More"
-msgstr ""
-
 #: templates/author-custom-page.php:224
 msgid "Loading..."
-msgstr ""
-
-#: includes/functions.php:96
-msgid "Login"
-msgstr ""
-
-#: includes/functions.php:81
-msgid "Logout"
-msgstr ""
-
-#: includes/functions.php:1603
-msgid "MM/YY"
 msgstr ""
 
 #: includes/mockup-generator/mockup.php:879
@@ -142,11 +83,7 @@ msgstr ""
 
 #: includes/ajax-handler.php:1709
 msgid "more items to reduce your cost to"
-msgstr "מוצרים נוספים להורדת המחיר ל-"
-
-#: includes/functions.php:1789
-msgid "Name"
-msgstr "שם מלא"
+msgstr ""
 
 #: includes/ajax-handler.php:656
 msgid "Order Didn\"t go through"
@@ -158,16 +95,12 @@ msgstr ""
 
 #: includes/ajax-handler.php:1709
 msgid "per item"
-msgstr "ליחידה"
-
-#: includes/functions.php:1821
-msgid "Phone"
 msgstr ""
 
 #: includes/ajax-handler.php:552 includes/ajax-handler.php:594
 msgid ""
 "Please confirm by clicking on the button below and we’ll charge your card by"
-msgstr "בבקשה לחצו על הכפתור מטה לאישור ההזמנה וחיוב של "
+msgstr ""
 
 #: includes/ajax-handler.php:745 includes/ajax-handler.php:1005
 msgid "Please enter a valid email address."
@@ -205,19 +138,9 @@ msgstr ""
 msgid "Remove Running Meta"
 msgstr ""
 
-#: includes/functions.php:1793 includes/functions.php:1803
-#: includes/functions.php:1814 includes/functions.php:1825
-#: includes/functions.php:1835 includes/functions.php:1846
-msgid "required"
-msgstr "שדה חובה"
-
 #: includes/ajax-handler.php:733 includes/ajax-handler.php:993
 msgid "Required field are empty. Please fill all the field."
-msgstr "אנא מלאו את כל שדות החובה."
-
-#: includes/functions.php:1855
-msgid "Return"
-msgstr "חזרה"
+msgstr ""
 
 #: includes/ajax-handler.php:1746
 msgid "Select a Color"
@@ -231,13 +154,9 @@ msgstr ""
 msgid "Single User Mockup Generated Start "
 msgstr ""
 
-#: includes/functions.php:2071
-msgid "Size"
-msgstr ""
-
 #: includes/ajax-handler.php:550 includes/ajax-handler.php:592
 msgid "Thanks for adding it to your order!"
-msgstr "תודה רבה על הזמנתך! :)"
+msgstr ""
 
 #: includes/ajax-handler.php:1267
 msgid "This email address is already in use."
@@ -247,19 +166,10 @@ msgstr ""
 msgid "Token value empty."
 msgstr ""
 
-#: includes/functions.php:294 includes/functions.php:1472
-#: includes/functions.php:1750
-msgid "Total Amount"
-msgstr "סכום כולל"
-
 #: includes/ajax-handler.php:543 includes/ajax-handler.php:585
 #: includes/ajax-handler.php:659
 msgid "Try Again"
 msgstr ""
-
-#: includes/functions.php:1852
-msgid "Update"
-msgstr "לעדכן"
 
 #: includes/mockup-generator/mockup.php:210
 msgid "User Dispatch"
@@ -274,52 +184,21 @@ msgid "Your mini store is being generated. Please check back in a few minutes!"
 msgstr ""
 
 #: includes/ajax-handler.php:261 includes/ajax-handler.php:499
-#: includes/functions.php:3091
 msgid "הוסיפו לעגלה"
-msgstr ""
-
-#: includes/functions.php:2293
-msgid "העגלה ריקה"
 msgstr ""
 
 #: includes/ajax-handler.php:1794
 msgid "הקלידו כמות…"
 msgstr ""
 
-#: includes/functions.php:1756
-msgid "התקדם לנקודת הביקורת"
-msgstr "לחצו לתשלום"
-
-#: includes/ajax-handler.php:1310 includes/functions.php:1441
-#: includes/functions.php:1541
+#: includes/ajax-handler.php:1310
 msgid "חשבונית על שם"
 msgstr ""
 
-#: includes/functions.php:1579
-msgid "יארשא סיטרכ"
-msgstr "פרטי תשלום"
-
-#: includes/ajax-handler.php:1309 includes/functions.php:1438
-#: includes/functions.php:1538 includes/functions.php:1784
+#: includes/ajax-handler.php:1309
 msgid "כתובת למשלוח"
-msgstr ""
-
-#: includes/functions.php:3113
-msgid "מוצרים נוספים..."
-msgstr ""
-
-#: includes/functions.php:1573
-msgid "מעובד לקופה"
-msgstr "תשלום"
-
-#: includes/functions.php:2298
-msgid "משלוח"
-msgstr ""
-
-#: includes/functions.php:1290
-msgid "פרטי תשלום"
 msgstr ""
 
 #: includes/ajax-handler.php:1322
 msgid "שינוי"
-msgstr "עריכה"
+msgstr ""

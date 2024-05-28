@@ -1,18 +1,19 @@
+#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: AllAround Mini Store\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-01-07 17:21+0000\n"
-"PO-Revision-Date: 2024-04-24 09:47+0000\n"
-"Last-Translator: admin\n"
-"Language-Team: עִבְרִית\n"
-"Language: he_IL\n"
-"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"POT-Creation-Date: 2024-04-21 15:15+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: \n"
+"Language: \n"
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: Loco https://localise.biz/\n"
-"X-Loco-Version: 2.6.6; wp-6.5.2\n"
+"X-Loco-Version: 2.6.6; wp-6.4.2\n"
 "X-Domain: hello-elementor"
 
 #: includes/ajax-handler.php:1724
@@ -29,19 +30,19 @@ msgstr ""
 
 #: includes/ajax-handler.php:1709
 msgid "Add"
-msgstr "הוסיפו"
+msgstr ""
 
 #: includes/ajax-handler.php:1729 includes/ajax-handler.php:1839
 msgid "Added to Cart"
-msgstr "התווסף לעגלה"
+msgstr ""
 
 #: includes/functions.php:1842
 msgid "Address"
-msgstr "כתובת (רחוב ומספר)"
+msgstr ""
 
 #: templates/author-custom-page.php:168
 msgid "All"
-msgstr "הכל"
+msgstr ""
 
 #. Name of the plugin
 msgid "AllAround Mini Store"
@@ -66,19 +67,19 @@ msgstr ""
 
 #: includes/functions.php:1586
 msgid "Card Number"
-msgstr "מספר כרטיס אשראי"
+msgstr ""
 
 #: includes/ajax-handler.php:684
 msgid "Cart is empty."
-msgstr "עגלת הקניות ריקה."
+msgstr ""
 
 #: includes/functions.php:1831
 msgid "City"
-msgstr "עיר"
+msgstr ""
 
 #: includes/ajax-handler.php:554 includes/ajax-handler.php:596
 msgid "Click To Pay "
-msgstr "לחצו לתשלום על סך "
+msgstr ""
 
 #: includes/functions.php:2063 includes/functions.php:2067
 msgid "Color"
@@ -90,11 +91,11 @@ msgstr ""
 
 #: includes/functions.php:1810
 msgid "Email"
-msgstr "אימייל"
+msgstr ""
 
 #: includes/functions.php:1599
 msgid "Expiration Date"
-msgstr "תוקף"
+msgstr ""
 
 #: includes/mockup-generator/mockup.php:989
 msgid "Generate"
@@ -104,13 +105,17 @@ msgstr ""
 msgid "Generate Mockup"
 msgstr ""
 
+#: includes/functions.php:3512
+msgid "Have a note for us? Write it down!"
+msgstr ""
+
 #. URI of the plugin
 msgid "https://allaround.co.il/"
 msgstr ""
 
 #: includes/functions.php:1799
 msgid "Invoice Name"
-msgstr "שם לחשבונית"
+msgstr ""
 
 #: includes/mockup-generator/mockup.php:881
 msgid "Last Generated"
@@ -142,11 +147,11 @@ msgstr ""
 
 #: includes/ajax-handler.php:1709
 msgid "more items to reduce your cost to"
-msgstr "מוצרים נוספים להורדת המחיר ל-"
+msgstr ""
 
 #: includes/functions.php:1789
 msgid "Name"
-msgstr "שם מלא"
+msgstr ""
 
 #: includes/ajax-handler.php:656
 msgid "Order Didn\"t go through"
@@ -158,7 +163,7 @@ msgstr ""
 
 #: includes/ajax-handler.php:1709
 msgid "per item"
-msgstr "ליחידה"
+msgstr ""
 
 #: includes/functions.php:1821
 msgid "Phone"
@@ -167,7 +172,7 @@ msgstr ""
 #: includes/ajax-handler.php:552 includes/ajax-handler.php:594
 msgid ""
 "Please confirm by clicking on the button below and we’ll charge your card by"
-msgstr "בבקשה לחצו על הכפתור מטה לאישור ההזמנה וחיוב של "
+msgstr ""
 
 #: includes/ajax-handler.php:745 includes/ajax-handler.php:1005
 msgid "Please enter a valid email address."
@@ -209,15 +214,15 @@ msgstr ""
 #: includes/functions.php:1814 includes/functions.php:1825
 #: includes/functions.php:1835 includes/functions.php:1846
 msgid "required"
-msgstr "שדה חובה"
+msgstr ""
 
 #: includes/ajax-handler.php:733 includes/ajax-handler.php:993
 msgid "Required field are empty. Please fill all the field."
-msgstr "אנא מלאו את כל שדות החובה."
+msgstr ""
 
 #: includes/functions.php:1855
 msgid "Return"
-msgstr "חזרה"
+msgstr ""
 
 #: includes/ajax-handler.php:1746
 msgid "Select a Color"
@@ -237,7 +242,7 @@ msgstr ""
 
 #: includes/ajax-handler.php:550 includes/ajax-handler.php:592
 msgid "Thanks for adding it to your order!"
-msgstr "תודה רבה על הזמנתך! :)"
+msgstr ""
 
 #: includes/ajax-handler.php:1267
 msgid "This email address is already in use."
@@ -250,7 +255,7 @@ msgstr ""
 #: includes/functions.php:294 includes/functions.php:1472
 #: includes/functions.php:1750
 msgid "Total Amount"
-msgstr "סכום כולל"
+msgstr ""
 
 #: includes/ajax-handler.php:543 includes/ajax-handler.php:585
 #: includes/ajax-handler.php:659
@@ -259,7 +264,7 @@ msgstr ""
 
 #: includes/functions.php:1852
 msgid "Update"
-msgstr "לעדכן"
+msgstr ""
 
 #: includes/mockup-generator/mockup.php:210
 msgid "User Dispatch"
@@ -288,7 +293,7 @@ msgstr ""
 
 #: includes/functions.php:1756
 msgid "התקדם לנקודת הביקורת"
-msgstr "לחצו לתשלום"
+msgstr ""
 
 #: includes/ajax-handler.php:1310 includes/functions.php:1441
 #: includes/functions.php:1541
@@ -297,7 +302,7 @@ msgstr ""
 
 #: includes/functions.php:1579
 msgid "יארשא סיטרכ"
-msgstr "פרטי תשלום"
+msgstr ""
 
 #: includes/ajax-handler.php:1309 includes/functions.php:1438
 #: includes/functions.php:1538 includes/functions.php:1784
@@ -310,7 +315,7 @@ msgstr ""
 
 #: includes/functions.php:1573
 msgid "מעובד לקופה"
-msgstr "תשלום"
+msgstr ""
 
 #: includes/functions.php:2298
 msgid "משלוח"
@@ -322,4 +327,4 @@ msgstr ""
 
 #: includes/ajax-handler.php:1322
 msgid "שינוי"
-msgstr "עריכה"
+msgstr ""

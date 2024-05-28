@@ -71,14 +71,25 @@ function enqueue_aum_script() {
 
     $itemsPerPage = ml_products_per_page();
 
-    wp_localize_script( 'custom-script', 'ajax_object',
-        array( 
-            'ajax_url' => admin_url( 'admin-ajax.php' ),
-            'admin_email' => get_bloginfo( 'admin_email' ),
-            'itemsPerPage' => $itemsPerPage,
-            'nonce' => wp_create_nonce( "aum_ajax_nonce" )
-        ) 
+    
+
+    // Get the author's user data
+    $current_author = get_query_var('author_name');
+    $get_current_puser = get_user_by('login', $current_author); 
+    $current_user_id = ! isset($get_current_puser->ID) ? 0 : $get_current_puser->ID;
+
+    $scripts = array( 
+        'ajax_url' => admin_url( 'admin-ajax.php' ),
+        'admin_email' => get_bloginfo( 'admin_email' ),
+        'get_current_puser' => $current_user_id,
+        'currency' => esc_attr( get_woocommerce_currency() ),
+        'itemsPerPage' => $itemsPerPage,
+        'nonce' => wp_create_nonce( "aum_ajax_nonce" )
     );
+    if ( ! empty( $current_user_id ) ) {
+        $scripts['user_data'] = ml_get_data_layer_user_data($current_user_id );
+    }
+    wp_localize_script( 'custom-script', 'ajax_object', $scripts );
 }
 add_action('wp_enqueue_scripts', 'enqueue_aum_script', 99);
 

@@ -1778,6 +1778,7 @@ function allaround_customer_form($is_disabled = false)
     $last_name = get_user_meta($current_user_id, 'billing_last_name', true);
     $current_user = get_userdata($current_user_id);
     $user_display_name = $current_user->display_name;
+    $lock_profile = get_field('lock_profile', 'user_' . $current_user_id);
     ?>
     <form action="" id="customerDetails"
         class="allaround--card-form<?php echo $is_disabled === false ? ' hidden_form' : ''; ?>">
@@ -1791,8 +1792,9 @@ function allaround_customer_form($is_disabled = false)
                 </div>
                 <div class="form-input">
                     <input type="text" id="userName" name="userName"
-                        placeholder="<?php esc_attr_e("required", "hello-elementor"); ?>"
-                        value="<?php echo $user_display_name ? esc_attr($user_display_name) : '' ?>" required>
+                        placeholder="<?php esc_attr_e("required", "hello-elementor"); ?>" value="<?php if ($user_display_name && !$lock_profile) {
+                               echo esc_attr($user_display_name);
+                           } ?>" required>
                 </div>
             </div>
             <div class="form-row">
@@ -1801,8 +1803,9 @@ function allaround_customer_form($is_disabled = false)
                 </div>
                 <div class="form-input">
                     <input type="text" id="userInvoiceName" name="userInvoiceName"
-                        placeholder="<?php esc_attr_e("required", "hello-elementor"); ?>"
-                        value="<?php echo esc_attr($invoice); ?>">
+                        placeholder="<?php esc_attr_e("required", "hello-elementor"); ?>" value="<?php if (!$lock_profile) {
+                               echo esc_attr($invoice);
+                           } ?>" required>
                 </div>
             </div>
         </div>
@@ -1812,8 +1815,9 @@ function allaround_customer_form($is_disabled = false)
             </div>
             <div class="form-input">
                 <input type="text" id="userEmail" name="userEmail"
-                    placeholder="<?php esc_attr_e("required", "hello-elementor"); ?>"
-                    value="<?php echo $dummy_email ? "" : esc_attr($the_user->user_email); ?>" required>
+                    placeholder="<?php esc_attr_e("required", "hello-elementor"); ?>" value="<?php if (!$dummy_email && !$lock_profile) {
+                           echo esc_attr($the_user->user_email);
+                       } ?>" required>
             </div>
         </div>
         <div class="form-row flex-row">
@@ -1823,8 +1827,9 @@ function allaround_customer_form($is_disabled = false)
                 </div>
                 <div class="form-input">
                     <input type="text" id="userPhone" name="userPhone"
-                        placeholder="<?php esc_attr_e("required", "hello-elementor"); ?>"
-                        value="<?php echo esc_attr($phone); ?>" required>
+                        placeholder="<?php esc_attr_e("required", "hello-elementor"); ?>" value="<?php if (!$lock_profile) {
+                               echo esc_attr($phone);
+                           } ?>" required>
                 </div>
             </div>
             <div class="form-row">
@@ -1833,8 +1838,9 @@ function allaround_customer_form($is_disabled = false)
                 </div>
                 <div class="form-input">
                     <input type="text" id="userCity" name="userCity"
-                        placeholder="<?php esc_attr_e("required", "hello-elementor"); ?>"
-                        value="<?php echo esc_attr($city); ?>" required>
+                        placeholder="<?php esc_attr_e("required", "hello-elementor"); ?>" value="<?php if (!$lock_profile) {
+                               echo esc_attr($city);
+                           } ?>" required>
                 </div>
             </div>
         </div>
@@ -1844,8 +1850,9 @@ function allaround_customer_form($is_disabled = false)
             </div>
             <div class="form-input">
                 <input type="text" id="userAdress" name="userAdress"
-                    placeholder="<?php esc_attr_e("required", "hello-elementor"); ?>"
-                    value="<?php echo esc_attr($billing_address); ?>" required>
+                    placeholder="<?php esc_attr_e("required", "hello-elementor"); ?>" value="<?php if (!$lock_profile) {
+                           echo esc_attr($billing_address);
+                       } ?>" required>
             </div>
         </div>
         <div class="form-row form-submit-row">
@@ -1987,6 +1994,8 @@ function ml_create_order($data)
     global $woocommerce;
     $cart = $woocommerce->cart;
     $cart->calculate_totals();
+
+    $order_info = ml_get_cart_data();
 
     $applied_coupons = WC()->cart->get_applied_coupons();
 
@@ -2145,6 +2154,9 @@ function ml_create_order($data)
         $shipping_item->set_method_id($chosen_shipping_method);
         $shipping_item->set_total($shipping_cost);
 
+        $order_info['shipping'] = $shipping_cost;
+        $order_info['shipping_label'] = $shipping_title;
+
         // Add the shipping item to the order
         $order->add_item($shipping_item);
 
@@ -2231,6 +2243,8 @@ function ml_create_order($data)
 
     $order_id = $order->get_id();
 
+    $order_info['transaction_id'] = $order_id;
+
     // Update billing company field with invoice name
     $invoice_name = isset($extraMeta['invoice']) ? $extraMeta['invoice'] : '';
     $order->set_billing_company($invoice_name);
@@ -2247,7 +2261,10 @@ function ml_create_order($data)
     // WC()->mailer()->get_emails()['WC_Email_Customer_Processing_Order']->trigger( $order_id );
     // WC()->mailer()->get_emails()['WC_Email_New_Order']->trigger( $order_id );
 
-    return $order_id;
+    return array(
+        'order_id' => $order_id,
+        'order_info' => $order_info
+    );
 }
 
 
@@ -3005,7 +3022,11 @@ function ml_get_filter_content($current_user_id, $filter = '', $pagination = tru
             } else {
                 echo '<span class="view_details_not_available"></span>';
             }
-            echo '<button class="quick-view-button ml_add_loading ml_trigger_details button" data-product-id="' . esc_attr($product->get_id()) . '">' . esc_html($product->single_add_to_cart_text()) . '</button>';
+            
+            $viewItemsAtts = ml_get_gtm_item( $product );
+            $viewItemsAtts = wc_implode_html_attributes( $viewItemsAtts );
+            
+            echo '<button class="quick-view-button ml_add_loading ml_trigger_details button" ' . $viewItemsAtts . ' data-product-id="' . esc_attr($product->get_id()) . '">' . esc_html($product->single_add_to_cart_text()) . '</button>';
             echo '</div>';
             echo '</div>';
 
@@ -3604,3 +3625,308 @@ add_action('admin_notices', function () {
         }
     }
 });
+
+
+function ml_get_gtm_item( $product, $extra = array() ) {
+
+    $category_ids = $product->get_category_ids();
+    if ( $product->get_parent_id() > 0 ) {
+        $parent_product = wc_get_product( $product->get_parent_id() );
+        if ( ! empty( $parent_product ) ) {
+            $category_ids = $parent_product->get_category_ids();
+        }
+    }
+
+    $result =  [
+        "data-ml_gtm_item_name" => $product->get_title(),
+        "data-ml_gtm_item_id" => $product->get_id(),
+        "data-ml_gtm_item_sku" => $product->get_sku(),
+        "data-ml_gtm_price" => $product->get_price()
+    ];
+
+    // check $category_ids is empty or not then loop through it and get_term to get term name.
+    if ( ! empty( $category_ids ) ) {
+        $index = 0;
+        foreach ( $category_ids as $key => $value ) {
+            $category_name = get_term( $value, 'product_cat' );
+            $item_key = $index === 0 ? '' : ($key + 1);
+            if ( ! empty( $category_name ) ) {
+                $result['data-ml_gtm_item_category' . $item_key] = $category_name->name;
+            }
+            $index++;
+        }
+    }
+    
+
+    // marge $result with $extra
+    return array_merge($result, $extra);
+}
+
+/**
+ * Hook: woocommerce_cart_item_remove_link.
+ *
+ * @param  string $link Html link.
+ * @param  string $cart_item_key Item key.
+ * @return string
+ */
+function ml_woocommerce_cart_item_remove_link( $link, $cart_item_key ) {
+    $item = WC()->cart->get_cart_item( $cart_item_key );
+    if ( empty( $item ) ) {
+        return $link;
+    }
+
+    $data             = ml_get_gtm_item( $item['data'] );
+    $data['quantity'] = isset( $item['quantity'] ) ? intval( $item['quantity'] ) : 1;
+    $attrs            = ml_convert_product_data_to_html_attrs( $data );
+    $link             = str_replace( '<a ', '<a ' . join( ' ', $attrs ), $link );
+
+    return $link;
+}
+add_filter('woocommerce_cart_item_remove_link', 'ml_woocommerce_cart_item_remove_link', 10, 2);
+
+
+function ml_convert_product_data_to_html_attrs( $data ) {
+    $array = array();
+    foreach ( $data as $key => $value ) {
+        $array[] = esc_attr( $key ) . '="' . esc_attr( $value ) . '"';
+    }
+    return $array;
+}
+
+
+function ml_get_data_layer_user_data( $customer_id ) {
+    if ( empty( $customer_id ) ) {
+        return array();
+    }
+    $customer = new WC_Customer( (int) $customer_id );
+
+    $fields = array(
+        'customer_id'         => $customer->get_id(),
+        'email'               => $customer->get_email(),
+        'first_name'          => $customer->get_first_name(),
+        'last_name'           => $customer->get_last_name(),
+        'billing_first_name'  => $customer->get_billing_first_name(),
+        'billing_last_name'   => $customer->get_billing_last_name(),
+        'billing_company'     => $customer->get_billing_company(),
+        'billing_address'     => join( ' ', array( $customer->get_billing_address_1(), $customer->get_billing_address_2() ) ),
+        'billing_postcode'    => $customer->get_billing_postcode(),
+        'billing_country'     => $customer->get_billing_country(),
+        'billing_state'       => $customer->get_billing_state(),
+        'billing_city'        => $customer->get_billing_city(),
+        'billing_email'       => $customer->get_billing_email(),
+        'billing_phone'       => $customer->get_billing_phone(),
+        'shipping_first_name' => $customer->get_billing_first_name(),
+        'shipping_last_name'  => $customer->get_billing_last_name(),
+        'shipping_company'    => $customer->get_billing_company(),
+        'shipping_address'    => join( ' ', array( $customer->get_billing_address_1(), $customer->get_billing_address_2() ) ),
+        'shipping_postcode'   => $customer->get_billing_postcode(),
+        'shipping_country'    => $customer->get_billing_country(),
+        'shipping_state'      => $customer->get_billing_state(),
+        'shipping_city'       => $customer->get_billing_city(),
+    );
+
+    if ( method_exists( $customer, 'get_shipping_phone' ) ) {
+        $fields['shipping_phone'] = $customer->get_billing_phone();
+    }
+
+    return $fields;
+}
+
+
+function ml_get_cart_data() {
+    // Ensure WooCommerce is active
+    if ( ! class_exists( 'WooCommerce' ) ) {
+        wp_send_json_error( 'WooCommerce is not active.' );
+    }
+
+    // Get cart contents
+    $cart_items = WC()->cart->get_cart();
+
+    $filter_items = [];
+    foreach ( $cart_items as $cart_item_key => $cart_item ) {
+        // error_log( print_r( $cart_item, true ) );
+        $_product = wc_get_product( $cart_item['product_id'] );
+        $group_enable = get_field( 'group_enable', $cart_item['product_id'] );
+        $custom_quanity = get_field( 'enable_custom_quantity', $cart_item['product_id'] );
+        if( 
+            $_product->is_type( 'simple' ) && 
+            ! empty( $group_enable ) && 
+            empty( $custom_quanity ) && 
+            isset( $cart_item['quantity'] ) 
+        ) {
+
+            // Check if the product ID exists in $filter_items, if not, initialize it to 0
+            if ( ! isset($filter_items[$cart_item['product_id']])) {
+                $filter_items[$cart_item['product_id']] = 0;
+            }
+
+            // Add the current quantity to the existing total for this product
+            $filter_items[$cart_item['product_id']] += $cart_item['quantity'];
+        }
+    }
+
+    // Prepare array to store cart products
+    $items = array();
+
+    // Loop through cart items
+    foreach ( $cart_items as $cart_item_key => $cart_item ) {
+        $product_id = $cart_item['product_id'];
+        $_product = wc_get_product( $product_id );
+
+        $regular_price = $_product->get_regular_price();
+        $group_enable = get_field( 'group_enable', $_product->get_id() );
+        $custom_quanity = get_field( 'enable_custom_quantity', $_product->get_id() );
+
+        $item_price = $_product->get_price();
+    
+        if( 
+            $_product->is_type( 'simple' ) && 
+            ! empty( $group_enable ) && 
+            empty( $custom_quanity ) && 
+            isset( $cart_item['quantity'] ) &&
+            isset( $filter_items[$cart_item['product_id']] )
+        ) {
+            $final_price = Alarnd_Utility::instance()->get_final_amount( $cart_item['product_id'], $filter_items[$cart_item['product_id']], $regular_price );
+
+            if(
+                isset($cart_item['art_item_price']) &&
+                ! empty($cart_item['art_item_price'])
+            ) {
+                $final_price = $final_price+$cart_item['art_item_price'];
+            }
+
+            $item_price = $final_price;
+
+        } elseif( 
+            $_product->is_type( 'simple' ) && 
+            empty( $group_enable ) && 
+            ! empty( $custom_quanity ) 
+        ) {
+            $custom_price = Alarnd_Utility::instance()->get_custom_amount( $cart_item['product_id'], $cart_item['quantity'], $regular_price );
+
+            if(
+                isset($cart_item['art_item_price']) &&
+                ! empty($cart_item['art_item_price'])
+            ) {
+                $custom_price = $custom_price+$cart_item['art_item_price'];
+            }
+
+            $item_price = $custom_price;
+        }
+
+        // error_log( print_r( $cart_item, true ) );
+
+        // Prepare product data
+        $product_data = array(
+            'item_name'      => $_product->get_name(),
+            'item_id'        => $product_id,
+            'price'  => $item_price,
+            'quantity'  => $cart_item['quantity']
+        );
+		
+		if( isset( $cart_item['alarnd_color'] ) ) {
+            $product_data['item_variant'] = $cart_item['alarnd_color'];
+        }
+        if( isset( $cart_item['alarnd_size'] ) ) {
+            $product_data['size'] = $cart_item['alarnd_size'];
+        }
+
+        // Add product data to array
+        $items[] = $product_data;
+    }
+
+    $applied_coupons = WC()->cart->get_applied_coupons();
+
+    
+
+    $begin_checkout = [
+        'currency' => esc_attr( get_woocommerce_currency() ),
+        'value' => WC()->cart->total
+    ];
+
+    $index = 0;
+    foreach ($applied_coupons as $key => $coupon_code) {
+        // Get the coupon ID by code
+        $coupon_id = wc_get_coupon_id_by_code($coupon_code);
+        if (!$coupon_id) {
+            return null;
+        }
+
+        // Get the coupon object
+        $coupon = new WC_Coupon($coupon_id);
+
+        // Get the discount amount
+        $discount_amount = $coupon->get_amount();
+        // Get the discount type
+        $coupon_type = $coupon->get_discount_type();
+
+        $coupon_discount_amount = ml_get_coupon_discount_amount( $coupon_code );
+
+        $item_key = $index === 0 ? '' : ($key + 1);
+        if ( ! empty( $discount_amount ) ) {
+            $begin_checkout['coupon' . $item_key] = $coupon_code;
+            $begin_checkout['discount' . $item_key] = $coupon_discount_amount;
+        }
+
+        $index++;
+    }
+
+    $chosen_shipping_method = ml_get_shipping_data('method');
+    if ( ! empty( $chosen_shipping_method ) ) {
+        $shipping_cost = ml_get_shipping_data('cost');
+        $shipping_title = ml_get_shipping_data();
+        if( ! empty( $shipping_title ) ) {
+            $begin_checkout['shipping'] = $shipping_cost;
+            $begin_checkout['shipping_label'] = $shipping_title;
+        }
+    }
+
+    $begin_checkout['payment_type'] = 'Z-Credit Payment';
+
+    $begin_checkout['items'] = $items;
+
+    return $begin_checkout;
+}
+
+function ml_get_coupon_discount_amount($coupon_code) {
+    // Ensure WooCommerce is active
+    if (!class_exists('WooCommerce')) {
+        return null;
+    }
+
+    // Get the coupon ID by code
+    $coupon_id = wc_get_coupon_id_by_code($coupon_code);
+    if (!$coupon_id) {
+        return null;
+    }
+
+    // Get the coupon object
+    $coupon = new WC_Coupon($coupon_id);
+
+    // Get the discount type and amount
+    $discount_type = $coupon->get_discount_type();
+    $discount_amount = $coupon->get_amount();
+
+    // Initialize total discount
+    $total_discount = 0;
+
+    // Get the cart
+    $cart = WC()->cart;
+
+    // Calculate the discount based on the type
+    if ($discount_type == 'percent') {
+        // Percentage discount
+        $total = $cart->get_subtotal();
+        $total_discount = ($total * $discount_amount) / 100;
+    } elseif ($discount_type == 'fixed_cart') {
+        // Fixed cart discount
+        $total_discount = min($discount_amount, $cart->get_subtotal());
+    } elseif ($discount_type == 'fixed_product') {
+        // Fixed product discount
+        foreach ($cart->get_cart() as $cart_item) {
+            $total_discount += $discount_amount * $cart_item['quantity'];
+        }
+    }
+
+    return $total_discount;
+}

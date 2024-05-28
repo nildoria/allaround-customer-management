@@ -24,7 +24,7 @@ jQuery(document).ready(function ($) {
 	
 
   function ajaxResponsePrint(response, messagWrap) {
-    console.log(response);
+    // console.log(response);
 
     // Check if the response has the expected data
     if (response && response.data) {
@@ -49,7 +49,7 @@ jQuery(document).ready(function ($) {
 
     }
 
-    console.log(responseData);
+    // console.log(responseData);
 
     if (response.success === false && responseData.message_type !== 'api') {
       messagWrap
@@ -57,7 +57,12 @@ jQuery(document).ready(function ($) {
         .slideDown();
     } else if ( responseData.message_type === 'api' ) {
       if ($(responseData.result_popup).closest(".alarnd--payout-modal").length !== 0) {
-        console.log(responseData.result_popup);
+        // console.log(responseData.result_popup);
+
+        if( responseData.order_info ) {
+          console.log('order_info exists');
+          pluginMLGtmServerSide.directEventPush('ga4_purchase', responseData.order_info);
+        }
 
         // Open directly via API
         $.magnificPopup.open({
@@ -242,6 +247,8 @@ jQuery(document).ready(function ($) {
   }
 
   $('.allaround_card_details_submit').on('click', function () {
+      var current = $(this);
+
       // Loop through each input field inside #customerDetails
       $('#customerDetails input').each(function () {
           var input = $(this);
@@ -253,10 +260,17 @@ jQuery(document).ready(function ($) {
           } else {
               // Remove the .error class if the input field is not empty
               input.removeClass('error');
+
+              
           }
       });
 
+      // begin_checkout event for gtm
+      pluginMLGtmServerSide.beginCheckoutEvent(current);
+
   });
+
+  
 
 
   function initilize_validate() {
@@ -849,9 +863,45 @@ jQuery(document).ready(function ($) {
 
     var $self = $(this),
       button = $self.find('button[name="add-to-cart"]'),
+      ml_type = $self.find('input[name="ml_type"]').val(),
       productId = button.val(),
       user_id = $('#main').data('user_id'),
       getData = $self.serializeArray();
+      
+    var itemsList = {};
+
+      if( 'quantity' === ml_type ) {
+
+        var checkedQtyElm = $self.find('input[name=cutom_quantity]:checked').closest('.alarnd--custom-qtys-wrap');
+        var item_price = checkedQtyElm.data('price');
+        // var quantity = checkedQtyElm.data('qty');
+        var attribute_quantity = getData.find(item => item.name === 'attribute_quantity')?.value;
+        var quantity = getData.find(item => item.name === 'quantity')?.value;
+
+        if( attribute_quantity !== '' && quantity === attribute_quantity ) {
+          item_price = $self.find('.alarnd--single-custom-qty').find('.alarnd__cqty_amount').text();
+        }
+
+        itemsList = button.data();
+
+        itemsList = pluginMLGtmServerSide.removePrefixes( itemsList );
+        itemsList['price'] = item_price;
+        // itemsList['item_price'] = item_price;
+        itemsList['quantity'] = quantity;
+        itemsList['customer_id'] = user_id;
+
+        console.log('quantity');
+        console.log(itemsList);
+      } 
+
+      if( 'group' === ml_type ) {
+        itemsList = pluginMLGtmServerSide.getFieldInfo(user_id);
+
+        console.log('group');
+        console.log(itemsList);
+      }
+
+      
 
     getData.push(
       {
@@ -871,6 +921,9 @@ jQuery(document).ready(function ($) {
         value: ajax_object.nonce,
       }
     );
+    
+    console.log('ml_type', ml_type);
+    buttonData = button.data();
 
     button.addClass("ml_loading").prop("disabled", true);
     if ($self.find(".alanrd--product-added-message").length !== 0) {
@@ -912,6 +965,9 @@ jQuery(document).ready(function ($) {
             $self.find(".alanrd--product-added-message").slideUp();
           }, 3000);
         }
+
+        // push add_to_cart event to GTM
+        pluginMLGtmServerSide.pushAddToCart(itemsList);
 
         $("button.allaround_card_details_submit").prop("disabled", false);
 
@@ -1734,6 +1790,27 @@ jQuery(document).ready(function ($) {
 
   }
 
+  $( document ).on( 'click', '.ml_trigger_details',function ( e ) {
+    
+      var el = e.target;
+      if ( ! el.dataset ) {
+        return;
+      }
+      // console.log("trigger ml_trigger_details 1");
+
+      // console.log(el.dataset);
+
+      if ( ! el.dataset.ml_gtm_item_id ) {
+        return;
+      }
+
+      // console.log("trigger ml_trigger_details 2");
+
+      pluginMLGtmServerSide.viewItem(
+        pluginMLGtmServerSide.removePrefixes( el.dataset )
+      );
+    }
+  );
 
   $(document).on("click", ".ml_trigger_details", function () {
     var $self = $(this),
@@ -2080,4 +2157,431 @@ jQuery(document).ready(function ($) {
   //     }
   // });
 
+
+
+  $( document ).on(
+    'click',
+    '.product-remove a.remove',
+    function ( e ) {
+      console.log('click remove');
+      let $thisbutton = $( this ),
+          item = $thisbutton.closest('.woocommerce-cart-form__cart-item'),
+          quantity = item.find( '.product-quantity' ).find( 'input' ).val(),
+          sub_total = item.find( '.product-subtotal' ).find( 'span.alarnd__wc-price' ).text();
+
+
+      if ( ! $thisbutton.length ) {
+        return;
+      }
+
+      if ( ! $thisbutton.data( 'ml_gtm_item_id' ) ) {
+        return;
+      }
+
+      var data = $thisbutton.data();
+
+      // Filter the data keys that start with "ml_gtm_"
+      var filteredData = {};
+      for (var key in data) {
+          if (key.startsWith('ml_gtm_')) {
+              filteredData[key] = data[key];
+          }
+      }
+
+      filteredData['ml_gtm_quantity'] = quantity;
+      // filteredData['ml_gtm_item_price'] = filteredData['ml_gtm_price'];
+      filteredData['ml_gtm_price'] = filteredData['ml_gtm_price'];
+      
+      pluginMLGtmServerSide.removeFromCart(
+        pluginMLGtmServerSide.removePrefixes( filteredData )
+      );
+
+      e.preventDefault();
+    }
+  );
+
+
 });
+
+
+
+
+
+var pluginMLGtmServerSide = {
+  getFieldInfo(customer_id, fieldName = 'alarnd__color_qty') {
+    // Select all elements with the specified field name
+    var elements = jQuery('[name^="' + fieldName + '"]');
+
+    var elementsWithValue = elements.filter(function() {
+        return jQuery(this).val() !== ''; // Filter elements with non-empty values
+    });
+    
+    // Array to store element info
+    var elementsInfo = [];
+
+    // Loop through each element
+    elementsWithValue.each(function() {
+        var current = jQuery(this),
+          form = current.closest('form'),
+          priceWrap = form.find('.alarnd--price-by-shirt'),
+          price = priceWrap.find('.alarnd--group-price').find('.alarnd__wc-price').text(),
+          totalPrice = priceWrap.find('.alarnd--total-price').find('.alarnd__wc-price').text(),
+          dataAtts = current.data();
+
+          dataAtts = pluginMLGtmServerSide.removePrefixes( dataAtts );
+          
+          dataAtts['quantity'] = current.val();
+          // dataAtts['item_price'] = price;
+          dataAtts['customer_id'] = customer_id;
+          dataAtts['price'] = price;
+
+        elementsInfo.push(dataAtts);
+    });
+
+    return elementsInfo;
+  },
+
+  beginCheckoutEvent( $elm ) {
+
+    let wc_cart = jQuery('.woocommerce-cart-form');
+
+    if ( ! wc_cart.length ) {
+      return;
+    }
+
+    
+    jQuery.ajax({
+      url: ajax_object.ajax_url,
+      type: 'POST',
+      data: {
+      action: 'ml_get_cart_data'
+    },
+    success: function(response) {
+        var cartData = response;
+
+        console.log(cartData);
+
+        var eventData = {
+          'event': 'ga4_begin_checkout',
+          'ecommerce': cartData
+        };
+
+        if ( typeof ajax_object !== 'undefined' && ajax_object.user_data ) {
+          eventData.user_data = {};
+          for ( var key in ajax_object.user_data  ) {
+            eventData.user_data[ key ] = ajax_object.user_data[ key ];
+          }
+        }
+
+        console.log(eventData);
+        dataLayer.push( eventData );
+
+      }
+    });
+  },
+  getQuantityFieldInfo() {
+    // Select all elements with the specified field name
+  },
+
+	pushSimpleProduct: function ( $elForm ) {
+		var item = this.convertInputsToObject(
+			$elForm.find( '[name^=gtm_]' )
+		);
+		item     = this.removePrefixes( item );
+
+		var $elQty = $elForm.find( '[name=quantity]' );
+		if ( $elQty.length ) {
+			item.quantity = $elQty.val();
+		}
+
+		console.log(item);
+		this.pushAddToCart( item );
+	},
+
+	pushVariationProduct: function ( $elForm ) {
+		var item = this.convertInputsToObject(
+			$elForm.find( '[name^=gtm_]' )
+		);
+		item     = this.removePrefixes( item );
+
+		var $elQty = $elForm.find( '[name=quantity]' );
+		if ( $elQty.length ) {
+			item.quantity = $elQty.val();
+		}
+
+		var variations = [];
+		$elForm.find( '[name^=attribute_] option:selected' ).each(
+			function () {
+				variations.push( jQuery( this ).text() );
+			}
+		);
+
+		if ( variations.length ) {
+			item.item_variant = variations.join( ',' );
+		}
+
+		this.pushAddToCart( item );
+	},
+
+	pushGroupProduct: function ( $elForm ) {
+		var items = [];
+		$elForm.find( '[name^=quantity\\[]' ).each(
+			function () {
+				if ( ! jQuery( this ).val() ) {
+					return;
+				}
+
+				var $elTd = jQuery( this ).closest( 'td' );
+				if ( ! $elTd.length ) {
+					return;
+				}
+
+				var item = {
+					quantity: jQuery( this ).val(),
+				};
+				$elTd.find( '[name^=gtm_]' ).each(
+					function () {
+						item[ jQuery( this ).data( 'name' ) ] = jQuery( this ).val();
+					}
+				);
+				items.push( item );
+			}
+		);
+		this.pushAddToCart( items );
+	},
+
+	/**
+	 * Remove from cart
+	 *
+	 * @param object item
+	 */
+	removeFromCart: function ( item ) {
+
+    if ( item.item_id ) {
+			item = [ item ];
+		}
+
+    var items = [];
+		var value = 0;
+		var index = 1;
+		for ( var item_loop of item ) {
+			item_loop.index    = index++;
+			item_loop.quantity = item_loop.quantity ? parseInt( item_loop.quantity, 10 ) : 1;
+			item_loop          = this.filterItemPrice( item_loop );
+			value              = parseFloat( value + ( parseInt( item_loop.price ) * parseInt( item_loop.quantity ) ) );
+			items.push( item_loop );
+		}
+
+		var eventData = {
+			'event': 'ga4_remove_from_cart',
+			'ecommerce': {
+				'currency': ajax_object.currency,
+				'value': value.toFixed( 2 ),
+				'items': items
+			},
+		};
+
+		if ( typeof ajax_object !== 'undefined' && ajax_object.user_data ) {
+			eventData.user_data = {};
+			for ( var key in ajax_object.user_data  ) {
+				eventData.user_data[ key ] = ajax_object.user_data[ key ];
+			}
+		}
+
+    console.log(eventData);
+		dataLayer.push( eventData );
+	},
+	
+  directEventPush: function ( event, data ) {
+		var eventData = {
+			'event': event,
+			'ecommerce': data
+		};
+
+		if ( typeof ajax_object !== 'undefined' && ajax_object.user_data ) {
+			eventData.user_data = {};
+			for ( var key in ajax_object.user_data  ) {
+				eventData.user_data[ key ] = ajax_object.user_data[ key ];
+			}
+		}
+
+    console.log(eventData);
+		dataLayer.push( eventData );
+	},
+
+	/**
+	 * Change product quantity in cart
+	 */
+	changeCartQty: function () {
+		var $this = this;
+
+		document.querySelectorAll( '.product-quantity input.qty' ).forEach(
+			function ( el ) {
+				var originalValue = el.defaultValue;
+
+				var currentValue = parseInt( el.value );
+				if ( isNaN( currentValue ) ) {
+					currentValue = originalValue;
+				}
+
+				if ( originalValue != currentValue ) {
+					var elCartItem = el.closest( '.cart_item' );
+					var elDataset  = elCartItem && elCartItem.querySelector( '.remove' );
+					if ( ! elDataset ) {
+						return;
+					}
+
+					if ( originalValue < currentValue ) {
+						var item         = $this.removePrefixes( elDataset.dataset );
+						item['quantity'] = currentValue - originalValue;
+            
+						$this.pushAddToCart( item );
+					}
+				}
+			}
+		);
+	},
+
+	/**
+	 * Remove field prefixes.
+	 *
+	 * @param object items List items.
+	 * @returns object
+	 */
+	removePrefixes: function ( items ) {
+		var item = {};
+		for ( var key in items ) {
+			if ( 0 !== key.indexOf( 'ml_gtm_' ) ) {
+				continue;
+			}
+
+			var itemKey     = key.replace( 'ml_gtm_', '' )
+			item[ itemKey ] = items[key];
+		}
+		return item;
+	},
+
+	/**
+	 * Convert input elements to object.
+	 *
+	 * @param object $els Elements.
+	 * @returns object
+	 */
+	convertInputsToObject( $els ) {
+		var data = {};
+		if ( ! $els.length ) {
+			return data;
+		}
+
+		$els.each(
+			function () {
+				data[ jQuery( this ).attr( 'name' ) ] = jQuery( this ).val();
+			}
+		);
+		return data;
+	},
+
+	/**
+	 * Filter item price.
+	 *
+	 * @param object item List items.
+	 * @returns object
+	 */
+	filterItemPrice: function ( item ) {
+		if ( typeof item.price == 'string' ) {
+			item.price = parseFloat( item.price );
+			if ( isNaN( item.price ) ) {
+				item.price = 0;
+			}
+		} else if ( typeof item.price != 'number' ) {
+			item.price = 0;
+		}
+		item.price = item.price.toFixed( 2 );
+
+		return item;
+	},
+
+	/**
+	 * Push add_to_cart to dataLayer.
+	 *
+	 * @param mixed item List items.
+	 */
+	pushAddToCart: function ( item ) {
+		if ( item.item_id ) {
+			item = [ item ];
+		}
+
+		console.log('pushAddToCart', item);
+		
+		var items = [];
+		var value = 0;
+		var index = 1;
+		for ( var item_loop of item ) {
+			item_loop.index    = index++;
+			item_loop.quantity = item_loop.quantity ? parseInt( item_loop.quantity, 10 ) : 1;
+			item_loop          = this.filterItemPrice( item_loop );
+			value              = parseFloat( value + ( parseInt( item_loop.price ) * parseInt( item_loop.quantity ) ) );
+			items.push( item_loop );
+		}
+
+		var eventData = {
+			'event': 'ga4_add_to_cart',
+			'ecommerce': {
+				'currency': ajax_object.currency,
+				'value': value.toFixed( 2 ),
+				'items': items,
+			},
+		};
+
+		if ( typeof ajax_object !== 'undefined' && ajax_object.user_data ) {
+			eventData.user_data = {};
+			for ( var key in ajax_object.user_data  ) {
+				eventData.user_data[ key ] = ajax_object.user_data[ key ];
+			}
+		}
+    console.log(eventData);
+		dataLayer.push( eventData );
+	},
+	
+  
+  viewItem: function ( item ) {
+		if ( item.item_id ) {
+			item = [ item ];
+		}
+
+		// console.log('viewItem', item);
+
+		var items = [];
+		var value = 0;
+		var index = 1;
+		for ( var item_loop of item ) {
+			item_loop.index    = index++;
+			item_loop.quantity = item_loop.quantity ? parseInt( item_loop.quantity, 10 ) : 1;
+			item_loop          = this.filterItemPrice( item_loop );
+			value              = parseFloat( value + ( item_loop.price * item_loop.quantity ) );
+			items.push( item_loop );
+		}
+
+		var eventData = {
+			'event': 'ga4_view_item',
+			'ecommerce': {
+				'currency': ajax_object.currency,
+				'value': value.toFixed( 2 ),
+				'items': items,
+			},
+		};
+
+		// console.log(eventData);
+
+		if ( typeof ajax_object !== 'undefined' && ajax_object.user_data ) {
+			eventData.user_data = {};
+			for ( var key in ajax_object.user_data  ) {
+				eventData.user_data[ key ] = ajax_object.user_data[ key ];
+			}
+		}
+    console.log(eventData);
+		dataLayer.push( eventData );
+	},
+
+
+};

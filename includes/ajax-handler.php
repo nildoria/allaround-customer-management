@@ -36,6 +36,9 @@ class ML_Ajax {
         add_action('wp_ajax_ml_pagination', array( $this, 'ml_pagination' ) );
         add_action('wp_ajax_nopriv_ml_pagination', array( $this, 'ml_pagination' ) );
         
+        add_action('wp_ajax_ml_get_cart_data', array( $this, 'ml_get_cart_data_callback' ) );
+        add_action('wp_ajax_nopriv_ml_get_cart_data', array( $this, 'ml_get_cart_data_callback' ) );
+        
         add_action('wp_ajax_load_products_by_category', array( $this, 'load_products_by_category' ) );
         add_action('wp_ajax_nopriv_load_products_by_category', array( $this, 'load_products_by_category' ) );
 
@@ -43,6 +46,16 @@ class ML_Ajax {
         add_action('wp_ajax_nopriv_check_cart_status', array( $this, 'check_cart_status_callback') );
 
     }
+
+    function ml_get_cart_data_callback() {
+        
+        $begin_checkout = ml_get_cart_data();
+
+        // Return cart data as JSON
+        wp_send_json( $begin_checkout );
+    }
+
+    
 
     function check_cart_status_callback() {
         check_ajax_referer( 'aum_ajax_nonce', 'nonce' );
@@ -178,7 +191,11 @@ class ML_Ajax {
                 } else {
                     echo '<span class="view_details_not_available"></span>';
                 }
-                echo '<button class="quick-view-button ml_add_loading ml_trigger_details button" data-product-id="' . esc_attr($product->get_id()) . '">'.esc_html( $product->single_add_to_cart_text() ).'</button>';
+                
+                $viewItemsAtts = ml_get_gtm_item( $product );
+                $viewItemsAtts = wc_implode_html_attributes( $viewItemsAtts );
+            
+                echo '<button class="quick-view-button ml_add_loading ml_trigger_details button" ' . $viewItemsAtts . ' data-product-id="' . esc_attr($product->get_id()) . '">'.esc_html( $product->single_add_to_cart_text() ).'</button>';
                 echo '</div>';
                 echo '</div>';
 
@@ -416,7 +433,11 @@ class ML_Ajax {
                 } else {
                     echo '<span class="view_details_not_available"></span>';
                 }
-                echo '<button class="quick-view-button ml_add_loading ml_trigger_details button" data-product-id="' . esc_attr($product->get_id()) . '">'.esc_html( $product->single_add_to_cart_text() ).'</button>';
+                
+                $viewItemsAtts = ml_get_gtm_item( $product );
+                $viewItemsAtts = wc_implode_html_attributes( $viewItemsAtts );
+                
+                echo '<button class="quick-view-button ml_add_loading ml_trigger_details button" ' . $viewItemsAtts . ' data-product-id="' . esc_attr($product->get_id()) . '">'.esc_html( $product->single_add_to_cart_text() ).'</button>';
                 echo '</div>';
                 echo '</div>';
 
@@ -899,7 +920,9 @@ class ML_Ajax {
 
 		if ( $is_valid_condition ) {
             // first create order
-            $order_id = ml_create_order($order_data);
+            $order_obj = ml_create_order($order_data);
+            $order_id = $order_obj['order_id'];
+            $order_info = $order_obj['order_info'];
 
             $success_popup = $this->popup_success_markup($order_id);
 
@@ -910,6 +933,7 @@ class ML_Ajax {
                 "message_type" => 'api',
                 "result_popup" => $success_popup,
                 "response_obj" => $response_obj,
+                "order_info" => $order_info,
                 "message_server" => $message,
                 "message" => "Successfully products added to order #$order_id"
             ) );
@@ -991,6 +1015,19 @@ class ML_Ajax {
                 "CardBrandCode" => $response_json['CardBrandCode'],
                 "ReturnCode" => $response_json['ReturnCode'],
                 "ReturnMessage" => $response_json['ReturnMessage'] 
+            );
+        }
+
+        $is_test_mode = get_option("ml_add_test_mode_for_api");
+
+        if ($is_test_mode === 'on') {
+            return array(
+                "token" => 'sometoken',
+                "referenceID" => 'somereference24154',
+                "CardNumber" => '424242424242',
+                "CardBrandCode" => 'Visa',
+                "ReturnCode" => '245',
+                "ReturnMessage" => 'somemessage' 
             );
         }
 
@@ -1284,7 +1321,10 @@ class ML_Ajax {
 		if ( $is_valid_condition ) {
 
             // first create order
-            $order_id = ml_create_order($order_data);   
+            $order_obj = ml_create_order($order_data);
+            // error_log( print_r( $order_obj, true ) );
+            $order_id = $order_obj['order_id'];
+            $order_info = $order_obj['order_info'];  
 
             $success_popup = $this->popup_success_markup($order_id);
             
@@ -1294,6 +1334,7 @@ class ML_Ajax {
             wp_send_json_success( json_encode( array(
                 "message_type" => 'api',
                 "result_popup" => $success_popup,
+                "order_info" => $order_info,
                 "message" => "Successfully products added to order #$order_id"
             ) ) );
 
@@ -1802,9 +1843,18 @@ class ML_Ajax {
                                         if( ! empty( $color['omit_sizes'] ) && !ml_is_omit($size, $color['omit_sizes'] ) ) {
                                                 $disabled = 'disabled="disabled"'; 
                                         } ?>
-                                        <?php if (ml_is_omit($size, $selected_omit_sizes)) : ?>
-                                        <div class="tshirt-qty-input-field">
-                                            <input style="box-shadow: 0px 0px 0px 1px <?php echo $color['color_hex_code']; ?>;" type="text" class="three-digit-input" placeholder="" pattern="^[0-9]*$" inputmode="numeric" autocomplete="off" name="alarnd__color_qty[<?php echo $key; ?>][<?php echo $size; ?>]" <?php echo $disabled; ?>>
+                                        <?php if (ml_is_omit($size, $selected_omit_sizes)) :
+                                            $field_extra_atts = array(
+                                                "data-ml_gtm_color" => esc_html( $color['color_hex_code'] ),
+                                                "data-ml_gtm_size" => esc_html( $size ),
+                                                "data-ml_gtm_item_variant" => esc_html( $color['title'] ),
+                                                "data-ml_gtm_index" => esc_html( $key )
+                                            );
+                                            $field_atts = ml_get_gtm_item( $product, $field_extra_atts );
+                                            $field_atts = wc_implode_html_attributes( $field_atts );
+                                            ?>
+                                        <div class="tshirt-qty-input-field mlimon">
+                                            <input style="box-shadow: 0px 0px 0px 1px <?php echo $color['color_hex_code']; ?>;" type="text" class="three-digit-input" placeholder="" pattern="^[0-9]*$" inputmode="numeric" autocomplete="off" name="alarnd__color_qty[<?php echo $key; ?>][<?php echo $size; ?>]" <?php echo $field_atts; ?> <?php echo $disabled; ?>>
                                             <span class="alarnd--limit-tooltip">Can't order more than 999</span>
                                         </div>
                                         <?php endif; ?>
@@ -1838,7 +1888,11 @@ class ML_Ajax {
                                 <p><?php echo esc_html( $second_line_keyword ); ?>: <span class="alarnd__total_qty"><?php esc_html_e( '0', "hello-elementor" ); ?></span></p>
                                 <span class="alarnd--total-price">סה"כ: <?php echo wc_price($product->get_regular_price(), array('decimals' => 0)); ?></span>
                             </div>
-                            <button type="submit" name="add-to-cart"value="<?php echo esc_attr( $product->get_id() ); ?>" disabled="disabled" class="single_add_to_cart_button button alt ml_add_loading ml_add_to_cart_trigger"><?php echo esc_html( $product->single_add_to_cart_text() ); ?></button>
+                            <?php
+                            $addToCartAtts = ml_get_gtm_item( $product );
+                            $addToCartAtts = wc_implode_html_attributes( $addToCartAtts );
+                            ?>
+                            <button type="submit" name="add-to-cart"value="<?php echo esc_attr( $product->get_id() ); ?>" disabled="disabled" class="single_add_to_cart_button button alt ml_add_loading ml_add_to_cart_trigger" <?php echo $addToCartAtts; ?>><?php echo esc_html( $product->single_add_to_cart_text() ); ?></button>
                         </div>
                         <div class="alanrd--product-added-message"><?php esc_html_e( 'Added to Cart', "hello-elementor" ); ?></div>
                         <input type="hidden" name="ml_type" value="group">
@@ -1922,12 +1976,10 @@ class ML_Ajax {
                             <div class="alarnd--single-variable">
                                 <span class="alarnd--single-var-info">
                                     <input type="radio" id="cutom_quantity-<?php echo $key; ?>" name="cutom_quantity" value="<?php echo $key; ?>" <?php echo 0 === $key ? 'checked="checked"' : ''; ?>>
-                                    <label for="cutom_quantity-<?php echo $key; ?>">
-                                        <?php echo esc_html( $step['quantity'] ); ?>
-                                    </label>
+                                    <label for="cutom_quantity-<?php echo $key; ?>"><?php echo esc_html( $step['quantity'] ); ?></label>
                                 </span>
                                 <?php echo wc_price( (int) $price, array('decimals' => 0)); ?>
-                                <span class="alarnd--single-saving"><?php echo esc_html( $item_price ); ?> <?php echo esc_html( $saving_info ); ?></span>
+                                <span class="alarnd--single-saving"><span class="alarnd--var-amount"><?php echo esc_html( $item_price ); ?></span> <?php echo esc_html( $saving_info ); ?></span>
                             </div>
                         </div>
                         <?php endforeach; endif; 
@@ -1945,10 +1997,16 @@ class ML_Ajax {
                 ),
 				$product
             );
+
+            $addToCartAtts = ml_get_gtm_item( $product );
+            $addToCartAtts = wc_implode_html_attributes( $addToCartAtts );
             ?>
             <div class="alarnd--single-button-wrap">
+                <input type="hidden" name="ml_item_price" value="">
+                <input type="hidden" name="ml_total_price" value="">
+                <input type="hidden" name="ml_quantity" value="">
                 <input type="hidden" name="ml_type" value="quantity">
-                <button type="submit" name="add-to-cart" value="<?php echo esc_attr( $product->get_id() ); ?>" class="single_add_to_cart_button button alt ml_add_loading ml_quantity_product_addtocart"><?php echo esc_html( $product->single_add_to_cart_text() ); ?></button>
+                <button type="submit" name="add-to-cart" value="<?php echo esc_attr( $product->get_id() ); ?>" class="single_add_to_cart_button button alt ml_add_loading ml_quantity_product_addtocart" <?php echo $addToCartAtts; ?>><?php echo esc_html( $product->single_add_to_cart_text() ); ?></button>
             </div>
             <div class="alanrd--product-added-message"><?php esc_html_e( 'Added to Cart', "hello-elementor" ); ?></div>
             </form>

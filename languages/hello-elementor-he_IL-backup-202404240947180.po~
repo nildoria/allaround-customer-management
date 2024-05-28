@@ -217,7 +217,7 @@ msgstr "אנא מלאו את כל שדות החובה."
 
 #: includes/functions.php:1855
 msgid "Return"
-msgstr "חזרה"
+msgstr ""
 
 #: includes/ajax-handler.php:1746
 msgid "Select a Color"

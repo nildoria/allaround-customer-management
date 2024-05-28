@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: AllAround Mini Store\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-01-07 17:21+0000\n"
-"PO-Revision-Date: 2024-04-24 09:47+0000\n"
+"PO-Revision-Date: 2024-04-22 07:02+0000\n"
 "Last-Translator: admin\n"
 "Language-Team: עִבְרִית\n"
 "Language: he_IL\n"
@@ -103,6 +103,10 @@ msgstr ""
 #: includes/mockup-generator/mockup.php:114
 msgid "Generate Mockup"
 msgstr ""
+
+#: includes/functions.php:3512
+msgid "Have a note for us? Write it down!"
+msgstr "Write your notes if any."
 
 #. URI of the plugin
 msgid "https://allaround.co.il/"
@@ -217,7 +221,7 @@ msgstr "אנא מלאו את כל שדות החובה."
 
 #: includes/functions.php:1855
 msgid "Return"
-msgstr "חזרה"
+msgstr ""
 
 #: includes/ajax-handler.php:1746
 msgid "Select a Color"
@@ -259,7 +263,7 @@ msgstr ""
 
 #: includes/functions.php:1852
 msgid "Update"
-msgstr "לעדכן"
+msgstr ""
 
 #: includes/mockup-generator/mockup.php:210
 msgid "User Dispatch"

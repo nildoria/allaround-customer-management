@@ -1,0 +1,172 @@
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: AllAround Mini Store\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-02-12 13:05+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: \n"
+"Language: \n"
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Loco https://localise.biz/\n"
+"X-Loco-Version: 2.6.6; wp-6.4.2\n"
+"X-Domain: hello-elementor"
+
+#: includes/ajax-handler.php:1682
+msgid "0"
+msgstr ""
+
+#: includes/ajax-handler.php:1667
+msgid "Add"
+msgstr ""
+
+#: includes/ajax-handler.php:1687 includes/ajax-handler.php:1796
+msgid "Added to Cart"
+msgstr ""
+
+#: templates/author-custom-page.php:159
+msgid "All"
+msgstr ""
+
+#. Name of the plugin
+msgid "AllAround Mini Store"
+msgstr ""
+
+#. Description of the plugin
+msgid "AllAround User Management and Mini Store."
+msgstr ""
+
+#: includes/ajax-handler.php:1671
+msgid "Can't order more than 999"
+msgstr ""
+
+#: includes/ajax-handler.php:668
+msgid "Cart is empty."
+msgstr ""
+
+#: includes/ajax-handler.php:538 includes/ajax-handler.php:580
+msgid "Click To Pay "
+msgstr ""
+
+#: includes/mockup-generator/mockup.php:211
+#: includes/mockup-generator/mockup.php:315
+msgid "Generate"
+msgstr ""
+
+#: includes/mockup-generator/mockup.php:19
+msgid "Generate Mockup"
+msgstr ""
+
+#. URI of the plugin
+msgid "https://allaround.co.il/"
+msgstr ""
+
+#: templates/author-custom-page.php:214
+msgid "Loading..."
+msgstr ""
+
+#: includes/mockup-generator/mockup.php:184
+msgid "Mockup Generate"
+msgstr ""
+
+#: includes/ajax-handler.php:1667
+msgid "more items to reduce your cost to"
+msgstr ""
+
+#: includes/ajax-handler.php:640
+msgid "Order Didn\"t go through"
+msgstr ""
+
+#: includes/ajax-handler.php:524 includes/ajax-handler.php:566
+msgid "Order Didn't go through"
+msgstr ""
+
+#: includes/ajax-handler.php:1667
+msgid "per item"
+msgstr ""
+
+#: includes/ajax-handler.php:536 includes/ajax-handler.php:578
+msgid ""
+"Please confirm by clicking on the button below and we’ll charge your card by"
+msgstr ""
+
+#: includes/ajax-handler.php:728 includes/ajax-handler.php:978
+msgid "Please enter a valid email address."
+msgstr ""
+
+#: includes/ajax-handler.php:1202
+msgid "Please enter a valid phone number."
+msgstr ""
+
+#: includes/ajax-handler.php:1199
+msgid "Please enter your full name."
+msgstr ""
+
+#: includes/ajax-handler.php:1217
+msgid "Please provide a valid email address."
+msgstr ""
+
+#: includes/ajax-handler.php:1208
+msgid "Please provide your city."
+msgstr ""
+
+#: includes/ajax-handler.php:1205
+msgid "Please provide your complete address."
+msgstr ""
+
+#: includes/ajax-handler.php:716 includes/ajax-handler.php:966
+msgid "Required field are empty. Please fill all the field."
+msgstr ""
+
+#: includes/ajax-handler.php:1704
+msgid "Select a Color"
+msgstr ""
+
+#: includes/ajax-handler.php:1746
+msgid "Select a Quantity"
+msgstr ""
+
+#: includes/ajax-handler.php:534 includes/ajax-handler.php:576
+msgid "Thanks for adding it to your order!"
+msgstr ""
+
+#: includes/ajax-handler.php:1225
+msgid "This email address is already in use."
+msgstr ""
+
+#: includes/ajax-handler.php:692
+msgid "Token value empty."
+msgstr ""
+
+#: includes/ajax-handler.php:527 includes/ajax-handler.php:569
+#: includes/ajax-handler.php:643
+msgid "Try Again"
+msgstr ""
+
+#: includes/ajax-handler.php:676
+msgid "User need to logged in."
+msgstr ""
+
+#: includes/ajax-handler.php:253 includes/ajax-handler.php:483
+msgid "הוסיפו לעגלה"
+msgstr ""
+
+#: includes/ajax-handler.php:1752
+msgid "הקלידו כמות…"
+msgstr ""
+
+#: includes/ajax-handler.php:1268
+msgid "חשבונית על שם"
+msgstr ""
+
+#: includes/ajax-handler.php:1267
+msgid "כתובת למשלוח"
+msgstr ""
+
+#: includes/ajax-handler.php:1280
+msgid "שינוי"
+msgstr ""
