@@ -139,6 +139,14 @@ function custom_logout_url($logout_url)
 add_filter('logout_url', 'custom_logout_url', 10, 2);
 
 
+function ml_start_session()
+{
+    if (!session_id()) {
+        session_start();
+    }
+}
+add_action('init', 'ml_start_session', 1);
+
 
 function get_positions_by_id($post_id)
 {
@@ -2257,7 +2265,6 @@ function ml_create_order($data)
         update_post_meta($order_id, '_gallery_thumbs', $gallery_thumbs);
     }
 
-
     // Trigger emails Manually
     // WC()->mailer()->get_emails()['WC_Email_Customer_Processing_Order']->trigger( $order_id );
     // WC()->mailer()->get_emails()['WC_Email_New_Order']->trigger( $order_id );
@@ -2580,19 +2587,67 @@ function ml_discount_obj_valid($obj)
     return $valid;
 }
 
+
+function ml_manage_user_session()
+{
+    // Start session if not already started
+    if (!session_id()) {
+        session_start();
+    }
+
+    // Get the current URL
+    $current_url = home_url(add_query_arg(NULL, NULL));
+
+    // Check if the request is an AJAX request
+    $is_ajax_request = defined('DOING_AJAX') && DOING_AJAX;
+
+    // Check if the URL has changed (only if it's not an AJAX request)
+    if (!$is_ajax_request && isset($_SESSION['ml_current_url']) && $_SESSION['ml_current_url'] !== $current_url) {
+        // URL has changed, unset previous user ID
+        unset($_SESSION['ml_user_id']);
+    }
+
+    // Update the session with the current URL if it's not an AJAX request
+    if (!$is_ajax_request) {
+        $_SESSION['ml_current_url'] = $current_url;
+    }
+
+    // Retrieve user ID from session if it exists, otherwise fetch it and store in session
+    if (isset($_SESSION['ml_user_id'])) {
+        return $_SESSION['ml_user_id'];
+    } else {
+        $user_id = ml_get_author_page_userid();
+        if ($user_id) {
+            $_SESSION['ml_user_id'] = $user_id;
+        }
+        return $user_id;
+    }
+}
+
+
 // Custom function to modify the price display
 function ml_modify_price_html($price, $product)
 {
+    // Manage user session and get the user ID
+    $user_id = ml_manage_user_session();
+
+    $bump_price = null;
+    if ($user_id) {
+        $bump_price = get_user_meta($user_id, 'bump_price', true);
+    }
+    error_log(print_r("User ID ml_modify_price_html: $user_id", true));
 
     $discount_steps = get_field('discount_steps', $product->get_id());
-    $percentage_increase = 10; // 10%
-    $discount_steps = apply_percentage_increase($discount_steps, $percentage_increase);
-
     $custom_quanity_enable = get_field('enable_custom_quantity', $product->get_id());
     $quantity_steps = get_field('quantity_steps', $product->get_id());
     $regular_price = (int) get_post_meta($product->get_id(), '_regular_price', true);
-    $regular_price = $regular_price + ($regular_price * $percentage_increase / 100);
-    // error_log( print_r( $discount_steps, true ) );
+    // if bump price is not empty then apply percentage increase to discount steps
+    if (!empty($bump_price)) {
+        $discount_steps = apply_percentage_increase($discount_steps, floatval($bump_price));
+        $quantity_steps = apply_percentage_increase($quantity_steps, floatval($bump_price));
+        $regular_price = round($regular_price + ($regular_price * (floatval($bump_price) / 100)));
+    }
+    error_log(print_r("Bump price ml_modify_price_html: $bump_price", true));
 
     if (
         !empty($custom_quanity_enable) &&
@@ -2873,6 +2928,9 @@ function modify_user_notification_checkbox()
 function ml_get_filter_content($current_user_id, $filter = '', $pagination = true)
 {
 
+    $bump_price = get_user_meta($current_user_id, 'bump_price', true);
+    error_log(print_r("Bump price ml_get_filter_content: $bump_price", true));
+
     $id = empty($filter) || 'all' === $filter ? "filter_wrap-all" : "filter_wrap-$filter";
     $active_class = empty($filter) || 'all' === $filter ? "filter_wrap-active" : "";
 
@@ -2955,14 +3013,17 @@ function ml_get_filter_content($current_user_id, $filter = '', $pagination = tru
         $discount_steps = get_field('discount_steps', $product->get_id());
 
         $discount_steps = ml_filter_disount_steps($discount_steps);
-        $percentage_increase = 10; // 10%
-        $discount_steps = apply_percentage_increase($discount_steps, $percentage_increase);
 
-        // error_log(print_r($updated_discount_steps, true));
-        error_log(print_r($discount_steps, true));
+        // error_log(print_r($discount_steps, true));
 
         $customQuantity_steps = get_field('quantity_steps', $product->get_id());
         $customQuantity_steps = ml_filter_disount_steps($customQuantity_steps);
+
+        // if bump price is not empty then apply percentage increase to discount steps
+        if (!empty($bump_price)) {
+            $discount_steps = apply_percentage_increase($discount_steps, $bump_price);
+            $customQuantity_steps = apply_percentage_increase($customQuantity_steps, $bump_price);
+        }
 
         $thumbnail = wp_get_attachment_image_src($product->get_image_id(), 'alarnd_main_thumbnail');
         if (!$thumbnail)
@@ -3159,25 +3220,23 @@ function ml_get_filter_content($current_user_id, $filter = '', $pagination = tru
 }
 
 
-function apply_percentage_increase($discount_steps, $percentage)
-{
-    // Initialize a new array to store the modified steps
-    $updated_steps = array();
-
-    foreach ($discount_steps as $step) {
-        // Ensure the original amount is treated as a float
-        $original_amount = (float) $step['amount'];
-        $new_amount = $original_amount + ($original_amount * ($percentage / 100));
-
-        // Add the updated step to the new array
-        $updated_steps[] = array(
-            'quantity' => $step['quantity'],
-            'amount' => $new_amount
-        );
+if (!function_exists('apply_percentage_increase')) {
+    function apply_percentage_increase($steps, $percentage)
+    {
+        if (!is_array($steps)) {
+            return $steps;
+        }
+        foreach ($steps as &$step) {
+            if (isset($step['amount']) && is_numeric($step['amount'])) {
+                $original_amount = floatval($step['amount']);
+                $percentage = floatval($percentage); // Ensure percentage is a float
+                $step['amount'] = round($original_amount + ($original_amount * ($percentage / 100)));
+            }
+        }
+        return $steps;
     }
-
-    return $updated_steps;
 }
+
 
 /**
  * Function to handle the quantity callback for Woocommerce cart items.
