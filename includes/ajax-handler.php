@@ -986,7 +986,7 @@ class ML_Ajax
             $order_obj = ml_create_order($order_data);
             $order_id = $order_obj['order_id'];
             $order_info = $order_obj['order_info'];
-            $send_om = send_order_to_other_domain($order_id);
+            // $send_om = send_order_to_other_domain($order_id);
 
             $success_popup = $this->popup_success_markup($order_id);
 
@@ -1000,7 +1000,7 @@ class ML_Ajax
                     "response_obj" => $response_obj,
                     "order_info" => $order_info,
                     "message_server" => $message,
-                    "send_om_result" => $send_om,
+                    // "send_om_result" => $send_om,
                     "message" => "Successfully products added to order #$order_id"
                 )
             );
@@ -1362,6 +1362,12 @@ class ML_Ajax
             $update_order = false;
         }
 
+        $display_name = $current_user->display_name;
+        if ($display_name != $cardholderName) {
+            $first_name = $this->ml_split_name($cardholderName, 'first');
+            $last_name = $this->ml_split_name($cardholderName, 'last');
+        }
+
         $customerInfo = array(
             'first_name' => $first_name,
             'last_name' => $last_name,
@@ -1410,7 +1416,7 @@ class ML_Ajax
             $order_info = $order_obj['order_info'];
 
             $success_popup = $this->popup_success_markup($order_id);
-            $send_om = send_order_to_other_domain($order_id);
+            // $send_om = send_order_to_other_domain($order_id);
 
             // Clear the cart
             WC()->cart->empty_cart();
@@ -1421,7 +1427,7 @@ class ML_Ajax
                         "message_type" => 'api',
                         "result_popup" => $success_popup,
                         "order_info" => $order_info,
-                        "send_om_result" => $send_om,
+                        // "send_om_result" => $send_om,
                         "message" => "Successfully products added to order #$order_id"
                     )
                 )
@@ -2175,6 +2181,19 @@ class ML_Ajax
             </div>
             <?php
         endif;
+    }
+
+    function ml_split_name($full_name, $part)
+    {
+        $name_parts = explode(' ', $full_name);
+        $first_name = array_shift($name_parts); // First part
+        $last_name = implode(' ', $name_parts); // Remaining parts
+
+        if ($part === 'last') {
+            return $last_name;
+        }
+
+        return $first_name;
     }
 }
 
