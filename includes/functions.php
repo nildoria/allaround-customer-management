@@ -44,16 +44,13 @@ function custom_login_redirect($redirect, $user)
 add_filter('woocommerce_login_redirect', 'custom_login_redirect', 10, 2);
 
 
-// function custom_woocommerce_my_account_redirect($url, $endpoint, $user) {
-//     // Check if the user is an administrator
-//     if (isset($user->roles) && is_array($user->roles) && in_array('administrator', $user->roles)) {
-//         return admin_url();
-//     } else {
-//         // Redirect other users to home_url/username
-//         return home_url('/' . $user->user_login);
-//     }
-// }
-// add_filter('woocommerce_get_endpoint_url', 'custom_woocommerce_my_account_redirect', 10, 3);
+
+// Disable email change notification to the old address
+add_filter('send_email_change_email', '__return_false');
+
+// Disable email change notification to the new address
+add_filter('send_email_change_admin_email', '__return_false');
+
 
 /**
  * Overwrite otp login redirect url
@@ -2032,7 +2029,7 @@ function ml_create_order($data)
     $extraMeta = isset($data['extraMeta']) ? $data['extraMeta'] : [];
     $response = isset($data['response']) ? $data['response'] : [];
     $note = isset($data['note']) ? $data['note'] : '';
-    $update = isset($data['update']) ? true : false;
+    $update = isset($data['update']) && !empty($data['update']) ? true : false;
     $token_update = isset($data['token_update']) ? true : false;
     $fullname = isset($customerInfo['name']) ? $customerInfo['name'] : '';
 

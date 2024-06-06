@@ -61,7 +61,6 @@ class AlrndCustomerManagement
 	public function init()
 	{
 		require_once (AlRNDCM_PATH . '/includes/functions.php');
-		require_once (AlRNDCM_PATH . '/includes/order-management.php');
 		require_once (AlRNDCM_PATH . '/includes/mockup-generator/wp-background-process/init.php');
 		require_once (AlRNDCM_PATH . '/includes/template-generator.php');
 		require_once (AlRNDCM_PATH . '/includes/public-functions.php');
