@@ -2,6 +2,7 @@ jQuery(document).ready(function ($) {
   /**
    * Set the Same Height to all Content area.
    */
+  
   function setProductDetailsHeight() {
     var windowWidth = $(window).width();
 
@@ -2585,3 +2586,7 @@ var pluginMLGtmServerSide = {
 
 
 };
+
+  if (typeof dataLayer === 'undefined') {
+    var dataLayer = [];
+  }

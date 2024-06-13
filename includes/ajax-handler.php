@@ -1347,6 +1347,7 @@ class ML_Ajax
         $first_name = empty($current_user->first_name) && empty($current_user->last_name) ? $cardholderName : $current_user->first_name;
         $last_name = empty($current_user->first_name) && empty($current_user->last_name) ? '' : $current_user->last_name;
         $company = get_user_meta($current_user_id, 'billing_company', true);
+        $company = !empty($cardholderInvoiceName) ? $cardholderInvoiceName : $company;
         $city = get_user_meta($current_user_id, 'billing_city', true);
         $city = !empty($cardholderCity) ? $cardholderCity : $city;
         $postcode = get_user_meta($current_user_id, 'billing_postcode', true);
