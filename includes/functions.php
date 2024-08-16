@@ -1267,6 +1267,7 @@ function alarnd_single_checkout($user_id = false)
     $invoice = get_field('invoice', "user_{$current_user_id}");
     $city = get_user_meta($current_user_id, 'billing_city', true);
     $billing_address = get_user_meta($current_user_id, 'billing_address_1', true);
+    $billing_postcode = get_user_meta($current_user_id, 'billing_postcode', true);
 
     $four_digit = isset($card_info['last_4_digit']) && !empty($card_info['last_4_digit']) ? $card_info['last_4_digit'] : '';
     $card_logo = isset($card_info['card_type']) && !empty($card_info['card_type']) ? strtolower($card_info['card_type']) : 'mastercard';
@@ -1278,6 +1279,7 @@ function alarnd_single_checkout($user_id = false)
     if (
         empty($phone) ||
         empty($billing_address) ||
+        empty($billing_postcode) ||
         empty($city) ||
         empty($display_name) ||
         empty($user_email)
@@ -1455,6 +1457,7 @@ function alarnd_single_checkout($user_id = false)
                                         <?php echo !empty($user_email) ? '<p>' . esc_html($user_email) . '</p>' : ''; ?>
                                         <p>
                                             <?php echo !empty($billing_address) ? '<span>' . esc_html($billing_address) . ', </span>' : ''; ?>
+                                            <?php echo !empty($billing_postcode) ? '<span>' . esc_html($billing_postcode) . ', </span>' : ''; ?>
                                             <?php echo !empty($city) ? '<span>' . esc_html($city) . '</span>' : ''; ?>
                                         </p>
                                     </div>
@@ -1511,6 +1514,7 @@ function allaround_card_form($user_id = '')
     $invoice = get_field('invoice', "user_{$current_user_id}");
     $city = get_user_meta($current_user_id, 'billing_city', true);
     $billing_address = get_user_meta($current_user_id, 'billing_address_1', true);
+    $billing_postcode = get_user_meta($current_user_id, 'billing_postcode', true);
     $dummy_email = get_field('dummy_email', "user_{$current_user_id}");
 
     $token = get_field('token', "user_{$current_user_id}");
@@ -1780,6 +1784,7 @@ function allaround_customer_form($is_disabled = false)
     $invoice = get_field('invoice', "user_{$current_user_id}");
     $city = get_user_meta($current_user_id, 'billing_city', true);
     $billing_address = get_user_meta($current_user_id, 'billing_address_1', true);
+    $billing_postcode = get_user_meta($current_user_id, 'billing_postcode', true);
     $first_name = get_user_meta($current_user_id, 'billing_first_name', true);
     $last_name = get_user_meta($current_user_id, 'billing_last_name', true);
     $current_user = get_userdata($current_user_id);
@@ -1850,15 +1855,28 @@ function allaround_customer_form($is_disabled = false)
                 </div>
             </div>
         </div>
-        <div class="form-row">
-            <div class="form-label">
-                <?php esc_html_e("Address", "hello-elementor"); ?>
+        <div class="form-row flex-row">
+            <div class="form-row">
+                <div class="form-label">
+                    <?php esc_html_e("Street Address", "hello-elementor"); ?>
+                </div>
+                <div class="form-input">
+                    <input type="text" id="userAdress" name="userAdress"
+                        placeholder="<?php esc_attr_e("required", "hello-elementor"); ?>" value="<?php if (!$lock_profile) {
+                               echo esc_attr($billing_address);
+                           } ?>" required>
+                </div>
             </div>
-            <div class="form-input">
-                <input type="text" id="userAdress" name="userAdress"
-                    placeholder="<?php esc_attr_e("required", "hello-elementor"); ?>" value="<?php if (!$lock_profile) {
-                           echo esc_attr($billing_address);
-                       } ?>" required>
+            <div class="form-row">
+                <div class="form-label">
+                    <?php esc_html_e("Street Number", "hello-elementor"); ?>
+                </div>
+                <div class="form-input">
+                    <input type="text" id="userPostcode" name="userPostcode"
+                        placeholder="<?php esc_attr_e("required", "hello-elementor"); ?>" value="<?php if (!$lock_profile) {
+                               echo esc_attr($billing_postcode);
+                           } ?>" required>
+                </div>
             </div>
         </div>
         <div class="form-row form-submit-row">
@@ -1893,9 +1911,15 @@ function add_address_phone_fields_to_user_form()
             </td>
         </tr>
         <tr>
-            <th><label for="billing_address_1">Address</label></th>
+            <th><label for="billing_address_1">Street Address</label></th>
             <td>
                 <input type="text" name="billing_address_1" id="billing_address_1" class="regular-text">
+            </td>
+        </tr>
+        <tr>
+            <th><label for="billing_postcode">Street Number</label></th>
+            <td>
+                <input type="text" name="billing_postcode" id="billing_postcode" class="regular-text">
             </td>
         </tr>
         <tr>
@@ -1920,6 +1944,10 @@ function save_address_phone_fields($user_id)
 
     if (isset($_POST['billing_address_1'])) {
         update_user_meta($user_id, 'billing_address_1', sanitize_text_field($_POST['billing_address_1']));
+    }
+
+    if (isset($_POST['billing_postcode'])) {
+        update_user_meta($user_id, 'billing_postcode', sanitize_text_field($_POST['billing_postcode']));
     }
     if (isset($_POST['billing_city'])) {
         update_user_meta($user_id, 'billing_city', sanitize_text_field($_POST['billing_city']));
@@ -2033,7 +2061,7 @@ function ml_create_order($data)
     $token_update = isset($data['token_update']) ? true : false;
     $fullname = isset($customerInfo['name']) ? $customerInfo['name'] : '';
 
-    // error_log( print_r( $data, true ) );
+    error_log(print_r($customerInfo, true));
 
     // Assuming you have received payment response and details
     $order = wc_create_order();
@@ -2188,6 +2216,7 @@ function ml_create_order($data)
 
             // WcooCommerce user field update
             update_user_meta_if_different($user_id, 'billing_address_1', $customerInfo['address_1']);
+            update_user_meta_if_different($user_id, 'billing_postcode', $customerInfo['postcode']);
             update_user_meta_if_different($user_id, 'billing_phone', $phoneNumber);
 
             update_user_meta_if_different($user_id, 'xoo_ml_phone_code', $countryCode);

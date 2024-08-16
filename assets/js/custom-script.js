@@ -393,6 +393,9 @@ jQuery(document).ready(function ($) {
           user_id = $('#main').data('user_id'),
           button = $(form).find(".allaround_card_details_submit");
 
+          console.log('customerDetails', customerDetails);
+          
+
         const note = $('#allaround_note_field').val();
 
           getData = getData.concat(detailsData);

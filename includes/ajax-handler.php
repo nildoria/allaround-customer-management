@@ -795,6 +795,7 @@ class ML_Ajax
         $userName = isset($customerDetails['userName']) && !empty($customerDetails['userName']) ? sanitize_text_field($customerDetails['userName']) : '';
         $userPhone = isset($customerDetails['userPhone']) && !empty($customerDetails['userPhone']) ? sanitize_text_field($customerDetails['userPhone']) : '';
         $userAdress = isset($customerDetails['userAdress']) && !empty($customerDetails['userAdress']) ? sanitize_text_field($customerDetails['userAdress']) : '';
+        $userPostcode = isset($customerDetails['userPostcode']) && !empty($customerDetails['userPostcode']) ? sanitize_text_field($customerDetails['userPostcode']) : '';
         $userEmail = isset($customerDetails['userEmail']) && !empty($customerDetails['userEmail']) ? sanitize_text_field($customerDetails['userEmail']) : '';
         $cardholderCity = isset($customerDetails['userCity']) && !empty($customerDetails['userCity']) ? sanitize_text_field($customerDetails['userCity']) : '';
         $cardholderInvoiceName = isset($customerDetails['userInvoiceName']) && !empty($customerDetails['userInvoiceName']) ? sanitize_text_field($customerDetails['userInvoiceName']) : '';
@@ -805,6 +806,7 @@ class ML_Ajax
             empty($userName) ||
             empty($userPhone) ||
             empty($userAdress) ||
+            empty($userPostcode) ||
             empty($cardholderCity) ||
             empty($userEmail)
         ) {
@@ -900,6 +902,7 @@ class ML_Ajax
             'email' => $userEmail,
             'phone' => $userPhone,
             'address' => $userAdress,
+            'postcode' => $userPostcode,
             'invoice' => $cardholderInvoiceName,
             'token' => $token,
             'cardNum' => $four_digit,
@@ -986,7 +989,6 @@ class ML_Ajax
             $order_obj = ml_create_order($order_data);
             $order_id = $order_obj['order_id'];
             $order_info = $order_obj['order_info'];
-            // $send_om = send_order_to_other_domain($order_id);
 
             $success_popup = $this->popup_success_markup($order_id);
 
@@ -1000,7 +1002,6 @@ class ML_Ajax
                     "response_obj" => $response_obj,
                     "order_info" => $order_info,
                     "message_server" => $message,
-                    // "send_om_result" => $send_om,
                     "message" => "Successfully products added to order #$order_id"
                 )
             );
@@ -1064,7 +1065,8 @@ class ML_Ajax
             'headers' => array(
                 'Content-Type' => 'application/json; charset=utf-8'
             ),
-            'body' => json_encode($jdata)
+            'body' => json_encode($jdata),
+            'sslverify' => true // Enforce SSL verification
         );
 
         $full_response = wp_remote_post("https://pci.zcredit.co.il/ZCreditWS/api/Transaction/CommitFullTransaction", $args);
@@ -1128,6 +1130,7 @@ class ML_Ajax
         $cardholderName = isset($_POST['userName']) && !empty($_POST['userName']) ? sanitize_text_field($_POST['userName']) : '';
         $cardholderPhone = isset($_POST['userPhone']) && !empty($_POST['userPhone']) ? sanitize_text_field($_POST['userPhone']) : '';
         $cardholderAdress = isset($_POST['userAdress']) && !empty($_POST['userAdress']) ? sanitize_text_field($_POST['userAdress']) : '';
+        $cardholderPostcode = isset($_POST['userPostcode']) && !empty($_POST['userPostcode']) ? sanitize_text_field($_POST['userPostcode']) : '';
         $cardholderEmail = isset($_POST['userEmail']) && !empty($_POST['userEmail']) ? sanitize_text_field($_POST['userEmail']) : '';
         $cardholderCity = isset($_POST['userCity']) && !empty($_POST['userCity']) ? sanitize_text_field($_POST['userCity']) : '';
         $note = isset($_POST['note']) && !empty($_POST['note']) ? sanitize_text_field($_POST['note']) : '';
@@ -1147,6 +1150,7 @@ class ML_Ajax
             empty($cardholderName) ||
             empty($cardholderPhone) ||
             empty($cardholderAdress) ||
+            empty($cardholderPostcode) ||
             empty($cardholderEmail) ||
             empty($cardholderCity) ||
             empty($cardNumber) ||
@@ -1269,6 +1273,7 @@ class ML_Ajax
             'cardholderName' => $cardholderName,
             'cardholderPhone' => $cardholderPhone,
             'cardholderAdress' => $cardholderAdress,
+            'cardholderPostcode' => $cardholderPostcode,
             'cardholderCity' => $cardholderCity,
             'cardholderEmail' => $cardholderEmail,
             'cardholderInvoiceName' => $cardholderInvoiceName,
@@ -1417,7 +1422,7 @@ class ML_Ajax
             $order_info = $order_obj['order_info'];
 
             $success_popup = $this->popup_success_markup($order_id);
-            // $send_om = send_order_to_other_domain($order_id);
+            $this->send_order_to_other_domain($order_id, $current_user_id);
 
             // Clear the cart
             WC()->cart->empty_cart();
@@ -1428,7 +1433,6 @@ class ML_Ajax
                         "message_type" => 'api',
                         "result_popup" => $success_popup,
                         "order_info" => $order_info,
-                        // "send_om_result" => $send_om,
                         "message" => "Successfully products added to order #$order_id"
                     )
                 )
@@ -1469,6 +1473,132 @@ class ML_Ajax
         wp_die();
     }
 
+    /**
+     * Order Management Send Order Details.
+     */
+    public function send_order_to_other_domain($order_id, $user_id)
+    {
+        // Check if user_id is provided
+        if (!$user_id) {
+            error_log('User ID not provided for order: ' . $order_id);
+            return;
+        }
+
+        // Ensure the order object is retrieved
+        $order = wc_get_order($order_id);
+        if (!$order) {
+            error_log('Order not found: ' . $order_id);
+            return;
+        }
+
+        // Process order data
+        $this->process_order_data($order, $user_id);
+    }
+
+    public function process_order_data($order, $user_id)
+    {
+        // Get the order items
+        $items = $order->get_items();
+        $orderItems = array();
+
+        if (empty($items)) {
+            error_log('No items found in order: ' . $order->get_id());
+            return; // Return early if there are no items in the order
+        } else {
+            foreach ($items as $item_id => $item) {
+                $product = $item->get_product();
+                if ($product) {
+                    $orderItems[] = array(
+                        'product_id' => $product->get_id(),
+                        'product_name' => $product->get_name(),
+                        'quantity' => $item->get_quantity(),
+                        'total' => $item->get_total(),
+                        // Add other item data here
+                    );
+                }
+            }
+        }
+
+        // Extract shipping lines
+        $shipping_lines = array();
+        foreach ($order->get_items('shipping') as $shipping_item_id => $shipping_item) {
+            $shipping_lines[] = array(
+                'method_id' => $shipping_item->get_method_id(),
+                'method_title' => $shipping_item->get_name(),
+                'total' => $shipping_item->get_total(),
+            );
+        }
+
+        // Get the order totoal
+        $order_total = $order->get_total();
+
+        // Get the order data
+        $orderData = array(
+            'order_number' => $order->get_order_number(),
+            'order_id' => $order->get_id(),
+            'minisite_id' => $user_id,
+            'order_status' => $order->get_status(),
+            'shipping_lines' => $shipping_lines,
+            'items' => $orderItems,
+            'billing' => $order->get_address('billing'),
+            'shipping' => $order->get_address('shipping'),
+            'payment_method' => $order->get_payment_method(),
+            'payment_method_title' => $order->get_payment_method_title(),
+            'total' => $order_total,
+            'customer_note' => $order->get_customer_note(),
+            'site_url' => get_site_url(),
+            'order_source' => 'miniSite_order',
+            // Add other order data here
+        );
+
+        // error_log(print_r($orderData, true));
+
+        // Username and Password for Basic Authentication
+        $username = 'OmAdmin';
+
+        $api_url = '';
+        // Determine if the request is from localhost or live site
+        $is_localhost = strpos($_SERVER['HTTP_HOST'], 'localhost') !== false;
+        if ($is_localhost) {
+            $password = 'Qj0p rsPu eU2i Fzco pwpX eCPD';
+            $api_url = 'https://ordermanage.test/wp-json/manage-order/v1/create';
+        } else {
+            $password = 'vZmm GYw4 LKDg 4ry5 BMYC 4TMw';
+            $api_url = 'https://om.lukpaluk.xyz/wp-json/manage-order/v1/create';
+        }
+
+        $auth_header = $this->get_basic_auth_header($username, $password);
+
+        // Send the order data to the other domain
+        $response = wp_remote_post(
+            $api_url,
+            array(
+                'method' => 'POST',
+                'headers' => array(
+                    'Content-Type' => 'application/json; charset=utf-8',
+                    'Authorization' => $auth_header
+                ),
+                'body' => json_encode($orderData),
+                'sslverify' => false
+            )
+        );
+
+        if (is_wp_error($response)) {
+            $error_message = $response->get_error_message();
+            error_log("Something went wrong: $error_message");
+        } else {
+            $response_body = json_decode(wp_remote_retrieve_body($response), true);
+            error_log('Response: ' . print_r($response_body, true));
+        }
+    }
+
+    private function get_basic_auth_header($username, $password)
+    {
+        $auth = base64_encode("$username:$password");
+        return 'Basic ' . $auth;
+    }
+
+
     public function ml_customer_details()
     {
         check_ajax_referer('aum_ajax_nonce', 'nonce');
@@ -1477,6 +1607,7 @@ class ML_Ajax
         $userName = isset($_POST['userName']) && !empty($_POST['userName']) ? sanitize_text_field($_POST['userName']) : '';
         $userPhone = isset($_POST['userPhone']) && !empty($_POST['userPhone']) ? sanitize_text_field($_POST['userPhone']) : '';
         $userAdress = isset($_POST['userAdress']) && !empty($_POST['userAdress']) ? sanitize_text_field($_POST['userAdress']) : '';
+        $userPostcode = isset($_POST['userPostcode']) && !empty($_POST['userPostcode']) ? sanitize_text_field($_POST['userPostcode']) : '';
         $userEmail = isset($_POST['userEmail']) && !empty($_POST['userEmail']) ? sanitize_text_field($_POST['userEmail']) : '';
         $userCity = isset($_POST['userCity']) && !empty($_POST['userCity']) ? sanitize_text_field($_POST['userCity']) : '';
         $userInvoiceName = isset($_POST['userInvoiceName']) && !empty($_POST['userInvoiceName']) ? sanitize_text_field($_POST['userInvoiceName']) : '';
@@ -1500,7 +1631,10 @@ class ML_Ajax
             $invalid_inputs['userPhone'] = esc_html__("Please enter a valid phone number.", "hello-elementor");
         }
         if (empty($userAdress)) {
-            $invalid_inputs['userAdress'] = esc_html__("Please provide your complete address.", "hello-elementor");
+            $invalid_inputs['userAdress'] = esc_html__("Please provide your street address.", "hello-elementor");
+        }
+        if (empty($userPostcode)) {
+            $invalid_inputs['userPostcode'] = esc_html__("Please provide your street postcode.", "hello-elementor");
         }
         if (empty($userCity)) {
             $invalid_inputs['userCity'] = esc_html__("Please provide your city.", "hello-elementor");
@@ -1542,6 +1676,7 @@ class ML_Ajax
 
             // WcooCommerce user field update
             update_user_meta_if_different($current_user_id, 'billing_address_1', $userAdress);
+            update_user_meta_if_different($current_user_id, 'billing_postcode', $userPostcode);
             update_user_meta_if_different($current_user_id, 'billing_phone', $userPhone);
             update_user_meta_if_different($current_user_id, 'billing_city', $userCity);
 
@@ -1574,6 +1709,7 @@ class ML_Ajax
                     <?php echo !empty($userEmail) ? '<p>' . esc_html($userEmail) . '</p>' : ''; ?>
                     <p>
                         <?php echo !empty($userAdress) ? '<span>' . esc_html($userAdress) . ', </span>' : ''; ?>
+                        <?php echo !empty($userPostcode) ? '<span>' . esc_html($userPostcode) . ', </span>' : ''; ?>
                         <?php echo !empty($userCity) ? '<span>' . esc_html($userCity) . '</span>' : ''; ?>
                     </p>
                 </div>
