@@ -1356,6 +1356,7 @@ class ML_Ajax
         $city = get_user_meta($current_user_id, 'billing_city', true);
         $city = !empty($cardholderCity) ? $cardholderCity : $city;
         $postcode = get_user_meta($current_user_id, 'billing_postcode', true);
+        $postcode = !empty($cardholderPostcode) ? $cardholderPostcode : $postcode;
         $state = get_user_meta($current_user_id, 'billing_state', true);
         $country = get_user_meta($current_user_id, 'billing_country', true);
         $country = empty($country) ? "IL" : $country;

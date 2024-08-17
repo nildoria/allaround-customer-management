@@ -1529,6 +1529,7 @@ function allaround_card_form($user_id = '')
     if (
         empty($phone) ||
         empty($billing_address) ||
+        empty($billing_postcode) ||
         empty($city) ||
         empty($name) ||
         empty($email) ||
@@ -1559,6 +1560,7 @@ function allaround_card_form($user_id = '')
                                 <?php echo !empty($email) && !$dummy_email ? '<p>' . esc_html($email) . '</p>' : ''; ?>
                                 <p>
                                     <?php echo !empty($billing_address) ? '<span>' . esc_html($billing_address) . ', </span>' : ''; ?>
+                                    <?php echo !empty($billing_postcode) ? '<span>' . esc_html($billing_postcode) . ', </span>' : ''; ?>
                                     <?php echo !empty($city) ? '<span>' . esc_html($city) . '</span>' : ''; ?>
                                 </p>
                             </div>
@@ -2889,7 +2891,7 @@ function custom_remove_woocommerce_shipping_details()
                 $('.user-role-wrap').hide();
                 $('#billing_company').closest('tr').hide();
                 $('#billing_address_2').closest('tr').hide();
-                $('#billing_postcode').closest('tr').hide();
+                // $('#billing_postcode').closest('tr').hide();
                 $('#billing_country').closest('tr').hide();
                 $('#billing_state').closest('tr').hide();
                 $('#billing_phone').closest('tr').hide();
@@ -2906,7 +2908,8 @@ function custom_remove_woocommerce_shipping_details()
                 $('h2:contains("Personal Options")').hide();
                 $('h2:contains("Account Management")').hide();
                 $('h2:contains("Customer billing address")').hide();
-                $('label[for="billing_address_1"]').text('Address');
+                $('label[for="billing_address_1"]').text('Street Address');
+                $('label[for="billing_postcode"]').text('Street Number');
                 $('select[name="xoo-ml-user-reg-phone-cc"]').hide();
             });
         </script>

@@ -243,6 +243,15 @@ jQuery(document).ready(function ($) {
     filterWhenInput
   );
 
+  $('#userAdress').on('input', function() {
+      // Remove any numbers from the input value
+      $(this).val($(this).val().replace(/[0-9]/g, ''));
+  });
+  $('#userPostcode').on('input', function() {
+      // Remove any non-numeric characters from the input value
+      $(this).val($(this).val().replace(/[^0-9]/g, ''));
+  });
+
   function filterWhenInput() {
     $('#customerDetails').find('.ml_error_label').remove();
   }
@@ -393,8 +402,6 @@ jQuery(document).ready(function ($) {
           user_id = $('#main').data('user_id'),
           button = $(form).find(".allaround_card_details_submit");
 
-          console.log('customerDetails', customerDetails);
-          
 
         const note = $('#allaround_note_field').val();
 
