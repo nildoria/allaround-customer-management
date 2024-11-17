@@ -608,8 +608,10 @@ table.shop_table.shop_table_responsive.cart.woocommerce-cart-form__contents {
 }
 
 .alarnd--custom-checkout-section h3 {
-  font-size: 20px;
-  font-weight: 700;
+    font-size: 32px;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 25px;
 }
 .alarnd--custom-checkout-section .form-label {
   font-size: 14px;
@@ -2322,6 +2324,87 @@ body.elementor-default main#main {
   margin-left: auto;
   width: 100%;
 }
+
+/* zCredit direct payment styles */
+.allaround_carf_form-fields {
+  z-index: -9999999;
+  position: relative;
+  visibility: hidden;
+  opacity: 0;
+  height: 0;
+}
+.alarnd--woocommerce-checkout-page .alrnd--shipping_address_tokenized {
+  position: relative;
+}
+form#customerDetails {
+  padding-bottom: 0;
+}
+.alarnd--custom-checkout-section {
+  padding: 15px 0 65px;
+}
+
+
+/* The Modal (background) */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  padding-top: 100px;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgb(0, 0, 0);
+  background-color: rgba(0, 0, 0, 0.4);
+}
+
+/* Modal Content */
+#paymentModal .modal-content {
+  background-color: #fefefe;
+  margin: auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%;
+  max-width: 600px;
+}
+
+/* Close Button */
+.close {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+  color: black;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+#alarnd__details_preview {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+span#order-status {
+  font-weight: 600;
+}
+.success-page-template {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 450px;
+}
+.success-page-content {
+  direction: rtl;
+  text-align: center;
+}
+
+
+
 @media (min-width: 576px) {
   body.elementor-default main#main {
     max-width: 500px;

@@ -3,74 +3,72 @@
 Plugin Name: AllAround Mini Store
 Plugin URI: https://allaround.co.il/
 Description: AllAround User Management and Mini Store.
-Version: 3.5.5
+Version: 4.1
 Text Domain: hello-elementor
 */
 
 // If this file is called directly, abort.
-if (!defined('WPINC')) {
+if ( ! defined( 'WPINC' ) ) {
 	die;
 }
 
 
-class AlrndCustomerManagement
-{
+class AlrndCustomerManagement {
 
-	/**
-	 * Plugin version.
-	 *
-	 * @var string
-	 */
-	const version = '3.5.3';
+    /**
+     * Plugin version.
+     *
+     * @var string
+     */
+    const version = '4.1';
 
-	/**
+    /**
 	 * Call this method to get the singleton
 	 *
 	 * @return AlrndCustomerManagement|null
 	 */
-	public static function instance()
-	{
+	public static function instance() {
 
 		static $instance = null;
-		if (is_null($instance)) {
+		if ( is_null( $instance ) ) {
 			$instance = new AlrndCustomerManagement();
 		}
 
 		return $instance;
 	}
 
-	public function __construct()
-	{
+	public function __construct() {
 
-		$this->define_constanst();
+        $this->define_constanst();
 
-		register_activation_hook(__FILE__, array($this, 'activation'));
-		register_deactivation_hook(__FILE__, array($this, 'deactivation'));
+		register_activation_hook( __FILE__, array( $this, 'activation' ) );
+		register_deactivation_hook( __FILE__, array( $this, 'deactivation' ) );
 
 		//run on uninstall
-		register_uninstall_hook(__FILE__, array('AlrndCustomerManagement', 'uninstall'));
+		register_uninstall_hook( __FILE__, array( 'AlrndCustomerManagement', 'uninstall' ) );
 
-		add_action('plugins_loaded', array($this, 'init'));
+        add_action( 'plugins_loaded', array( $this, 'init' ) );
 
-		load_plugin_textdomain('hello-elementor', false, basename(dirname(__FILE__)) . '/languages');
+		load_plugin_textdomain( 'hello-elementor', false, basename( dirname( __FILE__ ) ) . '/languages' );
 	}
 
-	/**
+    /**
 	 * Init
 	 */
-	public function init()
-	{
-		require_once (AlRNDCM_PATH . '/includes/functions.php');
-		require_once (AlRNDCM_PATH . '/includes/mockup-generator/wp-background-process/init.php');
-		require_once (AlRNDCM_PATH . '/includes/template-generator.php');
-		require_once (AlRNDCM_PATH . '/includes/public-functions.php');
-		require_once (AlRNDCM_PATH . '/includes/class-add-new-customer.php');
-		require_once (AlRNDCM_PATH . '/includes/class-all-customers.php');
-		require_once (AlRNDCM_PATH . '/includes/class-handle-submissions.php');
-		require_once (AlRNDCM_PATH . '/includes/ajax-handler.php');
-		require_once (AlRNDCM_PATH . '/includes/enqueue-scripts.php');
-		require_once (AlRNDCM_PATH . '/includes/mockup-generator/mockup.php');
-		require_once (AlRNDCM_PATH . '/admin/class-acm-admin.php');
+	public function init() {
+		require_once(AlRNDCM_PATH . '/includes/functions.php');
+		require_once(AlRNDCM_PATH . '/includes/mockup-generator/wp-background-process/init.php');
+		require_once(AlRNDCM_PATH . '/includes/template-generator.php');
+		require_once(AlRNDCM_PATH . '/includes/public-functions.php');
+		require_once(AlRNDCM_PATH . '/includes/class-add-new-customer.php');
+		require_once(AlRNDCM_PATH . '/includes/class-all-customers.php');
+		require_once(AlRNDCM_PATH . '/includes/class-handle-submissions.php');
+		require_once(AlRNDCM_PATH . '/includes/ajax-handler.php');
+		require_once(AlRNDCM_PATH . '/includes/enqueue-scripts.php');
+		require_once(AlRNDCM_PATH . '/includes/mockup-generator/mockup.php');
+		require_once(AlRNDCM_PATH . '/admin/class-acm-admin.php');
+		// zCredit direct payment - add this api file at the last
+		require_once(AlRNDCM_PATH . '/includes/class-api.php');
 	}
 
 	/**
@@ -79,8 +77,7 @@ class AlrndCustomerManagement
 	 *
 	 * @since 0.1
 	 */
-	public static function uninstall()
-	{
+	public static function uninstall() {
 
 	}
 
@@ -90,13 +87,12 @@ class AlrndCustomerManagement
 	 *
 	 * @return void
 	 */
-	public function activation()
-	{
+	public function activation() {
 		// Specify the full path to the folder
 		$folder_path = AlRNDCM_UPLOAD_DIR;
 
 		// Check if the folder doesn't exist yet
-		if (!is_dir($folder_path)) {
+		if ( ! is_dir($folder_path) ) {
 			// Create the folder
 			mkdir($folder_path, 0755);
 
@@ -108,8 +104,7 @@ class AlrndCustomerManagement
 		}
 	}
 
-	public function upload_dir()
-	{
+	public function upload_dir() {
 		$upload_dir = wp_upload_dir();
 
 		// Define the folder name you want to create
@@ -126,29 +121,27 @@ class AlrndCustomerManagement
 	 *
 	 * @return void
 	 */
-	public function deactivation()
-	{
+	public function deactivation() {
 
 	}
 
-	/**
-	 * Define require constansts
-	 * 
-	 * @return void
-	 */
-	public function define_constanst()
-	{
-		define('AlRNDCM_VERSION', self::version);
-		define('AlRNDCM_UPLOAD_FOLDER', 'alaround-mockup');
-		define('AlRNDCM_UPLOAD_DIR', self::upload_dir());
-		define("AlRNDCM_URL", plugins_url("/", __FILE__));
-		define("AlRNDCM_PATH", plugin_dir_path(__FILE__));
-	}
+    /**
+     * Define require constansts
+     * 
+     * @return void
+     */
+    public function define_constanst(){
+		define( 'AlRNDCM_VERSION', self::version );
+		define( 'AlRNDCM_UPLOAD_FOLDER', 'alaround-mockup' );
+		define( 'AlRNDCM_UPLOAD_DIR', self::upload_dir() );
+		define( "AlRNDCM_URL", plugins_url( "/" , __FILE__ ) );
+		define( "AlRNDCM_PATH", plugin_dir_path( __FILE__ ) );
+    }
 
-
+	
 }
 
-(new AlrndCustomerManagement());
+( new AlrndCustomerManagement() );
 
 
 

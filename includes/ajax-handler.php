@@ -32,8 +32,13 @@ class ML_Ajax
         add_action('wp_ajax_alarnd_create_order', array($this, 'alarnd_create_order'));
         add_action('wp_ajax_nopriv_alarnd_create_order', array($this, 'alarnd_create_order'));
 
+        // zCredit direct payment
         add_action('wp_ajax_ml_send_card', array($this, 'ml_send_card'));
         add_action('wp_ajax_nopriv_ml_send_card', array($this, 'ml_send_card'));
+
+        // zCredit direct payment
+        add_action('wp_ajax_nopriv_zcredit_callback', array($this, 'zcredit_callback_handler'));
+        add_action('wp_ajax_zcredit_callback', array($this, 'zcredit_callback_handler'));
 
         add_action('wp_ajax_ml_pagination', array($this, 'ml_pagination'));
         add_action('wp_ajax_nopriv_ml_pagination', array($this, 'ml_pagination'));
@@ -901,7 +906,7 @@ class ML_Ajax
             'username' => $userName,
             'email' => $userEmail,
             'phone' => $userPhone,
-            'address' => $userAdress,
+            'address_2' => $userAdress,
             'postcode' => $userPostcode,
             'invoice' => $cardholderInvoiceName,
             'token' => $token,
@@ -941,7 +946,7 @@ class ML_Ajax
         $company = get_user_meta($current_user_id, 'billing_company', true);
         $city = get_user_meta($current_user_id, 'billing_city', true);
         $city = !empty($cardholderCity) ? $cardholderCity : $city;
-        $postcode = get_user_meta($current_user_id, 'billing_postcode', true);
+        $postcode = get_user_meta($current_user_id, 'billing_address_2', true);
         $state = get_user_meta($current_user_id, 'billing_state', true);
         $country = get_user_meta($current_user_id, 'billing_country', true);
         $country = empty($country) ? "IL" : $country;
@@ -956,7 +961,7 @@ class ML_Ajax
             'address_1' => $userAdress,
             'city' => $city,
             'state' => $state,
-            'postcode' => $postcode,
+            'address_2' => $postcode,
             'country' => $country
         );
 
@@ -1112,6 +1117,378 @@ class ML_Ajax
      *
      * @return void
      */
+    // public function ml_send_card()
+    // {
+    //     check_ajax_referer('aum_ajax_nonce', 'nonce');
+
+    //     if (WC()->cart->get_cart_contents_count() == 0) {
+    //         wp_send_json_error(
+    //             array(
+    //                 "message_type" => 'reqular',
+    //                 "message" => "Cart is empty."
+    //             )
+    //         );
+    //         wp_die();
+    //     }
+
+    //     $user_id = isset($_POST['user_id']) && !empty($_POST['user_id']) ? intval($_POST['user_id']) : '';
+    //     $cardholderName = isset($_POST['userName']) && !empty($_POST['userName']) ? sanitize_text_field($_POST['userName']) : '';
+    //     $cardholderPhone = isset($_POST['userPhone']) && !empty($_POST['userPhone']) ? sanitize_text_field($_POST['userPhone']) : '';
+    //     $cardholderAdress = isset($_POST['userAdress']) && !empty($_POST['userAdress']) ? sanitize_text_field($_POST['userAdress']) : '';
+    //     $cardholderPostcode = isset($_POST['userPostcode']) && !empty($_POST['userPostcode']) ? sanitize_text_field($_POST['userPostcode']) : '';
+    //     $cardholderEmail = isset($_POST['userEmail']) && !empty($_POST['userEmail']) ? sanitize_text_field($_POST['userEmail']) : '';
+    //     $cardholderCity = isset($_POST['userCity']) && !empty($_POST['userCity']) ? sanitize_text_field($_POST['userCity']) : '';
+    //     $note = isset($_POST['note']) && !empty($_POST['note']) ? sanitize_text_field($_POST['note']) : '';
+    //     $cardholderInvoiceName = isset($_POST['userInvoiceName']) && !empty($_POST['userInvoiceName']) ? sanitize_text_field($_POST['userInvoiceName']) : '';
+
+    //     $cardNumber = isset($_POST['cardNumber']) && !empty($_POST['cardNumber']) ? sanitize_text_field($_POST['cardNumber']) : '';
+    //     $expirationDate = isset($_POST['expirationDate']) && !empty($_POST['expirationDate']) ? sanitize_text_field($_POST['expirationDate']) : '';
+    //     $cvvCode = isset($_POST['cvvCode']) && !empty($_POST['cvvCode']) ? sanitize_text_field($_POST['cvvCode']) : '';
+    //     $countryCode = ml_get_country_code();
+
+    //     $cardNumber = str_replace(' ', '', $cardNumber);
+
+    //     $current_user_id = $user_id;
+    //     $current_user = get_userdata($current_user_id);
+
+    //     if (
+    //         empty($cardholderName) ||
+    //         empty($cardholderPhone) ||
+    //         empty($cardholderAdress) ||
+    //         empty($cardholderPostcode) ||
+    //         empty($cardholderEmail) ||
+    //         empty($cardholderCity) ||
+    //         empty($cardNumber) ||
+    //         empty($expirationDate) ||
+    //         empty($cvvCode)
+    //     ) {
+    //         wp_send_json_error(
+    //             array(
+    //                 "message_type" => 'reqular',
+    //                 "message" => esc_html__("Required field are empty. Please fill all the field.", "hello-elementor")
+    //             )
+    //         );
+    //         wp_die();
+    //     }
+
+    //     // $cardholderPhone = $countryCode . $cardholderPhone;
+
+    //     if (
+    //         !is_email($cardholderEmail)
+    //     ) {
+    //         wp_send_json_error(
+    //             array(
+    //                 "message_type" => 'reqular',
+    //                 "message" => esc_html__("Please enter a valid email address.", "hello-elementor")
+    //             )
+    //         );
+    //         wp_die();
+    //     }
+
+    //     $expirationDate = str_replace("/", '', $expirationDate);
+
+    //     $cart_filter_data = [];
+    //     $product_list = [];
+    //     WC()->cart->calculate_totals();
+    //     foreach (WC()->cart->get_cart() as $cart_item_key => $cart_item) {
+    //         $_product = wc_get_product($cart_item['product_id']);
+
+    //         $cart_filter_data[$cart_item_key]["title"] = $_product->get_title();
+    //         $cart_filter_data[$cart_item_key]["price"] = (int) $cart_item['data']->get_price();
+    //         if (isset($cart_item['alarnd_size']) && !empty($cart_item['alarnd_size'])) {
+    //             $cart_filter_data[$cart_item_key]["size"] = $cart_item['alarnd_size'];
+    //         }
+    //         if (isset($cart_item['alarnd_color']) && !empty($cart_item['alarnd_color'])) {
+    //             $cart_filter_data[$cart_item_key]["color"] = $cart_item['alarnd_color'];
+    //         }
+    //         if (isset($cart_item['quantity']) && !empty($cart_item['quantity'])) {
+    //             $cart_filter_data[$cart_item_key]["quantity"] = $cart_item['quantity'];
+    //             $cart_filter_data[$cart_item_key]["total_price"] = (int) $cart_item['quantity'] * (int) $cart_item['data']->get_price();
+    //         }
+
+    //         if ($_product->is_type('variable')) {
+
+    //         }
+
+    //         $single_product_item = array(
+    //             "product_id" => $cart_item['product_id'],
+    //             "quantity" => $cart_item['quantity']
+    //         );
+
+    //         $single_product_item["price"] = $cart_item['data']->get_price();
+
+    //         if (isset($cart_item['alarnd_size']) && !empty($cart_item['alarnd_size'])) {
+    //             $single_product_item["size"] = $cart_item['alarnd_size'];
+    //         }
+    //         if (isset($cart_item['alarnd_color']) && !empty($cart_item['alarnd_color'])) {
+    //             $single_product_item["color"] = $cart_item['alarnd_color'];
+    //         }
+    //         if (isset($cart_item['alarnd_color_key'])) {
+    //             $single_product_item['alarnd_color_key'] = $cart_item['alarnd_color_key'];
+    //         }
+    //         if (isset($cart_item['alarnd_custom_color'])) {
+    //             $single_product_item['alarnd_custom_color'] = $cart_item['alarnd_custom_color'];
+    //         }
+    //         if (isset($cart_item['alarnd_step_key'])) {
+    //             $single_product_item['alarnd_step_key'] = $cart_item['alarnd_step_key'];
+    //         }
+
+    //         $product_list[] = $single_product_item;
+    //     }
+    //     WC()->cart->calculate_totals();
+
+    //     $extraMeta = [];
+    //     $extraMeta['invoice'] = $cardholderInvoiceName;
+    //     $extraMeta['city'] = $cardholderCity;
+
+    //     // Send Username
+    //     $siteUsername = $current_user->user_login;
+
+    //     // send request to api
+    //     $api_url = apply_filters('allaround_card_url', 'https://hook.eu1.make.com/80wvx4qyzxkegv4n1y2ys736dz92t6u6');
+
+    //     $get_token = $this->zcred_request(
+    //         array(
+    //             'cardNumber' => $cardNumber,
+    //             'expirationDate' => $expirationDate,
+    //             'cvvCode' => $cvvCode,
+    //             'price' => WC()->cart->total,
+    //         )
+    //     );
+
+    //     // show error popup if token not generated
+    //     if (false === $get_token || !isset($get_token['token']) || empty($get_token['token'])) {
+    //         $failed_popup = $this->popup_failed_markup();
+
+    //         $returnMessage = isset($get_token['ReturnMessage']) ? $get_token['ReturnMessage'] : '';
+    //         wp_send_json_error(
+    //             json_encode(
+    //                 array(
+    //                     "message_type" => 'api',
+    //                     "message" => $returnMessage,
+    //                     "result_popup" => $failed_popup,
+    //                 )
+    //             )
+    //         );
+
+    //         wp_die();
+    //     }
+
+    //     $body = array(
+    //         'cardholderName' => $cardholderName,
+    //         'cardholderPhone' => $cardholderPhone,
+    //         'cardholderAdress' => $cardholderAdress,
+    //         'cardholderAdress2' => $cardholderPostcode,
+    //         'cardholderCity' => $cardholderCity,
+    //         'cardholderEmail' => $cardholderEmail,
+    //         'cardholderInvoiceName' => $cardholderInvoiceName,
+    //         'siteUsername' => $siteUsername,
+    //         'note' => $note,
+    //         'price' => WC()->cart->total,
+    //         'items' => $cart_filter_data
+    //     );
+
+    //     $order_response_data = [];
+
+    //     if (false !== $get_token) {
+    //         $body['token'] = $get_token['token'];
+    //         $order_response_data['token'] = $get_token['token'];
+    //         $order_response_data['referenceID'] = $get_token['referenceID'];
+    //     }
+
+    //     // error_log( print_r( $body, true ) );
+
+    //     // Get user profile picture URLs
+    //     $profile_picture_id = get_field('profile_picture_id', 'user_' . $current_user_id);
+    //     $profile_picture_id_second = get_field('profile_picture_id_second', 'user_' . $current_user_id);
+    //     $custom_logo_lighter = get_field('custom_logo_lighter', 'user_' . $current_user_id);
+    //     $custom_logo_darker = get_field('custom_logo_darker', 'user_' . $current_user_id);
+
+    //     // Check if profile pictures are not empty and add them to the body
+    //     if (!empty($profile_picture_id)) {
+    //         $profile_picture_url = wp_get_attachment_url($profile_picture_id);
+    //         $body['defaultLogoLighter'] = $profile_picture_url;
+    //     }
+
+    //     if (!empty($profile_picture_id_second)) {
+    //         $profile_picture_url_second = wp_get_attachment_url($profile_picture_id_second);
+    //         $body['defaultLogoDarker'] = $profile_picture_url_second;
+    //     }
+
+    //     if (!empty($custom_logo_lighter)) {
+    //         $custom_logo_lighter = wp_get_attachment_url($custom_logo_lighter);
+    //         $body['customLogoLighter'] = $custom_logo_lighter;
+    //     }
+
+    //     if (!empty($custom_logo_darker)) {
+    //         $custom_logo_darker = wp_get_attachment_url($custom_logo_darker);
+    //         $body['customLogoDarker'] = $custom_logo_darker;
+    //     }
+
+    //     // error_log( print_r( $body, true ) );
+
+    //     $body = apply_filters('allaround_card_api_body', $body, $current_user_id);
+
+    //     $args = array(
+    //         'method' => 'POST',
+    //         'timeout' => 15,
+    //         'sslverify' => false,
+    //         'headers' => array(
+    //             'Content-Type' => 'application/json',
+    //         ),
+    //         'body' => json_encode($body, JSON_UNESCAPED_UNICODE),
+    //     );
+    //     $args = apply_filters('allaround_card_api_args', $args, $current_user_id);
+
+    //     // send request to make.com
+    //     $request = wp_remote_post(esc_url($api_url), $args);
+
+    //     // error_log( print_r( $request, true ) );
+
+    //     // retrieve reponse body
+    //     $message = wp_remote_retrieve_body($request);
+
+    //     // decode response into array
+    //     $response_obj = ml_response($message);
+
+    //     // error_log( print_r( $response_obj, true ) );
+
+    //     // order data
+    //     $first_name = empty($current_user->first_name) && empty($current_user->last_name) ? $cardholderName : $current_user->first_name;
+    //     $last_name = empty($current_user->first_name) && empty($current_user->last_name) ? '' : $current_user->last_name;
+    //     $company = get_user_meta($current_user_id, 'billing_company', true);
+    //     $company = !empty($cardholderInvoiceName) ? $cardholderInvoiceName : $company;
+    //     $city = get_user_meta($current_user_id, 'billing_city', true);
+    //     $city = !empty($cardholderCity) ? $cardholderCity : $city;
+    //     $postcode = get_user_meta($current_user_id, 'billing_address_2', true);
+    //     $postcode = !empty($cardholderPostcode) ? $cardholderPostcode : $postcode;
+    //     $state = get_user_meta($current_user_id, 'billing_state', true);
+    //     $country = get_user_meta($current_user_id, 'billing_country', true);
+    //     $country = empty($country) ? "IL" : $country;
+    //     // Get the user's ACF lock_profile field value
+    //     $lock_profile = get_field('lock_profile', 'user_' . $current_user_id);
+
+    //     $update_order = true; // Default value
+
+    //     if ($lock_profile === true) {
+    //         $update_order = false;
+    //     }
+
+    //     $display_name = $current_user->display_name;
+    //     if ($display_name != $cardholderName) {
+    //         $first_name = $this->ml_split_name($cardholderName, 'first');
+    //         $last_name = $this->ml_split_name($cardholderName, 'last');
+    //     }
+
+    //     $customerInfo = array(
+    //         'first_name' => $first_name,
+    //         'last_name' => $last_name,
+    //         'name' => $cardholderName,
+    //         'company' => $company,
+    //         'email' => $cardholderEmail,
+    //         'phone' => $cardholderPhone,
+    //         'address_1' => $cardholderAdress,
+    //         'city' => $city,
+    //         'state' => $state,
+    //         'address_2' => $postcode,
+    //         'country' => $country
+    //     );
+
+    //     $order_data = array(
+    //         "products" => $product_list,
+    //         "customerInfo" => $customerInfo,
+    //         "cardNumber" => $cardNumber,
+    //         "response" => $order_response_data,
+    //         "extraMeta" => $extraMeta,
+    //         "update" => $update_order,
+    //         "note" => $note,
+    //         "user_id" => $current_user_id
+    //     );
+
+    //     // error_log( print_r( $body, true ) );
+    //     // error_log( print_r( $order_data, true ) );
+
+    //     $failed_popup = $this->popup_failed_markup();
+
+    //     $is_test_mode = get_option("ml_add_test_mode_for_api");
+
+    //     $is_valid_condition = !is_wp_error($request) && wp_remote_retrieve_response_code($request) == 200 && $message !== "Accepted";
+    //     if ($is_test_mode === 'on') {
+    //         $is_valid_condition = !is_wp_error($request) && $message !== "Accepted";
+    //         $order_data['response']['referenceID'] = '56555545411';
+    //         $order_data['response']['token'] = 'skdjfdsfsdf41exesdf';
+    //     }
+
+    //     if ($is_valid_condition) {
+
+    //         // first create order
+    //         $order_obj = ml_create_order($order_data);
+    //         // error_log( print_r( $order_obj, true ) );
+    //         $order_id = $order_obj['order_id'];
+    //         $order_info = $order_obj['order_info'];
+
+    //         $success_popup = $this->popup_success_markup($order_id);
+	// 		//TODO: Enable this when OM is Live
+	// 		$this->send_order_to_other_domain($order_id, $current_user_id);
+
+    //         // Clear the cart
+    //         WC()->cart->empty_cart();
+
+    //         wp_send_json_success(
+    //             json_encode(
+    //                 array(
+    //                     "message_type" => 'api',
+    //                     "result_popup" => $success_popup,
+    //                     "order_info" => $order_info,
+    //                     "message" => "Successfully products added to order #$order_id"
+    //                 )
+    //             )
+    //         );
+
+    //         wp_die();
+    //     }
+
+    //     $error_message = "Something went wrong";
+    //     if (is_wp_error($request)) {
+    //         $error_message = $request->get_error_message();
+    //     }
+
+    //     if ("Accepted" === $message) {
+    //         $error_message = "Unable to reach the api server";
+    //     }
+
+    //     if (!empty($response_obj) && isset($response_obj['returnMessage']) && !empty($response_obj['returnMessage'])) {
+    //         $error_message = $response_obj['returnMessage'];
+    //     }
+
+    //     // error_log( print_r( $response_obj, true ) );
+
+    //     // error_log( print_r( $error_message, true ) );
+    //     wp_send_json_error(
+    //         json_encode(
+    //             array(
+    //                 "body" => $body,
+    //                 "message_type" => 'api',
+    //                 "message" => $error_message,
+    //                 "server_message" => $message,
+    //                 "result_popup" => $failed_popup,
+    //                 "server_body_obj" => $response_obj
+    //             )
+    //         )
+    //     );
+
+    //     wp_die();
+    // }
+
+
+    /**
+     * zCredit direct payment
+     * AJAX handler for submitting the checkout form and creating a WebCheckout session with ZCredit API.
+     *
+     * @since 1.0.0
+     *
+     * @return void
+     */
     public function ml_send_card()
     {
         check_ajax_referer('aum_ajax_nonce', 'nonce');
@@ -1126,51 +1503,37 @@ class ML_Ajax
             wp_die();
         }
 
-        $user_id = isset($_POST['user_id']) && !empty($_POST['user_id']) ? intval($_POST['user_id']) : '';
+        $proof_id = isset($_POST['user_id']) && !empty($_POST['user_id']) ? intval($_POST['user_id']) : '';
+        $first_name = isset($_POST['first_name']) && !empty($_POST['first_name']) ? sanitize_text_field($_POST['first_name']) : '';
+        $last_name = isset($_POST['last_name']) && !empty($_POST['last_name']) ? sanitize_text_field($_POST['last_name']) : '';
         $cardholderName = isset($_POST['userName']) && !empty($_POST['userName']) ? sanitize_text_field($_POST['userName']) : '';
         $cardholderPhone = isset($_POST['userPhone']) && !empty($_POST['userPhone']) ? sanitize_text_field($_POST['userPhone']) : '';
         $cardholderAdress = isset($_POST['userAdress']) && !empty($_POST['userAdress']) ? sanitize_text_field($_POST['userAdress']) : '';
-        $cardholderPostcode = isset($_POST['userPostcode']) && !empty($_POST['userPostcode']) ? sanitize_text_field($_POST['userPostcode']) : '';
+        $cardholderAdressNumber = isset($_POST['userAdressNumber']) && !empty($_POST['userAdressNumber']) ? sanitize_text_field($_POST['userAdressNumber']) : '';
         $cardholderEmail = isset($_POST['userEmail']) && !empty($_POST['userEmail']) ? sanitize_text_field($_POST['userEmail']) : '';
         $cardholderCity = isset($_POST['userCity']) && !empty($_POST['userCity']) ? sanitize_text_field($_POST['userCity']) : '';
         $note = isset($_POST['note']) && !empty($_POST['note']) ? sanitize_text_field($_POST['note']) : '';
         $cardholderInvoiceName = isset($_POST['userInvoiceName']) && !empty($_POST['userInvoiceName']) ? sanitize_text_field($_POST['userInvoiceName']) : '';
 
-        $cardNumber = isset($_POST['cardNumber']) && !empty($_POST['cardNumber']) ? sanitize_text_field($_POST['cardNumber']) : '';
-        $expirationDate = isset($_POST['expirationDate']) && !empty($_POST['expirationDate']) ? sanitize_text_field($_POST['expirationDate']) : '';
-        $cvvCode = isset($_POST['cvvCode']) && !empty($_POST['cvvCode']) ? sanitize_text_field($_POST['cvvCode']) : '';
-        $countryCode = ml_get_country_code();
-
-        $cardNumber = str_replace(' ', '', $cardNumber);
-
-        $current_user_id = $user_id;
-        $current_user = get_userdata($current_user_id);
+        $current_user_id = $proof_id;
 
         if (
             empty($cardholderName) ||
             empty($cardholderPhone) ||
             empty($cardholderAdress) ||
-            empty($cardholderPostcode) ||
             empty($cardholderEmail) ||
-            empty($cardholderCity) ||
-            empty($cardNumber) ||
-            empty($expirationDate) ||
-            empty($cvvCode)
+            empty($cardholderCity)
         ) {
             wp_send_json_error(
                 array(
                     "message_type" => 'reqular',
-                    "message" => esc_html__("Required field are empty. Please fill all the field.", "hello-elementor")
+                    "message" => esc_html__("Required fields are empty. Please fill all the fields.", "hello-elementor")
                 )
             );
             wp_die();
         }
 
-        // $cardholderPhone = $countryCode . $cardholderPhone;
-
-        if (
-            !is_email($cardholderEmail)
-        ) {
+        if (!is_email($cardholderEmail)) {
             wp_send_json_error(
                 array(
                     "message_type" => 'reqular',
@@ -1180,7 +1543,7 @@ class ML_Ajax
             wp_die();
         }
 
-        $expirationDate = str_replace("/", '', $expirationDate);
+        // Prepare product details and cart items
 
         $cart_filter_data = [];
         $product_list = [];
@@ -1199,6 +1562,13 @@ class ML_Ajax
             if (isset($cart_item['quantity']) && !empty($cart_item['quantity'])) {
                 $cart_filter_data[$cart_item_key]["quantity"] = $cart_item['quantity'];
                 $cart_filter_data[$cart_item_key]["total_price"] = (int) $cart_item['quantity'] * (int) $cart_item['data']->get_price();
+            }
+
+            if (isset($cart_item['art_item_title'])) {
+                $cart_filter_data[$cart_item_key]['artwork_position'] = $cart_item['art_item_title'];
+            }
+            if (isset($cart_item['artwork_logos'])) {
+                $cart_filter_data[$cart_item_key]['artwork_logos'] = $cart_item['artwork_logos'];
             }
 
             if ($_product->is_type('variable')) {
@@ -1224,8 +1594,24 @@ class ML_Ajax
             if (isset($cart_item['alarnd_custom_color'])) {
                 $single_product_item['alarnd_custom_color'] = $cart_item['alarnd_custom_color'];
             }
+            if (isset($cart_item['art_item_title'])) {
+                $single_product_item['art_item_title'] = $cart_item['art_item_title'];
+            }
+
+            if (isset($cart_item['default_dark_logo'])) {
+                $single_product_item['default_dark_logo'] = $cart_item['default_dark_logo'];
+            }
+            if (isset($cart_item['alarnd_artwork_id'])) {
+                $single_product_item['alarnd_artwork_id'] = $cart_item['alarnd_artwork_id'];
+            }
+            if (isset($cart_item['alarnd_artwork_id2'])) {
+                $single_product_item['alarnd_artwork_id2'] = $cart_item['alarnd_artwork_id2'];
+            }
             if (isset($cart_item['alarnd_step_key'])) {
                 $single_product_item['alarnd_step_key'] = $cart_item['alarnd_step_key'];
+            }
+            if (isset($cart_item['artwork_logos'])) {
+                $single_product_item['artwork_logos'] = $cart_item['artwork_logos'];
             }
 
             $product_list[] = $single_product_item;
@@ -1236,240 +1622,298 @@ class ML_Ajax
         $extraMeta['invoice'] = $cardholderInvoiceName;
         $extraMeta['city'] = $cardholderCity;
 
-        // Send Username
-        $siteUsername = $current_user->user_login;
-
-        // send request to api
-        $api_url = apply_filters('allaround_card_url', 'https://hook.eu1.make.com/80wvx4qyzxkegv4n1y2ys736dz92t6u6');
-
-        $get_token = $this->zcred_request(
-            array(
-                'cardNumber' => $cardNumber,
-                'expirationDate' => $expirationDate,
-                'cvvCode' => $cvvCode,
-                'price' => WC()->cart->total,
-            )
-        );
-
-        // show error popup if token not generated
-        if (false === $get_token || !isset($get_token['token']) || empty($get_token['token'])) {
-            $failed_popup = $this->popup_failed_markup();
-
-            $returnMessage = isset($get_token['ReturnMessage']) ? $get_token['ReturnMessage'] : '';
-            wp_send_json_error(
-                json_encode(
-                    array(
-                        "message_type" => 'api',
-                        "message" => $returnMessage,
-                        "result_popup" => $failed_popup,
-                    )
-                )
-            );
-
-            wp_die();
-        }
-
-        $body = array(
-            'cardholderName' => $cardholderName,
-            'cardholderPhone' => $cardholderPhone,
-            'cardholderAdress' => $cardholderAdress,
-            'cardholderPostcode' => $cardholderPostcode,
-            'cardholderCity' => $cardholderCity,
-            'cardholderEmail' => $cardholderEmail,
-            'cardholderInvoiceName' => $cardholderInvoiceName,
-            'siteUsername' => $siteUsername,
-            'note' => $note,
-            'price' => WC()->cart->total,
-            'items' => $cart_filter_data
-        );
-
-        $order_response_data = [];
-
-        if (false !== $get_token) {
-            $body['token'] = $get_token['token'];
-            $order_response_data['token'] = $get_token['token'];
-            $order_response_data['referenceID'] = $get_token['referenceID'];
-        }
-
-        // error_log( print_r( $body, true ) );
-
-        // Get user profile picture URLs
-        $profile_picture_id = get_field('profile_picture_id', 'user_' . $current_user_id);
-        $profile_picture_id_second = get_field('profile_picture_id_second', 'user_' . $current_user_id);
-        $custom_logo_lighter = get_field('custom_logo_lighter', 'user_' . $current_user_id);
-        $custom_logo_darker = get_field('custom_logo_darker', 'user_' . $current_user_id);
-
-        // Check if profile pictures are not empty and add them to the body
-        if (!empty($profile_picture_id)) {
-            $profile_picture_url = wp_get_attachment_url($profile_picture_id);
-            $body['defaultLogoLighter'] = $profile_picture_url;
-        }
-
-        if (!empty($profile_picture_id_second)) {
-            $profile_picture_url_second = wp_get_attachment_url($profile_picture_id_second);
-            $body['defaultLogoDarker'] = $profile_picture_url_second;
-        }
-
-        if (!empty($custom_logo_lighter)) {
-            $custom_logo_lighter = wp_get_attachment_url($custom_logo_lighter);
-            $body['customLogoLighter'] = $custom_logo_lighter;
-        }
-
-        if (!empty($custom_logo_darker)) {
-            $custom_logo_darker = wp_get_attachment_url($custom_logo_darker);
-            $body['customLogoDarker'] = $custom_logo_darker;
-        }
-
-        // error_log( print_r( $body, true ) );
-
-        $body = apply_filters('allaround_card_api_body', $body, $current_user_id);
-
-        $args = array(
-            'method' => 'POST',
-            'timeout' => 15,
-            'sslverify' => false,
-            'headers' => array(
-                'Content-Type' => 'application/json',
-            ),
-            'body' => json_encode($body, JSON_UNESCAPED_UNICODE),
-        );
-        $args = apply_filters('allaround_card_api_args', $args, $current_user_id);
-
-        // send request to make.com
-        $request = wp_remote_post(esc_url($api_url), $args);
-
-        // error_log( print_r( $request, true ) );
-
-        // retrieve reponse body
-        $message = wp_remote_retrieve_body($request);
-
-        // decode response into array
-        $response_obj = ml_response($message);
-
-        // error_log( print_r( $response_obj, true ) );
-
-        // order data
-        $first_name = empty($current_user->first_name) && empty($current_user->last_name) ? $cardholderName : $current_user->first_name;
-        $last_name = empty($current_user->first_name) && empty($current_user->last_name) ? '' : $current_user->last_name;
-        $company = get_user_meta($current_user_id, 'billing_company', true);
-        $company = !empty($cardholderInvoiceName) ? $cardholderInvoiceName : $company;
-        $city = get_user_meta($current_user_id, 'billing_city', true);
-        $city = !empty($cardholderCity) ? $cardholderCity : $city;
-        $postcode = get_user_meta($current_user_id, 'billing_postcode', true);
-        $postcode = !empty($cardholderPostcode) ? $cardholderPostcode : $postcode;
-        $state = get_user_meta($current_user_id, 'billing_state', true);
-        $country = get_user_meta($current_user_id, 'billing_country', true);
-        $country = empty($country) ? "IL" : $country;
-        // Get the user's ACF lock_profile field value
-        $lock_profile = get_field('lock_profile', 'user_' . $current_user_id);
-
-        $update_order = true; // Default value
-
-        if ($lock_profile === true) {
-            $update_order = false;
-        }
-
-        $display_name = $current_user->display_name;
-        if ($display_name != $cardholderName) {
+        if (!empty($cardholderName)) {
             $first_name = $this->ml_split_name($cardholderName, 'first');
             $last_name = $this->ml_split_name($cardholderName, 'last');
         }
 
         $customerInfo = array(
-            'first_name' => $first_name,
-            'last_name' => $last_name,
-            'name' => $cardholderName,
-            'company' => $company,
+            'customer_name' => $cardholderName,
+            'invoice_name' => $cardholderInvoiceName,
+            'customer_email' => $cardholderEmail,
+            'customer_phone' => $cardholderPhone,
+            'customer_address' => $cardholderAdress,
+            'customer_address_number' => $cardholderAdressNumber,
+            'customer_city' => $cardholderCity
+        );
+
+        $shippingInfo = array(
+            'company' => $cardholderInvoiceName,
             'email' => $cardholderEmail,
             'phone' => $cardholderPhone,
             'address_1' => $cardholderAdress,
-            'city' => $city,
-            'state' => $state,
-            'postcode' => $postcode,
-            'country' => $country
+            'address_2' => $cardholderAdressNumber,
+            'city' => $cardholderCity,
+            'first_name' => $first_name,
+            'last_name' => $last_name
         );
+		
+		$applied_coupons = WC()->cart->get_applied_coupons();
+
+        $chosen_shipping_method = ml_get_shipping_data('method');
+		$shipping_method_info = array();
+
+        // Set shipping method
+        if (!empty($chosen_shipping_method)) {
+            $shipping_cost = ml_get_shipping_data('cost');
+            $shipping_title = ml_get_shipping_data();
+
+            $shipping_method_info = array(
+                'id' => $chosen_shipping_method,
+                'cost' => $shipping_cost,
+                'title' => $shipping_title
+            );
+        }
 
         $order_data = array(
             "products" => $product_list,
             "customerInfo" => $customerInfo,
-            "cardNumber" => $cardNumber,
-            "response" => $order_response_data,
             "extraMeta" => $extraMeta,
-            "update" => $update_order,
+            "shippingInfo" => $shippingInfo,
+			'applied_coupons' => $applied_coupons,
+            'shipping_method_info' => $shipping_method_info,
+            "update" => true,
             "note" => $note,
             "user_id" => $current_user_id
         );
 
-        // error_log( print_r( $body, true ) );
-        // error_log( print_r( $order_data, true ) );
+        session_start();
+        $_SESSION['order_data'] = ['order_data' => $order_data];
+        
+        // Step 1: Create WebCheckout Session with ZCredit API
+        $zcredit_data = $this->create_zcredit_webcheckout_session(WC()->cart->total, $cart_filter_data, [
+            'email' => $cardholderEmail,
+            'name' => $cardholderName,
+            'phone' => $cardholderPhone
+        ]);
 
-        $failed_popup = $this->popup_failed_markup();
+        $webcheckout_url = isset( $zcredit_data['SessionUrl'] ) && !empty( $zcredit_data['SessionUrl'] ) ? $zcredit_data['SessionUrl'] : '';
+        $session_id = isset( $zcredit_data['SessionId'] ) && !empty( $zcredit_data['SessionId'] ) ? $zcredit_data['SessionId'] : '';
 
-        $is_test_mode = get_option("ml_add_test_mode_for_api");
+        if ($webcheckout_url) {
 
-        $is_valid_condition = !is_wp_error($request) && wp_remote_retrieve_response_code($request) == 200 && $message !== "Accepted";
-        if ($is_test_mode === 'on') {
-            $is_valid_condition = !is_wp_error($request) && $message !== "Accepted";
-            $order_data['response']['referenceID'] = '56555545411';
-            $order_data['response']['token'] = 'skdjfdsfsdf41exesdf';
-        }
+            // Generate a unique key (like session ID or user ID)
+            $transient_unique_key = 'order_data_' . $session_id;
+            
+            // Store order data in transient
+            set_transient($transient_unique_key, $order_data, 60 * 60); // 1 hour expiration
 
-        if ($is_valid_condition) {
-
-            // first create order
-            $order_obj = ml_create_order($order_data);
-            // error_log( print_r( $order_obj, true ) );
-            $order_id = $order_obj['order_id'];
-            $order_info = $order_obj['order_info'];
-
-            $success_popup = $this->popup_success_markup($order_id);
-            $this->send_order_to_other_domain($order_id, $current_user_id);
-
-            // Clear the cart
-            WC()->cart->empty_cart();
-
+            // Step 2: Send JSON response with success and redirect URL
             wp_send_json_success(
-                json_encode(
-                    array(
-                        "message_type" => 'api',
-                        "result_popup" => $success_popup,
-                        "order_info" => $order_info,
-                        "message" => "Successfully products added to order #$order_id"
-                    )
+                array(
+                    "message_type" => 'api',
+                    "payment_url" => $webcheckout_url,
+                    "message" => "Redirecting to payment gateway..."
                 )
             );
-
             wp_die();
         }
 
-        $error_message = "Something went wrong";
-        if (is_wp_error($request)) {
-            $error_message = $request->get_error_message();
-        }
-
-        if ("Accepted" === $message) {
-            $error_message = "Unable to reach the api server";
-        }
-
-        if (!empty($response_obj) && isset($response_obj['returnMessage']) && !empty($response_obj['returnMessage'])) {
-            $error_message = $response_obj['returnMessage'];
-        }
-
-        // error_log( print_r( $response_obj, true ) );
-
-        // error_log( print_r( $error_message, true ) );
+        // If creating the session fails, return error
         wp_send_json_error(
-            json_encode(
-                array(
-                    "body" => $body,
-                    "message_type" => 'api',
-                    "message" => $error_message,
-                    "server_message" => $message,
-                    "result_popup" => $failed_popup,
-                    "server_body_obj" => $response_obj
-                )
+            array(
+                "message_type" => 'api',
+                "message" => "Failed to create payment session. Please try again."
             )
         );
+        wp_die();
+    }
+
+    /**
+     * zCredit direct payment
+     * Create a ZCredit WebCheckout session for a given order and cart.
+     * 
+     * @param float $total_amount The total amount of the order.
+     * @param array $cart_data The cart items and their details.
+     * @param array $customer_data The customer's details.
+     * 
+     * @return array|false If successful, returns an array with the SessionUrl and SessionId.
+     *                    If failed, returns false.
+     */
+    private function create_zcredit_webcheckout_session($total_amount, $cart_data, $customer_data) {
+        // ZCredit WebCheckout API URL
+        $url = "https://pci.zcredit.co.il/webcheckout/api/WebCheckout/CreateSession";
+        
+        // Your ZCredit credentials
+        $credentials = [
+            'terminalId' => '2669593010',
+            'username' => '516185543',
+            'password' => '514951dc7de'
+        ];
+    
+        // Prepare customer data
+        $customer = [
+            'Email' => $customer_data['email'],
+            'Name' => $customer_data['name'],
+            'PhoneNumber' => $customer_data['phone'],
+            'Attributes' => [
+                'HolderId' => 'none',
+                'Name' => 'required',
+                'PhoneNumber' => 'required',
+                'Email' => 'optional'
+            ]
+        ];
+    
+        // Prepare cart items
+        $cart_items = [];
+        foreach ($cart_data as $item) {
+            $cart_items[] = [
+                'Amount' => number_format($item['price'], 2, '.', ''), // Format amount as string
+                'Currency' => 'ILS',
+                'Name' => $item['title'],
+                'Description' => 'Item description', // Customize as needed
+                'Quantity' => $item['quantity'],
+                'Image' => '', // Optionally include an image URL
+                'IsTaxFree' => 'false',
+                'AdjustAmount' => 'false'
+            ];
+        }
+
+        $session_id = '';
+    
+        $home_url = esc_url( get_home_url() );
+        $success_url = "$home_url/success";
+    
+        // Prepare the body based on the structure you provided
+        $postData = [
+            'Key' => 'd36980eacea1b5a33527c8ed551a8686146775de06726146800e50ec928d7cee',  // Can be left empty if not needed
+            'Local' => 'He',  // Hebrew language (or 'En' for English)
+            'UniqueId' => uniqid(),  // Unique transaction ID
+            'SuccessUrl' => $success_url,
+            'CancelUrl' => "$home_url/failure",
+            'CallbackUrl' => "$home_url/wp-json/flash-sale/v1/get-payout-status",
+            'PaymentType' => 'regular',
+            'CreateInvoice' => 'false',
+            'AdditionalText' => '',
+            'ShowCart' => 'false',
+            'ThemeColor' => '005ebb',
+            'BitButtonEnabled' => 'true',
+            'ApplePayButtonEnabled' => 'true',
+            'GooglePayButtonEnabled' => 'true',
+            'Customer' => $customer,
+            'CartItems' => $cart_items,
+            'FocusType' => 'None',
+            'CardsIcons' => [
+                'ShowVisaIcon' => 'true',
+                'ShowMastercardIcon' => 'true',
+                'ShowDinersIcon' => 'true',
+                'ShowAmericanExpressIcon' => 'true',
+                'ShowIsracardIcon' => 'true'
+            ],
+            'IssuerWhiteList' => [1, 2, 3, 4, 5, 6],
+            'BrandWhiteList' => [1, 2, 3, 4, 5, 6],
+            'UseLightMode' => 'false',
+            'UseCustomCSS' => 'false',
+            'BackgroundColor' => 'FFFFFF',
+            'ShowTotalSumInPayButton' => 'true',
+            'ForceCaptcha' => 'false',
+            'CustomCSS' => '',
+            'Bypass3DS' => 'false'
+        ];
+    
+        // Use WP HTTP API to send request
+        $response = wp_remote_post($url, array(
+            'headers' => array(
+                'Authorization' => 'Basic ' . base64_encode($credentials['username'] . ':' . $credentials['password']),
+                'Content-Type' => 'application/json',
+            ),
+            'body' => json_encode($postData),
+            'method' => 'POST',
+            'data_format' => 'body',
+            'timeout' => 15,
+        ));
+    
+        if (is_wp_error($response)) {
+            return false; // Handle error
+        }
+    
+        $response_body = wp_remote_retrieve_body($response);
+        $decoded_body = json_decode($response_body, true);
+        
+        error_log( "zcredit_decoded_body" );
+        error_log(print_r($decoded_body, true));
+    
+        if (isset($decoded_body['Data']['SessionUrl'])) {
+            // Reassign the session ID from the decoded body to the variable
+            $session_id = $decoded_body['Data']['SessionId'];
+
+            // Reassign the SuccessUrl to include the SessionId
+            $decoded_body['Data']['SuccessUrl'] = "$home_url/success?SessionId=$session_id";
+            
+            // Return the URL for the payment iframe
+            return array(
+                'SessionUrl' => $decoded_body['Data']['SessionUrl'],
+                'SessionId' => $decoded_body['Data']['SessionId']
+            );
+        } else {
+            // Handle error in response
+            return false;
+        }
+    }
+
+
+    /**
+     * zCredit direct payment
+     * Handles the ZCredit callback and creates a WooCommerce order based on the session data.
+     *
+     * @return void
+     */
+    public function zcredit_callback_handler()
+    {
+        // Get the SessionId from the AJAX request
+        $session_id = isset($_POST['SessionId']) ? sanitize_text_field($_POST['SessionId']) : '';
+
+        if (empty($session_id)) {
+            wp_send_json_error(['message' => 'Invalid SessionId.']);
+            return; // Stop execution
+        }
+
+        // Normally, you would check the transaction status here, but it's assumed that ZCredit already sent you the transaction status in the redirect or callback.
+        // Assuming the transaction is successful if you reach here.
+
+        // Extract necessary customer and order data stored in the session, cookies, or database (this should have been set during the ml_send_card process).
+        $order_data = $_SESSION['order_data'];
+
+        // Extract customer and shipping info
+        $customerInfo = $order_data['customerInfo'];
+        $shippingInfo = $order_data['shippingInfo'];
+
+        // Create order data array
+        $order_data = array(
+            "products" => $order_data['products'],
+            "customerInfo" => $customerInfo,
+            "response" => [
+                'SessionId' => $session_id
+            ],
+            "extraMeta" => $order_data['extraMeta'],
+            "shippingInfo" => $shippingInfo,
+            "update" => true,
+            "note" => $order_data['note'],
+            "user_id" => $order_data['user_id']
+        );
+
+        // First, create the WooCommerce order
+        $order_obj = ml_create_order($order_data);
+
+        if ($order_obj) {
+            $order_id = $order_obj['order_id'];
+            $order_info = $order_obj['order_info'];
+
+            // Success popup and webhook notification
+            $success_popup = $this->popup_success_markup($order_id);
+            $this->send_order_to_other_domain($order_id, $order_data['user_id']);
+
+            // Clear the WooCommerce cart
+            WC()->cart->empty_cart();
+
+            wp_send_json_success([
+                "result_popup" => $success_popup,
+                "message" => "Order successfully created.",
+                "order_id" => $order_id
+            ]);
+        } else {
+            wp_send_json_error(['message' => 'Order creation failed.']);
+        }
 
         wp_die();
     }
@@ -1492,8 +1936,21 @@ class ML_Ajax
             return;
         }
 
+        // Check if the order has already been sent
+        $order_already_sent = get_post_meta($order_id, '_order_sent_to_management', true);
+
+        if ($order_already_sent) {
+            // If the order has already been sent, don't send it again
+            error_log('Order ' . $order_id . ' has already been sent. Skipping...');
+            return;
+        }
+
+
         // Process order data
         $this->process_order_data($order, $user_id);
+
+        // Mark the order as sent
+        update_post_meta($order_id, '_order_sent_to_management', true);
     }
 
     public function process_order_data($order, $user_id)
@@ -1509,11 +1966,26 @@ class ML_Ajax
             foreach ($items as $item_id => $item) {
                 $product = $item->get_product();
                 if ($product) {
+                    $mockup_thumbnail = '';
+                    $attachment_meta = $item->get_meta('קובץ מצורף') ?: $item->get_meta('Attachment');
+
+                    // Check if the meta exists and extract the URL
+                    if ($attachment_meta) {
+                        preg_match('/<img[^>]+src="([^">]+)"/', $attachment_meta, $matches);
+                        if (!empty($matches[1])) {
+                            $mockup_thumbnail = $matches[1];
+                        }
+                    }
+					
                     $orderItems[] = array(
+                        'id' => $item->get_id(),
+                        'item_id' => $item->get_id(),
                         'product_id' => $product->get_id(),
                         'product_name' => $product->get_name(),
                         'quantity' => $item->get_quantity(),
                         'total' => $item->get_total(),
+                        'mockup_thumbnail' => $mockup_thumbnail,
+                    	'printing_note' => "",
                         // Add other item data here
                     );
                 }
@@ -1533,12 +2005,28 @@ class ML_Ajax
         // Get the order totoal
         $order_total = $order->get_total();
 
+        // get date created
+        $date_created = $order->get_date_created();
+
+        // Get user profile picture URLs
+        $profile_picture_id = get_field('profile_picture_id', 'user_' . $user_id);
+        $profile_picture_id_second = get_field('profile_picture_id_second', 'user_' . $user_id);
+
+        if (!empty($profile_picture_id)) {
+            $profile_picture_url = wp_get_attachment_url($profile_picture_id);
+        }
+
+        if (!empty($profile_picture_id_second)) {
+            $profile_picture_url_second = wp_get_attachment_url($profile_picture_id_second);
+        }
+
         // Get the order data
         $orderData = array(
             'order_number' => $order->get_order_number(),
             'order_id' => $order->get_id(),
             'minisite_id' => $user_id,
             'order_status' => $order->get_status(),
+            'date_created' => $date_created->date('Y-m-d H:i:s'),
             'shipping_lines' => $shipping_lines,
             'items' => $orderItems,
             'billing' => $order->get_address('billing'),
@@ -1549,6 +2037,8 @@ class ML_Ajax
             'customer_note' => $order->get_customer_note(),
             'site_url' => get_site_url(),
             'order_source' => 'miniSite_order',
+            'lighter_logo' => $profile_picture_url,
+            'dark_logo' => $profile_picture_url_second,
             // Add other order data here
         );
 
@@ -1564,8 +2054,12 @@ class ML_Ajax
             $password = 'Qj0p rsPu eU2i Fzco pwpX eCPD';
             $api_url = 'https://ordermanage.test/wp-json/manage-order/v1/create';
         } else {
-            $password = 'vZmm GYw4 LKDg 4ry5 BMYC 4TMw';
-            $api_url = 'https://om.lukpaluk.xyz/wp-json/manage-order/v1/create';
+            // TODO: For Staging
+            // $password = 'vZmm GYw4 LKDg 4ry5 BMYC 4TMw';
+            // $api_url = 'https://om.lukpaluk.xyz/wp-json/manage-order/v1/create';
+            // For Live
+            $password = 'Vlh4 F7Sw Zu26 ShUG 6AYu DuRI';
+            $api_url = 'https://om.allaround.co.il/wp-json/manage-order/v1/create';
         }
 
         $auth_header = $this->get_basic_auth_header($username, $password);
@@ -1598,6 +2092,7 @@ class ML_Ajax
         $auth = base64_encode("$username:$password");
         return 'Basic ' . $auth;
     }
+
 
 
     public function ml_customer_details()
@@ -1635,7 +2130,7 @@ class ML_Ajax
             $invalid_inputs['userAdress'] = esc_html__("Please provide your street address.", "hello-elementor");
         }
         if (empty($userPostcode)) {
-            $invalid_inputs['userPostcode'] = esc_html__("Please provide your street postcode.", "hello-elementor");
+            $invalid_inputs['userPostcode'] = esc_html__("Please provide your address number.", "hello-elementor");
         }
         if (empty($userCity)) {
             $invalid_inputs['userCity'] = esc_html__("Please provide your city.", "hello-elementor");
@@ -1677,7 +2172,7 @@ class ML_Ajax
 
             // WcooCommerce user field update
             update_user_meta_if_different($current_user_id, 'billing_address_1', $userAdress);
-            update_user_meta_if_different($current_user_id, 'billing_postcode', $userPostcode);
+            update_user_meta_if_different($current_user_id, 'billing_address_2', $userPostcode);
             update_user_meta_if_different($current_user_id, 'billing_phone', $userPhone);
             update_user_meta_if_different($current_user_id, 'billing_city', $userCity);
 

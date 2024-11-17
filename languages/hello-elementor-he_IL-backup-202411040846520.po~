@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: AllAround Mini Store\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-01-07 17:21+0000\n"
-"PO-Revision-Date: 2024-11-04 08:46+0000\n"
+"PO-Revision-Date: 2024-04-24 09:47+0000\n"
 "Last-Translator: admin\n"
 "Language-Team: עִבְרִית\n"
 "Language: he_IL\n"
@@ -12,7 +12,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: Loco https://localise.biz/\n"
-"X-Loco-Version: 2.6.6; wp-6.6.2\n"
+"X-Loco-Version: 2.6.6; wp-6.5.2\n"
 "X-Domain: hello-elementor"
 
 #: includes/ajax-handler.php:1724
@@ -302,7 +302,7 @@ msgstr "פרטי תשלום"
 #: includes/ajax-handler.php:1309 includes/functions.php:1438
 #: includes/functions.php:1538 includes/functions.php:1784
 msgid "כתובת למשלוח"
-msgstr "פרטי הזמנה"
+msgstr ""
 
 #: includes/functions.php:3113
 msgid "מוצרים נוספים..."

@@ -136,15 +136,6 @@ function custom_logout_url($logout_url)
 add_filter('logout_url', 'custom_logout_url', 10, 2);
 
 
-function ml_start_session()
-{
-    if (!session_id()) {
-        session_start();
-    }
-}
-add_action('init', 'ml_start_session', 1);
-
-
 function get_positions_by_id($post_id)
 {
     $prefix = 'ml_logos_positions';
@@ -1267,7 +1258,7 @@ function alarnd_single_checkout($user_id = false)
     $invoice = get_field('invoice', "user_{$current_user_id}");
     $city = get_user_meta($current_user_id, 'billing_city', true);
     $billing_address = get_user_meta($current_user_id, 'billing_address_1', true);
-    $billing_postcode = get_user_meta($current_user_id, 'billing_postcode', true);
+    $billing_postcode = get_user_meta($current_user_id, 'billing_address_2', true);
 
     $four_digit = isset($card_info['last_4_digit']) && !empty($card_info['last_4_digit']) ? $card_info['last_4_digit'] : '';
     $card_logo = isset($card_info['card_type']) && !empty($card_info['card_type']) ? strtolower($card_info['card_type']) : 'mastercard';
@@ -1514,7 +1505,7 @@ function allaround_card_form($user_id = '')
     $invoice = get_field('invoice', "user_{$current_user_id}");
     $city = get_user_meta($current_user_id, 'billing_city', true);
     $billing_address = get_user_meta($current_user_id, 'billing_address_1', true);
-    $billing_postcode = get_user_meta($current_user_id, 'billing_postcode', true);
+    $billing_postcode = get_user_meta($current_user_id, 'billing_address_2', true);
     $dummy_email = get_field('dummy_email', "user_{$current_user_id}");
 
     $token = get_field('token', "user_{$current_user_id}");
@@ -1538,6 +1529,9 @@ function allaround_card_form($user_id = '')
     ) {
         $is_disabled = true;
     }
+
+    // zCredit direct payment - overwrite and make true to hide preview
+    $is_disabled = true;
 
     ?>
     <?php if (!is_user_logged_in() || empty($token)): ?>
@@ -1771,6 +1765,14 @@ function allaround_card_form($user_id = '')
             <div class="form-message text-center"></div>
         </div>
     </form>
+
+    <!-- zCredit direct payment -->
+    <div id="paymentModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <iframe id="paymentIframe" src="" width="100%" height="600px" frameborder="0"></iframe>
+        </div>
+    </div>
     <?php
 }
 
@@ -1786,7 +1788,7 @@ function allaround_customer_form($is_disabled = false)
     $invoice = get_field('invoice', "user_{$current_user_id}");
     $city = get_user_meta($current_user_id, 'billing_city', true);
     $billing_address = get_user_meta($current_user_id, 'billing_address_1', true);
-    $billing_postcode = get_user_meta($current_user_id, 'billing_postcode', true);
+    $billing_postcode = get_user_meta($current_user_id, 'billing_address_2', true);
     $first_name = get_user_meta($current_user_id, 'billing_first_name', true);
     $last_name = get_user_meta($current_user_id, 'billing_last_name', true);
     $current_user = get_userdata($current_user_id);
@@ -1860,7 +1862,7 @@ function allaround_customer_form($is_disabled = false)
         <div class="form-row flex-row">
             <div class="form-row">
                 <div class="form-label">
-                    <?php esc_html_e("Street Address", "hello-elementor"); ?>
+                    <?php esc_html_e("שם רחוב", "hello-elementor"); ?>
                 </div>
                 <div class="form-input">
                     <input type="text" id="userAdress" name="userAdress"
@@ -1871,7 +1873,7 @@ function allaround_customer_form($is_disabled = false)
             </div>
             <div class="form-row">
                 <div class="form-label">
-                    <?php esc_html_e("Street Number", "hello-elementor"); ?>
+                    <?php esc_html_e("מספר רחוב", "hello-elementor"); ?>
                 </div>
                 <div class="form-input">
                     <input type="text" id="userPostcode" name="userPostcode"
@@ -1919,9 +1921,9 @@ function add_address_phone_fields_to_user_form()
             </td>
         </tr>
         <tr>
-            <th><label for="billing_postcode">Street Number</label></th>
+            <th><label for="billing_address_2">Street Number</label></th>
             <td>
-                <input type="text" name="billing_postcode" id="billing_postcode" class="regular-text">
+                <input type="text" name="billing_address_2" id="billing_address_2" class="regular-text">
             </td>
         </tr>
         <tr>
@@ -1948,8 +1950,8 @@ function save_address_phone_fields($user_id)
         update_user_meta($user_id, 'billing_address_1', sanitize_text_field($_POST['billing_address_1']));
     }
 
-    if (isset($_POST['billing_postcode'])) {
-        update_user_meta($user_id, 'billing_postcode', sanitize_text_field($_POST['billing_postcode']));
+    if (isset($_POST['billing_address_2'])) {
+        update_user_meta($user_id, 'billing_address_2', sanitize_text_field($_POST['billing_address_2']));
     }
     if (isset($_POST['billing_city'])) {
         update_user_meta($user_id, 'billing_city', sanitize_text_field($_POST['billing_city']));
@@ -2028,12 +2030,10 @@ function ml_create_order($data)
 {
 
     global $woocommerce;
-    $cart = $woocommerce->cart;
-    $cart->calculate_totals();
 
-    $order_info = ml_get_cart_data();
-
-    $applied_coupons = WC()->cart->get_applied_coupons();
+    $order_info = [];
+	
+	//error_log( print_r( $data, true ) );
 
     $user_id = isset($data['user_id']) && !empty($data['user_id']) ? (int) $data['user_id'] : '';
     if (!empty($user_id)) {
@@ -2054,13 +2054,14 @@ function ml_create_order($data)
     $user_login = $current_user->user_login;
 
     $products = $data['products'];
-    $customerInfo = $data['customerInfo'];
+    $customerInfo = $data['shippingInfo'];
+    $applied_coupons = $data['applied_coupons'];
+    $shipping_method_info = $data['shipping_method_info'];
     $cardNumber = isset($data['cardNumber']) && !empty($data['cardNumber']) ? $data['cardNumber'] : '';
     $extraMeta = isset($data['extraMeta']) ? $data['extraMeta'] : [];
     $response = isset($data['response']) ? $data['response'] : [];
     $note = isset($data['note']) ? $data['note'] : '';
     $update = isset($data['update']) && !empty($data['update']) ? true : false;
-    $token_update = isset($data['token_update']) ? true : false;
     $fullname = isset($customerInfo['name']) ? $customerInfo['name'] : '';
 
     error_log(print_r($customerInfo, true));
@@ -2175,19 +2176,24 @@ function ml_create_order($data)
     $order->set_payment_method('zcredit_checkout_payment');
     $order->set_payment_method_title('Z-Credit Payment');
 
-    // Get the chosen shipping method
-    $chosen_shipping_method = ml_get_shipping_data('method');
+    // Set shipping method
+    error_log( "shipping_method_info" );
+    error_log( print_r( $shipping_method_info, true ) );
 
     // Set shipping method
-    if (!empty($chosen_shipping_method)) {
+    if ( !empty($shipping_method_info) && isset($shipping_method_info['id']) ) {
 
-        $shipping_cost = ml_get_shipping_data('cost');
-        $shipping_title = ml_get_shipping_data();
+        $shipping_cost = $shipping_method_info['cost'];
+        $shipping_title = $shipping_method_info['title'];
+        $method_id = $shipping_method_info['id'];
+        
+        error_log( "shipping_title $shipping_title" );
+        error_log( "shipping_cost $shipping_cost" );
 
         // Create a new shipping item
         $shipping_item = new WC_Order_Item_Shipping();
         $shipping_item->set_method_title($shipping_title); // Replace with the shipping method title
-        $shipping_item->set_method_id($chosen_shipping_method);
+        $shipping_item->set_method_id($method_id);
         $shipping_item->set_total($shipping_cost);
 
         $order_info['shipping'] = $shipping_cost;
@@ -2196,13 +2202,19 @@ function ml_create_order($data)
         // Add the shipping item to the order
         $order->add_item($shipping_item);
 
-        // Set the applied coupons to the order
+        // Recalculate totals and save the order
+        $order->calculate_totals();
+    }
+
+    // Set the applied coupons to the order
+    if( ! empty( $applied_coupons ) ) {
+
         foreach ($applied_coupons as $coupon_code) {
             $order->apply_coupon($coupon_code);
         }
 
-        // Recalculate totals and save the order
-        $order->calculate_totals();
+         // Recalculate totals and save the order
+         $order->calculate_totals();
     }
 
     if (true === $update) {
@@ -2218,7 +2230,7 @@ function ml_create_order($data)
 
             // WcooCommerce user field update
             update_user_meta_if_different($user_id, 'billing_address_1', $customerInfo['address_1']);
-            update_user_meta_if_different($user_id, 'billing_postcode', $customerInfo['postcode']);
+            update_user_meta_if_different($user_id, 'billing_address_2', $customerInfo['address_2']);
             update_user_meta_if_different($user_id, 'billing_phone', $phoneNumber);
 
             update_user_meta_if_different($user_id, 'xoo_ml_phone_code', $countryCode);
@@ -2241,34 +2253,30 @@ function ml_create_order($data)
             }
         }
 
-        if (true === $token_update && !empty($response) && isset($response['referenceID'])) {
-            //TODO - update token and customer info if new or change input.
+        if (!empty($cardNumber)) {
+            $last_four_digit = ml_get_last_four_digit($cardNumber);
+            $card_type = ml_get_card_type($cardNumber);
 
-            if (isset($response['token']) && !empty($response['token'])) {
-                update_post_meta($order->get_id(), 'zc_payment_token', $response['token']);
-                update_post_meta($order->get_id(), 'zc_transaction_id', $response['referenceID']);
-                update_acf_usermeta($user_id, 'token', $response['token']);
-            }
+            $card_info = [];
+            $card_info['last_4_digit'] = $last_four_digit;
+            $card_info['card_type'] = $card_type;
 
-            if (isset($response['token']) && !empty($response['token'])) {
-                // ACF field update
-                update_acf_usermeta($user_id, 'token', $response['token']);
-            }
-
-            if (!empty($cardNumber)) {
-                $last_four_digit = ml_get_last_four_digit($cardNumber);
-                $card_type = ml_get_card_type($cardNumber);
-
-                $card_info = [];
-                $card_info['last_4_digit'] = $last_four_digit;
-                $card_info['card_type'] = $card_type;
-
-                update_acf_usermeta($user_id, 'card_info', $card_info);
-            }
+            update_acf_usermeta($user_id, 'card_info', $card_info);
         }
+
+        // update_acf_usermeta($user_id, 'token', $response['token']);
     }
 
-    $woocommerce->cart->calculate_totals();
+    if (!empty($response) && isset($response['token'])) {
+        //TODO - update token and customer info if new or change input.
+
+        if (isset($response['token']) && !empty($response['token'])) {
+            update_post_meta($order->get_id(), 'zc_payment_token', $response['token']);
+        }
+        if (isset($response['referenceID']) && !empty($response['referenceID'])) {
+            update_post_meta($order->get_id(), 'zc_transaction_id', $response['referenceID']);
+        }
+    }
 
     $order->calculate_totals();
 
@@ -2294,8 +2302,8 @@ function ml_create_order($data)
     }
 
     // Trigger emails Manually
-    // WC()->mailer()->get_emails()['WC_Email_Customer_Processing_Order']->trigger( $order_id );
-    // WC()->mailer()->get_emails()['WC_Email_New_Order']->trigger( $order_id );
+    WC()->mailer()->get_emails()['WC_Email_Customer_Processing_Order']->trigger( $order_id );
+    WC()->mailer()->get_emails()['WC_Email_New_Order']->trigger( $order_id );
 
     return array(
         'order_id' => $order_id,
@@ -2890,8 +2898,8 @@ function custom_remove_woocommerce_shipping_details()
                 $('.user-last-name-wrap').hide();
                 $('.user-role-wrap').hide();
                 $('#billing_company').closest('tr').hide();
-                $('#billing_address_2').closest('tr').hide();
-                // $('#billing_postcode').closest('tr').hide();
+                // $('#billing_address_2').closest('tr').hide();
+                $('#billing_postcode').closest('tr').hide();
                 $('#billing_country').closest('tr').hide();
                 $('#billing_state').closest('tr').hide();
                 $('#billing_phone').closest('tr').hide();
@@ -2909,7 +2917,7 @@ function custom_remove_woocommerce_shipping_details()
                 $('h2:contains("Account Management")').hide();
                 $('h2:contains("Customer billing address")').hide();
                 $('label[for="billing_address_1"]').text('Street Address');
-                $('label[for="billing_postcode"]').text('Street Number');
+                $('label[for="billing_address_2"]').text('Street Number');
                 $('select[name="xoo-ml-user-reg-phone-cc"]').hide();
             });
         </script>

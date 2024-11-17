@@ -2,7 +2,6 @@ jQuery(document).ready(function ($) {
   /**
    * Set the Same Height to all Content area.
    */
-  
   function setProductDetailsHeight() {
     var windowWidth = $(window).width();
 
@@ -252,6 +251,7 @@ jQuery(document).ready(function ($) {
       $(this).val($(this).val().replace(/[^0-9]/g, ''));
   });
 
+
   function filterWhenInput() {
     $('#customerDetails').find('.ml_error_label').remove();
   }
@@ -372,81 +372,82 @@ jQuery(document).ready(function ($) {
       return false;
     });
 
-    $("#cardDetailsForm").validate({
-      rules: {
-        expirationDate: {
-          required: true,
-          dateformat: true,
-        },
-        cardholderEmail: {
-          required: true,
-          email: true,
-        },
-      },
-      messages: {
-        expirationDate: {
-          dateformat: "Please enter a valid MM/YY date format",
-        },
-        cardholderEmail: {
-          email: "Please enter a valid email address",
-        },
-      },
-      submitHandler: function (form, event) {
-        event.preventDefault();
+    /* zCredit direct payment - commented out */
 
-        var getData = $(form).serializeArray(),
-          messagWrap = $(form).find(".form-message"),
+    // $("#cardDetailsForm").validate({
+    //   rules: {
+    //     expirationDate: {
+    //       required: true,
+    //       dateformat: true,
+    //     },
+    //     cardholderEmail: {
+    //       required: true,
+    //       email: true,
+    //     },
+    //   },
+    //   messages: {
+    //     expirationDate: {
+    //       dateformat: "Please enter a valid MM/YY date format",
+    //     },
+    //     cardholderEmail: {
+    //       email: "Please enter a valid email address",
+    //     },
+    //   },
+    //   submitHandler: function (form, event) {
+    //     event.preventDefault();
 
-          customerDetails = $('form#customerDetails'),
-          detailsData = customerDetails.serializeArray(),
-          user_id = $('#main').data('user_id'),
-          button = $(form).find(".allaround_card_details_submit");
+    //     var getData = $(form).serializeArray(),
+    //       messagWrap = $(form).find(".form-message"),
 
+    //       customerDetails = $('form#customerDetails'),
+    //       detailsData = customerDetails.serializeArray(),
+    //       user_id = $('#main').data('user_id'),
+    //       button = $(form).find(".allaround_card_details_submit");
 
-        const note = $('#allaround_note_field').val();
+    //     const note = $('#allaround_note_field').val();
 
-          getData = getData.concat(detailsData);
+    //       getData = getData.concat(detailsData);
 
-        getData.push(
-          {
-            name: "action",
-            value: "ml_send_card",
-          },
-          {
-            name: "user_id",
-            value: user_id,
-          },
-          {
-            name: "note",
-            value: note,
-          },
-          {
-            name: "nonce",
-            value: ajax_object.nonce,
-          }
-        );
+    //     getData.push(
+    //       {
+    //         name: "action",
+    //         value: "ml_send_card",
+    //       },
+    //       {
+    //         name: "user_id",
+    //         value: user_id,
+    //       },
+    //       {
+    //         name: "note",
+    //         value: note,
+    //       },
+    //       {
+    //         name: "nonce",
+    //         value: ajax_object.nonce,
+    //       }
+    //     );
 
-        button.addClass("ml_loading");
-        messagWrap.html("").slideUp();
+    //     button.addClass("ml_loading");
+    //     messagWrap.html("").slideUp();
 
-        // Form is valid, send data via AJAX
-        $.ajax({
-          type: "POST",
-          dataType: "json",
-          url: ajax_object.ajax_url,
-          data: getData,
-          success: function (response) {
-            button.removeClass("ml_loading");
+    //     // Form is valid, send data via AJAX
+    //     $.ajax({
+    //       type: "POST",
+    //       dataType: "json",
+    //       url: ajax_object.ajax_url,
+    //       data: getData,
+    //       success: function (response) {
+    //         button.removeClass("ml_loading");
 
-            ajaxResponsePrint(response, messagWrap);
+    //         ajaxResponsePrint(response, messagWrap);
 
-          },
-          error: function (xhr, status, error) {
-            button.removeClass("ml_loading");
-          },
-        });
-      },
-    });
+    //       },
+    //       error: function (xhr, status, error) {
+    //         button.removeClass("ml_loading");
+    //       },
+    //     });
+    //   },
+    // });
 
     $.validator.addMethod(
       "dateformat",
@@ -463,6 +464,123 @@ jQuery(document).ready(function ($) {
     );
   }
   initilize_validate();
+
+  
+  /* start zCredit direct payment scripts */
+  $(document).on("click", ".allaround_card_details_submit", function (event) {
+    event.preventDefault();
+  
+    var form = $("#customerDetails"), // Select the form
+      getData = form.serializeArray(), // Serialize form data
+      messagWrap = form.find(".form-message"), // Error message wrapper
+      user_id = $("#main").data("user_id"), // Get user ID from the main data
+      button = $(this), // Button that was clicked
+      isValid = true; // Default to true until we find an invalid field
+  
+    const requiredFields = [
+      "#userName",
+      "#userEmail",
+      "#userPhone",
+      "#userCity",
+      "#userAdress",
+      "#userAdressNumber",
+    ];
+  
+    // Clear any previous error messages
+    messagWrap.html("").slideUp();
+  
+    // Check if the required fields are filled
+    requiredFields.forEach(function (field) {
+      var fieldElement = $(field);
+      if (fieldElement.attr("required") && fieldElement.val().trim() === "") {
+        isValid = false;
+        fieldElement.addClass("error"); // Add error class if the field is empty
+      } else {
+        fieldElement.removeClass("error"); // Remove error class if the field is filled
+      }
+    });
+  
+    if (!isValid) {
+      messagWrap.html("אנא השלימו את כל שדות החובה").slideDown(); // Show error message if fields are missing
+      return; // Stop the AJAX execution if any required field is missing
+    }
+  
+    const note = $("#allaround_note_field").val(); // Get the note value
+  
+    // Add the note and user_id to the data
+    getData.push(
+      {
+        name: "action",
+        value: "ml_send_card",
+      },
+      {
+        name: "user_id",
+        value: user_id,
+      },
+      {
+        name: "note",
+        value: note,
+      },
+      {
+        name: "nonce",
+        value: ajax_object.nonce, // Use the nonce for security
+      }
+    );
+  
+    // Set the loading state for the button
+    button.addClass("ml_loading");
+  
+    // Clear the message wrap area
+    messagWrap.html("").slideUp();
+  
+    // Perform the AJAX request
+    $.ajax({
+      type: "POST",
+      dataType: "json",
+      url: ajax_object.ajax_url,
+      data: getData,
+      success: function (response) {
+        button.removeClass("ml_loading");
+  
+        if (response.success) {
+          openPaymentModal(response.data.payment_url); // Open the payment modal with the returned URL
+          ajaxResponsePrint(response, messagWrap); // Display success message
+        } else {
+          messagWrap.html("Error processing the payment. Please try again.").slideDown(); // Handle failure
+        }
+      },
+      error: function (xhr, status, error) {
+        button.removeClass("ml_loading");
+        messagWrap.html("An error occurred. Please try again.").slideDown(); // Handle error
+      },
+    });
+  });
+  
+  function openPaymentModal(paymentUrl) {
+    // Open the modal
+    $("#paymentModal").css("display", "block");
+  
+    // Set the iframe src to the payment URL
+    $("#paymentIframe").attr("src", paymentUrl);
+  }
+  
+  // Close the modal when the user clicks on <span> (x)
+  $(".close").on("click", function () {
+    $("#paymentModal").css("display", "none");
+    $("#paymentIframe").attr("src", ""); // Reset iframe src
+    location.reload(); // Reload the page after closing
+  });
+  
+  // Also close the modal if the user clicks anywhere outside of the modal content
+  $(window).on("click", function (event) {
+    if ($(event.target).is("#paymentModal")) {
+      $("#paymentModal").css("display", "none");
+      $("#paymentIframe").attr("src", ""); // Reset iframe src
+      location.reload(); // Reload the page after closing
+    }
+  });
+
+/* end zCredit direct payment scripts */
 
   function is_cart_empty() {
     return $('.woocommerce-cart-form').length === 0;
@@ -1359,23 +1477,29 @@ jQuery(document).ready(function ($) {
   // Assuming you have jQuery loaded on your page
   $(document).ajaxComplete(function(event, xhr, settings) {
       var response = xhr.responseText;
-      // Check if the response contains the custom error message
-      if (response.includes('<div class="custom-error-message woocommerce-info">')) {
-          console.log(response);
 
-          // Append the error message to the span with class 'coupon_varification_message'
-          setTimeout(function() {
-            var $message = $(response);
+      // Check if the response is not undefined or null
+      if (response && typeof response === 'string') {
+          // Check if the response contains the custom error message
+          if (response.includes('<div class="custom-error-message woocommerce-info">')) {
+              console.log(response);
 
-            $('.coupon_varification_message').append($message.hide().fadeIn());
+              // Append the error message to the span with class 'coupon_varification_message'
+              setTimeout(function() {
+                  let $message = $(response);
 
-            // Remove the error message after 4 seconds
-            setTimeout(function() {
-              $message.fadeOut(function() {
-                  $(this).remove();
-              });
-            }, 5000);
-          }, 2500);
+                  $('.coupon_varification_message').append($message.hide().fadeIn());
+
+                  // Remove the error message after 4 seconds
+                  setTimeout(function() {
+                      $message.fadeOut(function() {
+                          $(this).remove();
+                      });
+                  }, 5000);
+              }, 2500);
+          }
+      } else {
+          console.warn('Response is undefined or not a string');
       }
   });
 
@@ -2596,7 +2720,3 @@ var pluginMLGtmServerSide = {
 
 
 };
-
-  if (typeof dataLayer === 'undefined') {
-    var dataLayer = [];
-  }
