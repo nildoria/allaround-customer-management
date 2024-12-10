@@ -1685,7 +1685,7 @@ class ML_Ajax
             'email' => $cardholderEmail,
             'name' => $cardholderName,
             'phone' => $cardholderPhone
-        ]);
+        ], $shipping_method_info['cost']);
 
         $webcheckout_url = isset( $zcredit_data['SessionUrl'] ) && !empty( $zcredit_data['SessionUrl'] ) ? $zcredit_data['SessionUrl'] : '';
         $session_id = isset( $zcredit_data['SessionId'] ) && !empty( $zcredit_data['SessionId'] ) ? $zcredit_data['SessionId'] : '';
@@ -1730,7 +1730,7 @@ class ML_Ajax
      * @return array|false If successful, returns an array with the SessionUrl and SessionId.
      *                    If failed, returns false.
      */
-    private function create_zcredit_webcheckout_session($total_amount, $cart_data, $customer_data) {
+    private function create_zcredit_webcheckout_session($total_amount, $cart_data, $customer_data, $shipping_cost = 0) {
         // ZCredit WebCheckout API URL
         $url = "https://pci.zcredit.co.il/webcheckout/api/WebCheckout/CreateSession";
         
@@ -1765,6 +1765,19 @@ class ML_Ajax
                 'Quantity' => $item['quantity'],
                 'Image' => '', // Optionally include an image URL
                 'IsTaxFree' => 'false',
+                'AdjustAmount' => 'false'
+            ];
+        }
+
+        // Add shipping as an additional item in CartItems
+        if ($shipping_cost > 0) {
+            $cart_items[] = [
+                'Amount' => number_format($shipping_cost, 2, '.', ''),
+                'Currency' => 'ILS',
+                'Name' => 'Shipping',
+                'Description' => 'Shipping Charge',
+                'Quantity' => 1,
+                'IsTaxFree' => 'true',
                 'AdjustAmount' => 'false'
             ];
         }
@@ -2632,7 +2645,18 @@ class ML_Ajax
                         </div>
 
                         <div class="alarnd--next-target-message">
-                            <h6><?php printf('%1$s <span class="ml_next_target"></span> %2$s %3$s %4$s', __("Add", "hello-elementor"), __("more items to reduce your cost to", "hello-elementor"), wc_price(0, array('decimals' => 0)), __("per item", "hello-elementor")); ?>
+                            <h6>
+                            <?php printf(
+                                '%1$s <span class="ml_next_target"></span> %2$s %3$s %4$s %5$s<span class="stripe-through-text">%6$s <span class="ml_current_price_target"></span>%7$s</span>%8$s',
+                                __( "הוסיפו", "hello-elementor" ),
+                                __( "פריטים נוספים להורדת המחיר ל-", "hello-elementor" ),
+                                wc_price(0, array('decimals' => 0)),
+                                __( "ליחידה", "hello-elementor" ),
+                                __( "(", "hello-elementor" ),
+                                __( "כרגע", "hello-elementor" ),
+                                __( "₪", "hello-elementor" ),
+                                __( ")", "hello-elementor" )
+                            ); ?>
                             </h6>
                         </div>
 

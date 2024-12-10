@@ -263,6 +263,11 @@ jQuery(document).ready(function ($) {
       $('#customerDetails input').each(function () {
           var input = $(this);
 
+		// Skip the input field with ID #userInvoiceName
+		if (input.attr('id') === 'userInvoiceName') {
+			return; // Continue to the next input
+		}
+
           // Check if the input field is empty
           if (input.val().trim() === '') {
               // Add the .error class to the input field

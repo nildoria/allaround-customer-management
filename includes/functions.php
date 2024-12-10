@@ -287,7 +287,7 @@ function update_order_total($fragments)
     // Output the updated order total HTML
     ?>
     <div class="your-order-total-container">
-        <?php esc_html_e("Total Amount", "hello-elementor"); ?>:
+        <?php esc_html_e("סכום כולל", "hello-elementor"); ?>:
         <?php printf(WC()->cart->get_total()); ?>
     </div>
     <?php
@@ -1434,7 +1434,7 @@ function alarnd_single_checkout($user_id = false)
                         <div id="alarnd__details_preview">
                             <div class="alarnd--payout-col alarnd--details-previewer">
                                 <h3>
-                                    <?php esc_html_e("כתובת למשלוח", "hello-elementor"); ?>
+                                    <?php esc_html_e("פרטי הזמנה", "hello-elementor"); ?>
                                 </h3>
                                 <div class="tokenized_inv_name_cont">
                                     <?php esc_html_e('חשבונית על שם', 'hello-elementor'); ?>:
@@ -1469,7 +1469,7 @@ function alarnd_single_checkout($user_id = false)
         </div>
 
         <div class="your-order-total-container">
-            <?php esc_html_e("Total Amount", "hello-elementor"); ?>:
+            <?php esc_html_e("סכום כולל", "hello-elementor"); ?>:
             <?php printf(WC()->cart->get_total()); ?>
         </div>
 
@@ -1540,7 +1540,7 @@ function allaround_card_form($user_id = '')
                 <div id="alarnd__details_preview">
                     <div class="alarnd--payout-col alarnd--details-previewer">
                         <h3>
-                            <?php esc_html_e("כתובת למשלוח", "hello-elementor"); ?>
+                            <?php esc_html_e("פרטי הזמנה", "hello-elementor"); ?>
                         </h3>
                         <div class="tokenized_inv_name_cont">
                             <?php esc_html_e('חשבונית על שם', 'hello-elementor'); ?>:
@@ -1753,13 +1753,13 @@ function allaround_card_form($user_id = '')
         </div>
         <div class="form-row form-row-special">
             <div class="your-order-total-container">
-                <?php esc_html_e("Total Amount", "hello-elementor"); ?>:
+                <?php esc_html_e("סכום כולל", "hello-elementor"); ?>:
                 <?php printf(WC()->cart->get_total()); ?>
             </div>
             <div class="form-label"></div>
             <div class="form-input form-submit-container">
                 <button type="submit" class="ml_add_loading button allaround_card_details_submit" <?php echo WC()->cart->is_empty() ? 'disabled' : ''; ?>>
-                    <?php esc_html_e("התקדם לנקודת הביקורת", "hello-elementor"); ?>
+                    <?php esc_html_e("לחצו לתשלום", "hello-elementor"); ?>
                 </button>
             </div>
             <div class="form-message text-center"></div>
@@ -1794,43 +1794,49 @@ function allaround_customer_form($is_disabled = false)
     $current_user = get_userdata($current_user_id);
     $user_display_name = $current_user->display_name;
     $lock_profile = get_field('lock_profile', 'user_' . $current_user_id);
+    $user_full_name = $first_name . ' ' . $last_name;
+
+    if ($user_display_name !== $user_full_name) {
+        $user_display_name = $user_full_name;
+    }
+
     ?>
     <form action="" id="customerDetails"
         class="allaround--card-form<?php echo $is_disabled === false ? ' hidden_form' : ''; ?>">
         <h3>
-            <?php esc_html_e("כתובת למשלוח", "hello-elementor"); ?>
+            <?php esc_html_e("פרטי הזמנה", "hello-elementor"); ?>
         </h3>
         <div class="form-row flex-row">
             <div class="form-row">
                 <div class="form-label">
-                    <?php esc_html_e("Name", "hello-elementor"); ?>
+                    <?php esc_html_e("שם מלא", "hello-elementor"); ?>
                 </div>
                 <div class="form-input">
                     <input type="text" id="userName" name="userName"
-                        placeholder="<?php esc_attr_e("required", "hello-elementor"); ?>" value="<?php if ($user_display_name && !$lock_profile) {
+                        placeholder="<?php esc_attr_e("שדה חובה", "hello-elementor"); ?>" value="<?php if ($user_display_name && !$lock_profile) {
                                echo esc_attr($user_display_name);
                            } ?>" required>
                 </div>
             </div>
             <div class="form-row">
                 <div class="form-label">
-                    <?php esc_html_e("Invoice Name", "hello-elementor"); ?>
+                    <?php esc_html_e("שם לחשבונית", "hello-elementor"); ?>
                 </div>
                 <div class="form-input">
                     <input type="text" id="userInvoiceName" name="userInvoiceName"
-                        placeholder="<?php esc_attr_e("required", "hello-elementor"); ?>" value="<?php if (!$lock_profile) {
+                        placeholder="" value="<?php if (!$lock_profile) {
                                echo esc_attr($invoice);
-                           } ?>" required>
+                           } ?>" >
                 </div>
             </div>
         </div>
         <div class="form-row">
             <div class="form-label">
-                <?php esc_html_e("Email", "hello-elementor"); ?>
+                <?php esc_html_e("אימייל", "hello-elementor"); ?>
             </div>
             <div class="form-input">
                 <input type="text" id="userEmail" name="userEmail"
-                    placeholder="<?php esc_attr_e("required", "hello-elementor"); ?>" value="<?php if (!$dummy_email && !$lock_profile) {
+                    placeholder="<?php esc_attr_e("שדה חובה", "hello-elementor"); ?>" value="<?php if (!$dummy_email && !$lock_profile) {
                            echo esc_attr($the_user->user_email);
                        } ?>" required>
             </div>
@@ -1838,22 +1844,22 @@ function allaround_customer_form($is_disabled = false)
         <div class="form-row flex-row">
             <div class="form-row">
                 <div class="form-label">
-                    <?php esc_html_e("Phone", "hello-elementor"); ?>
+                    <?php esc_html_e("טלפון", "hello-elementor"); ?>
                 </div>
                 <div class="form-input">
                     <input type="text" id="userPhone" name="userPhone"
-                        placeholder="<?php esc_attr_e("required", "hello-elementor"); ?>" value="<?php if (!$lock_profile) {
+                        placeholder="<?php esc_attr_e("שדה חובה", "hello-elementor"); ?>" value="<?php if (!$lock_profile) {
                                echo esc_attr($phone);
                            } ?>" required>
                 </div>
             </div>
             <div class="form-row">
                 <div class="form-label">
-                    <?php esc_html_e("City", "hello-elementor"); ?>
+                    <?php esc_html_e("עיר", "hello-elementor"); ?>
                 </div>
                 <div class="form-input">
                     <input type="text" id="userCity" name="userCity"
-                        placeholder="<?php esc_attr_e("required", "hello-elementor"); ?>" value="<?php if (!$lock_profile) {
+                        placeholder="<?php esc_attr_e("שדה חובה", "hello-elementor"); ?>" value="<?php if (!$lock_profile) {
                                echo esc_attr($city);
                            } ?>" required>
                 </div>
@@ -1866,7 +1872,7 @@ function allaround_customer_form($is_disabled = false)
                 </div>
                 <div class="form-input">
                     <input type="text" id="userAdress" name="userAdress"
-                        placeholder="<?php esc_attr_e("required", "hello-elementor"); ?>" value="<?php if (!$lock_profile) {
+                        placeholder="<?php esc_attr_e("שדה חובה", "hello-elementor"); ?>" value="<?php if (!$lock_profile) {
                                echo esc_attr($billing_address);
                            } ?>" required>
                 </div>
@@ -1876,8 +1882,8 @@ function allaround_customer_form($is_disabled = false)
                     <?php esc_html_e("מספר רחוב", "hello-elementor"); ?>
                 </div>
                 <div class="form-input">
-                    <input type="text" id="userPostcode" name="userPostcode"
-                        placeholder="<?php esc_attr_e("required", "hello-elementor"); ?>" value="<?php if (!$lock_profile) {
+                    <input type="text" id="userAdressNumber" name="userAdressNumber"
+                        placeholder="<?php esc_attr_e("שדה חובה", "hello-elementor"); ?>" value="<?php if (!$lock_profile) {
                                echo esc_attr($billing_postcode);
                            } ?>" required>
                 </div>
@@ -2032,8 +2038,8 @@ function ml_create_order($data)
     global $woocommerce;
 
     $order_info = [];
-	
-	//error_log( print_r( $data, true ) );
+
+    //error_log( print_r( $data, true ) );
 
     $user_id = isset($data['user_id']) && !empty($data['user_id']) ? (int) $data['user_id'] : '';
     if (!empty($user_id)) {
@@ -2177,18 +2183,18 @@ function ml_create_order($data)
     $order->set_payment_method_title('Z-Credit Payment');
 
     // Set shipping method
-    error_log( "shipping_method_info" );
-    error_log( print_r( $shipping_method_info, true ) );
+    error_log("shipping_method_info");
+    error_log(print_r($shipping_method_info, true));
 
     // Set shipping method
-    if ( !empty($shipping_method_info) && isset($shipping_method_info['id']) ) {
+    if (!empty($shipping_method_info) && isset($shipping_method_info['id'])) {
 
         $shipping_cost = $shipping_method_info['cost'];
         $shipping_title = $shipping_method_info['title'];
         $method_id = $shipping_method_info['id'];
-        
-        error_log( "shipping_title $shipping_title" );
-        error_log( "shipping_cost $shipping_cost" );
+
+        error_log("shipping_title $shipping_title");
+        error_log("shipping_cost $shipping_cost");
 
         // Create a new shipping item
         $shipping_item = new WC_Order_Item_Shipping();
@@ -2207,14 +2213,14 @@ function ml_create_order($data)
     }
 
     // Set the applied coupons to the order
-    if( ! empty( $applied_coupons ) ) {
+    if (!empty($applied_coupons)) {
 
         foreach ($applied_coupons as $coupon_code) {
             $order->apply_coupon($coupon_code);
         }
 
-         // Recalculate totals and save the order
-         $order->calculate_totals();
+        // Recalculate totals and save the order
+        $order->calculate_totals();
     }
 
     if (true === $update) {
@@ -2302,8 +2308,8 @@ function ml_create_order($data)
     }
 
     // Trigger emails Manually
-    WC()->mailer()->get_emails()['WC_Email_Customer_Processing_Order']->trigger( $order_id );
-    WC()->mailer()->get_emails()['WC_Email_New_Order']->trigger( $order_id );
+    WC()->mailer()->get_emails()['WC_Email_Customer_Processing_Order']->trigger($order_id);
+    WC()->mailer()->get_emails()['WC_Email_New_Order']->trigger($order_id);
 
     return array(
         'order_id' => $order_id,

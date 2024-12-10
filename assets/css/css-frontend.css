@@ -392,7 +392,9 @@ span.shipping-title {
   padding: 0px 0 9px;
 }
 .cart-collaterals a.checkout-button.button.wc-forward {
-  text-align: center;
+    text-align: center;
+    display: block;
+    font-weight: 700;
 }
 .woocommerce .product-remove a.remove {
   font-size: 15px;
@@ -1970,6 +1972,9 @@ text#svgnameback {
 form#customerDetails {
   position: relative;
 }
+form#customerDetails .form-message {
+	text-align: center;	
+}
 .alarnd--woocommerce-checkout-page.alarnd--default-visible
   .allaround_carf_form-userDetail {
   margin-top: 0;
@@ -2061,7 +2066,9 @@ button.ml_save_customer_info.alarnd--regular-button {
   border-radius: 5px;
   font-size: 14px;
 }
-
+span.stripe-through-text {
+    text-decoration: line-through;
+}
 .allaround--card-form.hidden_form {
   display: none;
 }
