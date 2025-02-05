@@ -1512,7 +1512,7 @@ class ML_Ajax
         $cardholderAdressNumber = isset($_POST['userAdressNumber']) && !empty($_POST['userAdressNumber']) ? sanitize_text_field($_POST['userAdressNumber']) : '';
         $cardholderEmail = isset($_POST['userEmail']) && !empty($_POST['userEmail']) ? sanitize_text_field($_POST['userEmail']) : '';
         $cardholderCity = isset($_POST['userCity']) && !empty($_POST['userCity']) ? sanitize_text_field($_POST['userCity']) : '';
-        $note = isset($_POST['note']) && !empty($_POST['note']) ? sanitize_text_field($_POST['note']) : '';
+        $note = isset($_POST['note']) && !empty($_POST['note']) ? wp_unslash(sanitize_text_field($_POST['note'])) : '';
         $cardholderInvoiceName = isset($_POST['userInvoiceName']) && !empty($_POST['userInvoiceName']) ? sanitize_text_field($_POST['userInvoiceName']) : '';
 
         $current_user_id = $proof_id;
@@ -1691,18 +1691,21 @@ class ML_Ajax
         $session_id = isset( $zcredit_data['SessionId'] ) && !empty( $zcredit_data['SessionId'] ) ? $zcredit_data['SessionId'] : '';
 
         if ($webcheckout_url) {
+            // Define the expiration time in seconds
+            $expiration_time = 20 * 60; // 20 minutes
 
             // Generate a unique key (like session ID or user ID)
             $transient_unique_key = 'order_data_' . $session_id;
             
             // Store order data in transient
-            set_transient($transient_unique_key, $order_data, 60 * 60); // 1 hour expiration
+            set_transient($transient_unique_key, $order_data, $expiration_time); // 1 hour expiration
 
             // Step 2: Send JSON response with success and redirect URL
             wp_send_json_success(
                 array(
                     "message_type" => 'api',
                     "payment_url" => $webcheckout_url,
+                    "expiration_time" => $expiration_time,
                     "message" => "Redirecting to payment gateway..."
                 )
             );
@@ -1994,6 +1997,7 @@ class ML_Ajax
                         'id' => $item->get_id(),
                         'item_id' => $item->get_id(),
                         'product_id' => $product->get_id(),
+                        'product_sku' => $product->get_sku(),
                         'product_name' => $product->get_name(),
                         'quantity' => $item->get_quantity(),
                         'total' => $item->get_total(),

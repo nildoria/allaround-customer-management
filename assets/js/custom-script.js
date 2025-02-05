@@ -471,6 +471,7 @@ jQuery(document).ready(function ($) {
   initilize_validate();
 
   
+  let paymentTimer;
   /* start zCredit direct payment scripts */
   $(document).on("click", ".allaround_card_details_submit", function (event) {
     event.preventDefault();
@@ -548,7 +549,10 @@ jQuery(document).ready(function ($) {
         button.removeClass("ml_loading");
   
         if (response.success) {
-          openPaymentModal(response.data.payment_url); // Open the payment modal with the returned URL
+          const paymentUrl = response.data.payment_url;
+          const expirationTime = response.data.expiration_time;
+		
+          openPaymentModal(paymentUrl, expirationTime); // Open the payment modal with the returned URL
           ajaxResponsePrint(response, messagWrap); // Display success message
         } else {
           messagWrap.html("Error processing the payment. Please try again.").slideDown(); // Handle failure
@@ -561,13 +565,34 @@ jQuery(document).ready(function ($) {
     });
   });
   
-  function openPaymentModal(paymentUrl) {
+  function openPaymentModal(paymentUrl, expirationTime) {
+    // Clear any existing timer
+    if (paymentTimer) {
+      clearTimeout(paymentTimer);
+    }
     // Open the modal
     $("#paymentModal").css("display", "block");
   
     // Set the iframe src to the payment URL
     $("#paymentIframe").attr("src", paymentUrl);
+
+    expirationTime *= 1000;
+
+    // Set a timeout to change the iframe src to the session expired page
+    paymentTimer = setTimeout(() => {
+      $("#paymentIframe").attr(
+        "src",
+        "https://sites.allaround.co.il/session-expired"
+      );
+    }, expirationTime);
   }
+
+  // Clear the timer on page reload
+  $(window).on("beforeunload", function () {
+    if (paymentTimer) {
+      clearTimeout(paymentTimer);
+    }
+  });
   
   // Close the modal when the user clicks on <span> (x)
   $(".close").on("click", function () {

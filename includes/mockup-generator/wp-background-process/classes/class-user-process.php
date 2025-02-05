@@ -178,32 +178,83 @@ class MLUserProcess extends WP_Background_Process {
         update_user_meta( $user_id, 'ml_mockup_generation_queue', false );
     }
 
-    public function send_notification( $user_id ) {
+    public function send_notification($user_id)
+    {
+        // Get the saved webhook endpoints (comma-separated)
         $ml_user_notification_endpoint = get_option('ml_user_notification_endpoint');
-        $rest_url = "https://hook.eu1.make.com/f7ua6raebs2vwfguv1bfl8xqxlr613kf";
-        if( ! empty( $ml_user_notification_endpoint ) ) {
-            $rest_url = esc_url( $ml_user_notification_endpoint );
+        // Fallback default if nothing saved
+        $default_rest_url = "https://hook.eu1.make.com/f7ua6raebs2vwfguv1bfl8xqxlr613kf";
+
+        // Parse the endpoints into an array
+        // e.g. "https://hook1.com, https://hook2.com" => ["https://hook1.com", "https://hook2.com"]
+        $endpoints = array_map('trim', explode(',', $ml_user_notification_endpoint));
+        // If option is empty or invalid, use the fallback
+        if (empty($ml_user_notification_endpoint)) {
+            $endpoints = [$default_rest_url];
         }
 
-        if( empty( $rest_url ) ) {
-            $this->log( "Thre's no rest url to send notification" );
-            return false;
+        // Get user data so we can include user email in the body
+        $user_info = get_userdata($user_id);
+        if (!$user_info) {
+            $this->log("User ID $user_id not found");
+            return new WP_Error(
+                'user_not_found',
+                "User ID $user_id not found.",
+                array('status' => 404)
+            );
         }
 
-        $body = [ "user_id" => $user_id ];
-        // Make an HTTP request to an external server to get the image data
-        $response = wp_remote_post( esc_url( $rest_url ) , array(
-            'body' => json_encode( $body ),
-            'timeout' => 50,
-            'headers' => array('Content-Type' => 'application/json'),
-        ));
+        // Prepare request body
+        $body = [
+            "user_id" => $user_id,
+            "user_email" => $user_info->user_email,
+        ];
 
-        if ( is_wp_error($response) ) {
-            $this->log( "send_notification for $user_id failed" );
-            return $response;
+        // We'll collect responses or errors in an array
+        $results = [];
+
+        // Send to each endpoint
+        foreach ($endpoints as $rest_url) {
+            // If still empty or invalid, skip
+            if (empty($rest_url)) {
+                $this->log("No valid REST URL for user $user_id");
+                $results[] = [
+                    'endpoint' => $rest_url,
+                    'result' => 'skipped_empty_url',
+                ];
+                continue;
+            }
+
+            // Perform request
+            $response = wp_remote_post(esc_url($rest_url), [
+                'body' => json_encode($body),
+                'timeout' => 50,
+                'headers' => ['Content-Type' => 'application/json'],
+            ]);
+
+            // Check for errors
+            if (is_wp_error($response)) {
+                $this->log("send_notification for $user_id failed to $rest_url: " . $response->get_error_message());
+                $results[] = [
+                    'endpoint' => $rest_url,
+                    'result' => 'error',
+                    'error' => $response->get_error_message(),
+                ];
+            } else {
+                // Optionally inspect $response['body'] or $response['response']['code']
+                $results[] = [
+                    'endpoint' => $rest_url,
+                    'result' => 'success',
+                ];
+            }
         }
 
-        return rest_ensure_response( "Successfully notification sent to user $user_id" );
+        // Return aggregated result
+        // Optionally, you could return just a message: "Notifications sent."
+        return rest_ensure_response([
+            'message' => "Attempted to send notification to user $user_id at all endpoints.",
+            'results' => $results,
+        ]);
     }
 
     protected function update_running_meta( $task_id, $value ) {

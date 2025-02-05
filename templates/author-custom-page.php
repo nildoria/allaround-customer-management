@@ -112,7 +112,7 @@ $current_user_id = $get_current_puser->ID;
                         </div>
                         <h3 class="miniStore-promo-title">משלוחים מהירים</h3>
                         <div class="miniStore-promo-text">
-                            <p>בין 2-5 ימי עסקים וההזמנה אצלכם! ובנוסף, משלוח חינם ע"י שליח עד הבית בכל הזמנה מעל 500 ש"ח</p>
+                            <p>בין 2-5 ימי עסקים וההזמנה אצלכם! משלוח אקספרס של חברת UPS, שירות משלוחים ברמה הגבוהה ביותר</p>
                         </div>
                     </div>
                     <div class="miniStore-promo-item">

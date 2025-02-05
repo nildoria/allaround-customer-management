@@ -1799,7 +1799,6 @@ function allaround_customer_form($is_disabled = false)
     if ($user_display_name !== $user_full_name) {
         $user_display_name = $user_full_name;
     }
-
     ?>
     <form action="" id="customerDetails"
         class="allaround--card-form<?php echo $is_disabled === false ? ' hidden_form' : ''; ?>">

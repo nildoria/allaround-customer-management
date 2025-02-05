@@ -3,7 +3,7 @@
 Plugin Name: AllAround Mini Store
 Plugin URI: https://allaround.co.il/
 Description: AllAround User Management and Mini Store.
-Version: 4.2
+Version: 4.3
 Text Domain: hello-elementor
 */
 
