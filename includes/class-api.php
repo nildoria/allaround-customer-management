@@ -38,6 +38,20 @@ class ACM_API
                 }
             )
         );
+
+        // Register new route for checking user by email
+        register_rest_route(
+            'mini-sites/v1',
+            '/check-user-by-email',
+            array(
+                'methods' => 'POST',
+                'callback' => array($this, 'check_user_by_email'),
+                'permission_callback' => function () {
+                    return true;
+                }
+            )
+        );
+        
     }
     
     public function get_payout_status(WP_REST_Request $request) {
@@ -130,6 +144,40 @@ class ACM_API
         ], 200);
     }
 
+    public function check_user_by_email(WP_REST_Request $request)
+    {
+        $params = $request->get_params();
+
+        // Check if email parameter exists and is not empty
+        if (!isset($params['email']) || empty($params['email'])) {
+            return new WP_REST_Response('Email parameter is missing.', 400);
+        }
+
+        $email = sanitize_email($params['email']);
+        $user = get_user_by('email', $email);
+
+        if (!$user) {
+            return new WP_REST_Response(array(
+                'UserID' => null,
+                'UserName' => null,
+                'last_generated' => null,
+                'exist' => 'no'
+            ), 404);
+        }
+
+        $user_id = $user->ID;
+        $username = $user->user_login;
+        $last_generated_time = get_user_meta($user_id, 'mockup_last_generated_time', true);
+
+        $response = array(
+            'UserID' => $user_id,
+            'UserName' => $username,
+            'last_generated' => $last_generated_time ? date('Y-m-d H:i:s', $last_generated_time) : null,
+            'exist' => 'yes'
+        );
+
+        return new WP_REST_Response($response, 200);
+    }
 
 }
 
